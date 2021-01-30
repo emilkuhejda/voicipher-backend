@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "web", "web", "{A3945105-1D75-413A-B839-65B459372BBE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voicipher.Host", "src\web\Voicipher.Host\Voicipher.Host.csproj", "{6E9F8322-1F98-4F9F-95B1-AA5098008D93}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E9F8322-1F98-4F9F-95B1-AA5098008D93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E9F8322-1F98-4F9F-95B1-AA5098008D93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E9F8322-1F98-4F9F-95B1-AA5098008D93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E9F8322-1F98-4F9F-95B1-AA5098008D93}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6E9F8322-1F98-4F9F-95B1-AA5098008D93} = {A3945105-1D75-413A-B839-65B459372BBE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0701BE99-7471-42A6-B1A4-5F57527FF5AD}
+	EndGlobalSection
+EndGlobal
