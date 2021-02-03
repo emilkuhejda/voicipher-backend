@@ -217,3 +217,5 @@ FakesAssemblies/
 _Pvt_Extensions
 
 scripts/performance/__pycache__/
+
+src/web/Voicipher.Host/Logs/

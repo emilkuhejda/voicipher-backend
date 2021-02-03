@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Voicipher.Host.Configuration;
 
 namespace Voicipher.Host
@@ -73,6 +74,7 @@ namespace Voicipher.Host
             }
 
             app.UseHttpsRedirection();
+            app.UseSerilogRequestLogging();
 
             // Swagger
             app.UseSwagger();
