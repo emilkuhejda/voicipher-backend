@@ -27,6 +27,7 @@ namespace Voicipher.Host
             // Swagger
             services.AddSwaggerGen(configuration =>
             {
+                configuration.EnableAnnotations();
                 configuration.SwaggerDoc("v2", new OpenApiInfo
                 {
                     Title = "Voicipher API",

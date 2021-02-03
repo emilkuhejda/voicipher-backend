@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Voicipher.Host.Controllers.V2
 {
@@ -9,6 +10,7 @@ namespace Voicipher.Host.Controllers.V2
     {
         [HttpGet]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [SwaggerOperation(OperationId = "AudioFiles")]
         public IActionResult Get()
         {
             return Ok(string.Empty);
