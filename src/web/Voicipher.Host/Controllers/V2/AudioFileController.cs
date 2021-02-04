@@ -21,8 +21,6 @@ namespace Voicipher.Host.Controllers.V2
         [SwaggerOperation(OperationId = "AudioFiles")]
         public IActionResult Get()
         {
-            _logger.Information("This is INFO.");
-
             return Ok(string.Empty);
         }
     }

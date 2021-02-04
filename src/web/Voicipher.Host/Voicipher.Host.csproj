@@ -8,6 +8,7 @@
     <PackageReference Include="Autofac" Version="6.1.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="AutofacSerilogIntegration" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.11" />
     <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.6.3" />
@@ -16,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\components\Voicipher.Business\Voicipher.Business.csproj" />
     <ProjectReference Include="..\..\components\Voicipher.DataAccess\Voicipher.DataAccess.csproj" />
+    <ProjectReference Include="..\..\components\Voicipher.Domain\Voicipher.Domain.csproj" />
   </ItemGroup>
 
 
