@@ -12,6 +12,7 @@ using Serilog;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
+using Voicipher.Host.Extensions;
 using Voicipher.Host.Security;
 using Voicipher.Host.Security.Extensions;
 using Voicipher.Host.Utils;
@@ -120,12 +121,13 @@ namespace Voicipher.Host
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            RunStartupActions(app, Configuration);
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Migrate database
+            app.MigrateDatabase();
 
             app.UseHttpsRedirection();
             app.UseSerilogRequestLogging();
@@ -142,22 +144,6 @@ namespace Voicipher.Host
             {
                 endpoints.MapControllers();
             });
-        }
-
-        private static void RunStartupActions(IApplicationBuilder app, IConfiguration configuration)
-        {
-            MigrateDatabase(app, configuration);
-        }
-
-        private static void MigrateDatabase(IApplicationBuilder app, IConfiguration configuration)
-        {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
-            {
-                var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>();
-
-                context.InitializeDatabase(logger);
-            }
         }
     }
 }

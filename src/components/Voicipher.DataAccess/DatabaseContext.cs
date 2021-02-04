@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Serilog;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Voicipher.DataAccess
 {
@@ -24,18 +22,6 @@ namespace Voicipher.DataAccess
             if (!optionsBuilder.IsConfigured)
             {
                 optionsBuilder.UseSqlServer(_connectionString, providerOptions => providerOptions.CommandTimeout(60));
-            }
-        }
-
-        public void InitializeDatabase(ILogger logger)
-        {
-            try
-            {
-                Database.Migrate();
-            }
-            catch (Exception ex)
-            {
-                logger.Fatal(ex, "Initializing of the database failed");
             }
         }
     }

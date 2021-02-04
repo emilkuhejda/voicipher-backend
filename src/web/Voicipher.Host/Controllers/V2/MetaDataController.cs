@@ -25,7 +25,7 @@ namespace Voicipher.Host.Controllers.V2
             ILogger logger)
         {
             _appSettings = options.Value;
-            _logger = logger.ForContext<MetaDataController>();
+            _logger = logger;
         }
 
         [AllowAnonymous]
