@@ -7,5 +7,7 @@
 
         public static string AzureAdScheme { get; } = "AzureAd";
         public static string AzureAdPolicy { get; } = "AzureAdPolicy";
+
+        public static string CorsPolicy { get; } = "CorsPolicy";
     }
 }

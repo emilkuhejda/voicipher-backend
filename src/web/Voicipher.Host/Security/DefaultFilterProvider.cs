@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Voicipher.Host.Security
@@ -12,9 +13,6 @@ namespace Voicipher.Host.Security
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            if (context.ActionContext.ActionDescriptor.FilterDescriptors == null)
-                return;
-
             for (var index = 0; index < context.Results.Count; ++index)
             {
                 ProvideFilter(context, context.Results[index]);
@@ -27,11 +25,9 @@ namespace Voicipher.Host.Security
 
         public virtual void ProvideFilter(FilterProviderContext context, FilterItem filterItem)
         {
-            if (filterItem.Filter != null)
-                return;
-
             var filter = filterItem.Descriptor.Filter;
             var filterFactory = filter as IFilterFactory;
+
             if (filterFactory == null)
             {
                 filterItem.Filter = filter;

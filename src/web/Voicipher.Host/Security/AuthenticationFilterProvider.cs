@@ -15,14 +15,17 @@ namespace Voicipher.Host.Security
 
         public override void ProvideFilter(FilterProviderContext context, FilterItem filterItem)
         {
-            var route = context.ActionContext.ActionDescriptor.AttributeRouteInfo.Template;
+            var route = context.ActionContext.ActionDescriptor.AttributeRouteInfo?.Template;
 
-            var filter = _options.FirstOrDefault(option => route.StartsWith(option.RoutePrefix, StringComparison.OrdinalIgnoreCase))?.Filter;
-            if (filter != null)
+            if (route != null)
             {
-                if (context.Results.All(r => r.Descriptor.Filter != filter))
+                var filter = _options.FirstOrDefault(option => route.StartsWith(option.RoutePrefix, StringComparison.OrdinalIgnoreCase))?.Filter;
+                if (filter != null)
                 {
-                    context.Results.Add(new FilterItem(new FilterDescriptor(filter, FilterScope.Controller)));
+                    if (context.Results.All(r => r.Descriptor.Filter != filter))
+                    {
+                        context.Results.Add(new FilterItem(new FilterDescriptor(filter, FilterScope.Controller)));
+                    }
                 }
             }
 
