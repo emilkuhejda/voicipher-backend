@@ -12,6 +12,7 @@ namespace Voicipher.DataAccess
         }
 
         private static void RegisterServices(ContainerBuilder builder)
-        { }
+        {
+        }
     }
 }

@@ -3,11 +3,13 @@ using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
 using Voicipher.Host.Security;
@@ -42,6 +44,10 @@ namespace Voicipher.Host
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             services.Configure<AppSettings>(appSettingsSection);
+
+            // Database connection
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(appSettings.ConnectionString, providerOptions => providerOptions.CommandTimeout(60)));
+
             services.AddControllers();
             services.AddApiVersioning();
 
@@ -114,6 +120,8 @@ namespace Voicipher.Host
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            RunStartupActions(app, Configuration);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -134,6 +142,22 @@ namespace Voicipher.Host
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private static void RunStartupActions(IApplicationBuilder app, IConfiguration configuration)
+        {
+            MigrateDatabase(app, configuration);
+        }
+
+        private static void MigrateDatabase(IApplicationBuilder app, IConfiguration configuration)
+        {
+            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>();
+
+                context.InitializeDatabase(logger);
+            }
         }
     }
 }
