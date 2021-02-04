@@ -2,12 +2,17 @@ using System.Collections.Generic;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
+using Voicipher.Host.Security;
+using Voicipher.Host.Security.Extensions;
+using Voicipher.Host.Utils;
 
 namespace Voicipher.Host
 {
@@ -23,7 +28,22 @@ namespace Voicipher.Host
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(Constants.CorsPolicy,
+                    builder => builder
+                        .WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials());
+            });
+
+            var appSettingsSection = Configuration.GetSection("ApplicationSettings");
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
+            services.Configure<AppSettings>(appSettingsSection);
             services.AddControllers();
+            services.AddApiVersioning();
 
             // Swagger
             services.AddSwaggerGen(configuration =>
@@ -57,6 +77,32 @@ namespace Voicipher.Host
                         new List<string>()
                     }
                 });
+            });
+
+            services.AddVoicipherAuthorization(appSettings);
+            services.AddAzureAdAuthorization(appSettings);
+            services.AddMvc().AddFilterProvider(serviceProvider =>
+            {
+                var azureAdAuthorizeFilter = new AuthorizeFilter(new[]
+                    {new AuthorizeData {AuthenticationSchemes = Constants.AzureAdScheme}});
+                var rewriteMeAuthorizeFilter = new AuthorizeFilter(new[]
+                    {new AuthorizeData {AuthenticationSchemes = Constants.VoicipherScheme}});
+
+                var filterProviderOptions = new[]
+                {
+                    new FilterProviderOption
+                    {
+                        RoutePrefix = "api/b2c",
+                        Filter = azureAdAuthorizeFilter
+                    },
+                    new FilterProviderOption
+                    {
+                        RoutePrefix = "api",
+                        Filter = rewriteMeAuthorizeFilter
+                    }
+                };
+
+                return new AuthenticationFilterProvider(filterProviderOptions);
             });
         }
 

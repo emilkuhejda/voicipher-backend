@@ -5,16 +5,16 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Voicipher.Host.Controllers.V2
 {
     [ApiVersion("2.0")]
-    [Route("api/v{version:apiVersion}/audio-files")]
+    [Route("api/b2c/v{version:apiVersion}/auth")]
     [ApiController]
-    public class AudioFileController : ControllerBase
+    public class AuthenticationController : ControllerBase
     {
-        [HttpGet]
+        [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(OperationId = "GetAudioFiles")]
-        public IActionResult GetAudioFiles()
+        [SwaggerOperation(OperationId = "RegisterUser")]
+        public IActionResult RegisterUser()
         {
             return Ok();
         }
