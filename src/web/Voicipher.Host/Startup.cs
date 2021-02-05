@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
@@ -55,11 +56,21 @@ namespace Voicipher.Host
             // Swagger
             services.AddSwaggerGen(configuration =>
             {
-                configuration.EnableAnnotations();
                 configuration.SwaggerDoc("v2", new OpenApiInfo
                 {
                     Title = "Voicipher API",
                     Version = "v2"
+                });
+
+                configuration.EnableAnnotations();
+                configuration.CustomSchemaIds(tpye =>
+                {
+                    const string ending = "OutputModel";
+                    var returnedValue = tpye.Name;
+                    if (returnedValue.EndsWith(ending, StringComparison.Ordinal))
+                        returnedValue = returnedValue.Replace(ending, string.Empty, StringComparison.Ordinal);
+
+                    return returnedValue;
                 });
 
                 configuration.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
