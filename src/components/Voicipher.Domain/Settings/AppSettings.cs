@@ -8,6 +8,8 @@ namespace Voicipher.Domain.Settings
 
         public string SecretKey { get; set; }
 
+        public string ConnectionString { get; set; }
+
         public Authentication Authentication { get; set; }
     }
 }

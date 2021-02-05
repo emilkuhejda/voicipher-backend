@@ -27,13 +27,13 @@ namespace Voicipher.Host
 
             try
             {
-                Log.ForContext<Program>().Information("Starting application up.");
+                Log.Information("Starting application up.");
 
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
-                Log.ForContext<Program>().Fatal(ex, "Application start-up failed.");
+                Log.Fatal(ex, "Application start-up failed.");
             }
             finally
             {

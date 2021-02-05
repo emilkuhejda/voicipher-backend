@@ -3,13 +3,16 @@ using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
+using Voicipher.Host.Extensions;
 using Voicipher.Host.Security;
 using Voicipher.Host.Security.Extensions;
 using Voicipher.Host.Utils;
@@ -42,6 +45,10 @@ namespace Voicipher.Host
             var appSettings = appSettingsSection.Get<AppSettings>();
 
             services.Configure<AppSettings>(appSettingsSection);
+
+            // Database connection
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(appSettings.ConnectionString, providerOptions => providerOptions.CommandTimeout(60)));
+
             services.AddControllers();
             services.AddApiVersioning();
 
@@ -118,6 +125,9 @@ namespace Voicipher.Host
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Migrate database
+            app.MigrateDatabase();
 
             app.UseHttpsRedirection();
             app.UseSerilogRequestLogging();
