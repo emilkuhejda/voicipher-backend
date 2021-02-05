@@ -9,4 +9,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Voicipher.DataAccess\Voicipher.DataAccess.csproj" />
+  </ItemGroup>
+
 </Project>
