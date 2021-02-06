@@ -13,7 +13,7 @@ namespace Voicipher.Host.Filters
 
         public ApiExceptionFilter(ILogger logger)
         {
-            _logger = logger;
+            _logger = logger.ForContext<ApiExceptionFilter>();
         }
 
         public override void OnException(ExceptionContext context)

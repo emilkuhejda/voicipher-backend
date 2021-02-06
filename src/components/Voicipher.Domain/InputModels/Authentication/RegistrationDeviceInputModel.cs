@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Voicipher.Domain.Interfaces.Validation;
+using Voicipher.Domain.Validation;
 using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
 namespace Voicipher.Domain.InputModels.Authentication
@@ -21,7 +23,14 @@ namespace Voicipher.Domain.InputModels.Authentication
 
         public ValidationResult Validate()
         {
-            return ValidationResult.Success;
+            IList<ValidationError> errors = new List<ValidationError>();
+
+            errors.ValidateGuid(InstallationId, nameof(InstallationId));
+            errors.ValidateRequired(RuntimePlatform, nameof(RuntimePlatform));
+            errors.ValidateRequired(InstalledVersionNumber, nameof(InstalledVersionNumber));
+            errors.ValidateRequired(Language, nameof(Language));
+
+            return new ValidationResult(errors);
         }
     }
 }

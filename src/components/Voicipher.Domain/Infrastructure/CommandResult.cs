@@ -5,7 +5,7 @@ using Voicipher.Domain.Validation;
 
 namespace Voicipher.Domain.Infrastructure
 {
-    public class CommandResult : CommandResult<None>
+    public record CommandResult : CommandResult<None>
     {
         public CommandResult()
             : base(None.Value)
@@ -22,7 +22,7 @@ namespace Voicipher.Domain.Infrastructure
         {
         }
 
-        public static CommandResult Success { get; } = new CommandResult();
+        public static CommandResult Success { get; } = new();
 
         public static CommandResult<ICollection<T>> FromList<T>(IEnumerable<T> list)
         {
@@ -35,20 +35,20 @@ namespace Voicipher.Domain.Infrastructure
         }
     }
 
-    public class CommandResult<T> : CommandResultBase
+    public record CommandResult<T> : CommandResultBase
     {
         public CommandResult(T value)
-            : this(value, OperationResult.Success, null, EmptyList)
+            : this(value, OperationResult.Success, null, new List<ValidationError>())
         {
         }
 
         public CommandResult(OperationError error)
-            : this(default(T), OperationResult.Error, error, EmptyList)
+            : this(default, OperationResult.Error, error, new List<ValidationError>())
         {
         }
 
         public CommandResult(IEnumerable<ValidationError> validationErrors)
-            : this(default(T), OperationResult.Error, null, validationErrors)
+            : this(default, OperationResult.Error, null, validationErrors)
         {
         }
 
@@ -62,7 +62,7 @@ namespace Voicipher.Domain.Infrastructure
             Value = value;
             Result = result;
             Error = error;
-            ValidationErrors = validationErrors?.ToList() ?? EmptyList;
+            ValidationErrors = validationErrors?.ToList() ?? new List<ValidationError>();
         }
 
         public T Value { get; }

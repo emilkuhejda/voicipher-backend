@@ -12,10 +12,14 @@ namespace Voicipher.Host.Extensions
     {
         public static void MigrateDatabase(this IApplicationBuilder app)
         {
-            using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            var serviceScopeFactory = app.ApplicationServices.GetService<IServiceScopeFactory>();
+            if (serviceScopeFactory == null)
+                return;
+
+            using (var serviceScope = serviceScopeFactory.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>();
+                var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>().ForContext<DatabaseContext>();
 
                 try
                 {
