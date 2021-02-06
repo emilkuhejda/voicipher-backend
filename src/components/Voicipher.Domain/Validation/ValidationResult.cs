@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Voicipher.Domain.Validation
 {
-    public readonly struct ValidationResult
+    public record ValidationResult
     {
         private static readonly IReadOnlyList<ValidationError> EmptyErrorList = new ReadOnlyCollection<ValidationError>(new List<ValidationError>());
 

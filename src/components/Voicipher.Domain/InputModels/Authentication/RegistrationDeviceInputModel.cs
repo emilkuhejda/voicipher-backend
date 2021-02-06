@@ -5,19 +5,19 @@ using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
 namespace Voicipher.Domain.InputModels.Authentication
 {
-    public class RegistrationDeviceInputModel : IValidatable
+    public record RegistrationDeviceInputModel : IValidatable
     {
         [Required]
-        public Guid InstallationId { get; set; }
+        public Guid InstallationId { get; init; }
 
         [Required]
-        public string RuntimePlatform { get; set; }
+        public string RuntimePlatform { get; init; }
 
         [Required]
-        public string InstalledVersionNumber { get; set; }
+        public string InstalledVersionNumber { get; init; }
 
         [Required]
-        public string Language { get; set; }
+        public string Language { get; init; }
 
         public ValidationResult Validate()
         {
