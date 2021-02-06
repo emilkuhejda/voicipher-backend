@@ -14,6 +14,7 @@ using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
 using Voicipher.Host.Extensions;
+using Voicipher.Host.Filters;
 using Voicipher.Host.Security;
 using Voicipher.Host.Security.Extensions;
 using Voicipher.Host.Utils;
@@ -99,7 +100,10 @@ namespace Voicipher.Host
 
             services.AddVoicipherAuthorization(appSettings);
             services.AddAzureAdAuthorization(appSettings);
-            services.AddMvc().AddFilterProvider(serviceProvider =>
+            services.AddMvc(options =>
+            {
+                options.Filters.AddService<ApiExceptionFilter>();
+            }).AddFilterProvider(_ =>
             {
                 var azureAdAuthorizeFilter = new AuthorizeFilter(new[]
                     {new AuthorizeData {AuthenticationSchemes = Constants.AzureAdScheme}});
