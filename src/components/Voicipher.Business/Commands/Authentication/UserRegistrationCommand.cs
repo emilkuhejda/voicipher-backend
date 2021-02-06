@@ -47,7 +47,13 @@ namespace Voicipher.Business.Commands.Authentication
                 _logger.Information("Start user registration.");
 
                 var user = _mapper.Map<User>(parameter);
+
+                var validationResult = user.Validate();
+                if (!validationResult.IsValid)
+                    return new CommandResult<UserRegistrationOutputModel>(validationResult.Errors);
+
                 await _userRepository.AddAsync(user);
+                await _userRepository.SaveAsync(cancellationToken);
             }
 
             var outputModel = new UserRegistrationOutputModel();

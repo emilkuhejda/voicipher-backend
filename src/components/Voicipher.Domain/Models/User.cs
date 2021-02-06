@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 
@@ -7,6 +8,11 @@ namespace Voicipher.Domain.Models
 {
     public class User : EntityBase, IValidatable
     {
+        public User()
+        {
+            UserSubscriptions = new List<UserSubscription>();
+        }
+
         public string Email { get; set; }
 
         public string GivenName { get; set; }
@@ -45,6 +51,9 @@ namespace Voicipher.Domain.Models
             errors.ValidateMaxLength(FamilyName, nameof(FamilyName), 100, nameof(User));
 
             errors.ValidateDateTime(DateRegisteredUtc, nameof(DateRegisteredUtc), nameof(User));
+
+            errors.Merge(CurrentUserSubscription.Validate());
+            errors.Merge(UserSubscriptions.Select(x => x.Validate()).ToList());
 
             return new ValidationResult(errors);
         }

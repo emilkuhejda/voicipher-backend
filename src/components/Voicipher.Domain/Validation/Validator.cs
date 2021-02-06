@@ -55,6 +55,24 @@ namespace Voicipher.Domain.Validation
             return errors;
         }
 
+        public static IList<ValidationError> Merge(this IList<ValidationError> errorList, IList<ValidationResult> validationResults)
+        {
+            var errors = errorList ?? new List<ValidationError>();
+
+            foreach (var validationResult in validationResults)
+            {
+                if (!validationResult.IsValid)
+                {
+                    foreach (var error in validationResult.Errors)
+                    {
+                        errors.Add(error);
+                    }
+                }
+            }
+
+            return errors;
+        }
+
         public static IList<ValidationError> Add(this IList<ValidationError> errorList, string code, string field, string objectName = null)
         {
             var fieldName = string.IsNullOrWhiteSpace(objectName) ? field : objectName + "." + field;
