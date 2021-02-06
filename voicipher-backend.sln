@@ -9,11 +9,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voicipher.Host", "src\web\V
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "components", "components", "{3D87C66E-8F92-473F-843D-F5AA986BE154}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicipher.DataAccess", "src\components\Voicipher.DataAccess\Voicipher.DataAccess.csproj", "{7B052347-63BE-4349-BA58-4103DFDF77E9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voicipher.DataAccess", "src\components\Voicipher.DataAccess\Voicipher.DataAccess.csproj", "{7B052347-63BE-4349-BA58-4103DFDF77E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicipher.Business", "src\components\Voicipher.Business\Voicipher.Business.csproj", "{2C98E3E6-A813-4B4D-981F-05D249574391}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voicipher.Business", "src\components\Voicipher.Business\Voicipher.Business.csproj", "{2C98E3E6-A813-4B4D-981F-05D249574391}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicipher.Domain", "src\components\Voicipher.Domain\Voicipher.Domain.csproj", "{D27D61D5-FF66-4E9F-8038-8D7599EB67E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Voicipher.Domain", "src\components\Voicipher.Domain\Voicipher.Domain.csproj", "{D27D61D5-FF66-4E9F-8038-8D7599EB67E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_global", "_global", "{80C926FE-554E-4C56-9B6C-855AF7C2ED1C}"
+	ProjectSection(SolutionItems) = preProject
+		src\global\Voicipher.CodeAnalysis.ruleset = src\global\Voicipher.CodeAnalysis.ruleset
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
