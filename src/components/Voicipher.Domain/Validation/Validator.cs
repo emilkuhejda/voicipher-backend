@@ -34,7 +34,7 @@ namespace Voicipher.Domain.Validation
 
         public static IList<ValidationError> ValidateDateTime(this IList<ValidationError> errorList, DateTime value, string field, string objectName = null)
         {
-            if (value > DateTime.MinValue)
+            if (value == DateTime.MinValue)
                 return errorList.Add(ValidationErrorCodes.InvalidDateTime, field, objectName);
 
             return errorList;
