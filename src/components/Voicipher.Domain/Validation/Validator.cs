@@ -32,6 +32,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateDateTime(this IList<ValidationError> errorList, DateTime value, string field, string objectName = null)
+        {
+            if (value > DateTime.MinValue)
+                return errorList.Add(ValidationErrorCodes.InvalidDateTime, field, objectName);
+
+            return errorList;
+        }
+
         public static IList<ValidationError> Merge(this IList<ValidationError> errorList, ValidationResult validationResult)
         {
             var errors = errorList ?? new List<ValidationError>();

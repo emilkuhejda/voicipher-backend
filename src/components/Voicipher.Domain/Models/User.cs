@@ -19,6 +19,8 @@ namespace Voicipher.Domain.Models
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
+            errors.ValidateGuid(Id, nameof(Id));
+
             errors.ValidateRequired(Email, nameof(Email));
             errors.ValidateMaxLength(Email, nameof(Email), 100);
 
@@ -27,6 +29,8 @@ namespace Voicipher.Domain.Models
 
             errors.ValidateRequired(FamilyName, nameof(FamilyName));
             errors.ValidateMaxLength(FamilyName, nameof(FamilyName), 100);
+
+            errors.ValidateDateTime(DateRegisteredUtc, nameof(DateRegisteredUtc));
 
             return new ValidationResult(errors);
         }
