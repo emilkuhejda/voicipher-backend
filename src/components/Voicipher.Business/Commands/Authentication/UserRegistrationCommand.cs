@@ -7,7 +7,6 @@ using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.Authentication;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
 using Voicipher.Domain.Interfaces.Repositories;
-using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Authentication;
 
 namespace Voicipher.Business.Commands.Authentication
@@ -28,8 +27,6 @@ namespace Voicipher.Business.Commands.Authentication
         protected override async Task<CommandResult<UserRegistrationOutputModel>> Execute(UserRegistrationInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
-
-            var user = _mapper.Map<User>(parameter);
 
             var outputModel = new UserRegistrationOutputModel();
 
