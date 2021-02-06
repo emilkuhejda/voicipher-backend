@@ -4,6 +4,7 @@ using AutofacSerilogIntegration;
 using AutoMapper;
 using Voicipher.Business;
 using Voicipher.DataAccess;
+using Voicipher.Host.Filters;
 
 namespace Voicipher.Host.Configuration
 {
@@ -15,6 +16,7 @@ namespace Voicipher.Host.Configuration
 
             RegisterModules(builder);
             RegisterServices(builder);
+            ConfigureFilters(builder);
             ConfigureMappings(builder);
         }
 
@@ -27,6 +29,11 @@ namespace Voicipher.Host.Configuration
         public static void RegisterServices(ContainerBuilder builder)
         {
             builder.RegisterLogger();
+        }
+
+        private static void ConfigureFilters(ContainerBuilder builder)
+        {
+            builder.RegisterType<ApiExceptionFilter>().AsSelf();
         }
 
         private static void ConfigureMappings(ContainerBuilder builder)
