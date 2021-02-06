@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autofac;
+using AutoMapper;
 using Voicipher.Domain.Interfaces.Infrastructure;
 using Module = Autofac.Module;
 
@@ -25,6 +26,8 @@ namespace Voicipher.Business
                 .AsImplementedInterfaces();
             builder.RegisterAssemblyTypes(assembly).Where(t => t.IsClosedTypeOf(typeof(IQuery<>)))
                 .AsImplementedInterfaces();
+
+            builder.RegisterAssemblyTypes(assembly).Where(t => t.IsAssignableTo<Profile>()).As<Profile>().AsSelf();
         }
     }
 }
