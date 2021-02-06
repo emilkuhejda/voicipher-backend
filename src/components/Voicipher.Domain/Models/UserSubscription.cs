@@ -22,10 +22,10 @@ namespace Voicipher.Domain.Models
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
-            errors.ValidateGuid(Id, nameof(Id));
-            errors.ValidateGuid(UserId, nameof(UserId));
-            errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
-            errors.ValidateDateTime(DateCreatedUtc, nameof(DateCreatedUtc));
+            errors.ValidateGuid(Id, nameof(Id), nameof(UserSubscription));
+            errors.ValidateGuid(UserId, nameof(UserId), nameof(UserSubscription));
+            errors.ValidateGuid(ApplicationId, nameof(ApplicationId), nameof(UserSubscription));
+            errors.ValidateDateTime(DateCreatedUtc, nameof(DateCreatedUtc), nameof(UserSubscription));
 
             return new ValidationResult(errors);
         }

@@ -15,22 +15,36 @@ namespace Voicipher.Domain.Models
 
         public DateTime DateRegisteredUtc { get; set; }
 
+        public CurrentUserSubscription CurrentUserSubscription { get; set; }
+
+        public IList<UserSubscription> UserSubscriptions { get; set; }
+
+        public IList<object> FileItems { get; set; }
+
+        public IList<object> RecognizedAudioSamples { get; set; }
+
+        public IList<object> BillingPurchases { get; set; }
+
+        public IList<object> InformationMessages { get; set; }
+
+        public IList<object> UserDevices { get; set; }
+
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
-            errors.ValidateGuid(Id, nameof(Id));
+            errors.ValidateGuid(Id, nameof(Id), nameof(User));
 
-            errors.ValidateRequired(Email, nameof(Email));
-            errors.ValidateMaxLength(Email, nameof(Email), 100);
+            errors.ValidateRequired(Email, nameof(Email), nameof(User));
+            errors.ValidateMaxLength(Email, nameof(Email), 100, nameof(User));
 
-            errors.ValidateRequired(GivenName, nameof(GivenName));
-            errors.ValidateMaxLength(GivenName, nameof(GivenName), 100);
+            errors.ValidateRequired(GivenName, nameof(GivenName), nameof(User));
+            errors.ValidateMaxLength(GivenName, nameof(GivenName), 100, nameof(User));
 
-            errors.ValidateRequired(FamilyName, nameof(FamilyName));
-            errors.ValidateMaxLength(FamilyName, nameof(FamilyName), 100);
+            errors.ValidateRequired(FamilyName, nameof(FamilyName), nameof(User));
+            errors.ValidateMaxLength(FamilyName, nameof(FamilyName), 100, nameof(User));
 
-            errors.ValidateDateTime(DateRegisteredUtc, nameof(DateRegisteredUtc));
+            errors.ValidateDateTime(DateRegisteredUtc, nameof(DateRegisteredUtc), nameof(User));
 
             return new ValidationResult(errors);
         }
