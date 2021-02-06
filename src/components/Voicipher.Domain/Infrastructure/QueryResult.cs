@@ -37,8 +37,6 @@ namespace Voicipher.Domain.Infrastructure
             Value = value;
         }
 
-        public static QueryResult<T> Success { get; } = new QueryResult<T>();
-
         public T Value { get; }
     }
 }

@@ -7,7 +7,7 @@ using Voicipher.Domain.Exceptions;
 
 namespace Voicipher.Host.Filters
 {
-    public class ApiExceptionFilter : ExceptionFilterAttribute
+    public sealed class ApiExceptionFilter : ExceptionFilterAttribute
     {
         private readonly ILogger _logger;
 
