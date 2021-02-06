@@ -5,7 +5,7 @@ using Voicipher.Domain.Interfaces.Services;
 
 namespace Voicipher.DataAccess
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly DatabaseContext _context;
 

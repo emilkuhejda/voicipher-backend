@@ -6,6 +6,10 @@ namespace Voicipher.Domain.Exceptions
 {
     public class OperationErrorException : Exception
     {
+        public OperationErrorException()
+        {
+        }
+
         public OperationErrorException(string message)
             : base(message)
         {

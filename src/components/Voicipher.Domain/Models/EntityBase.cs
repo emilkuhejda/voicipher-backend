@@ -2,12 +2,8 @@
 
 namespace Voicipher.Domain.Models
 {
-    public abstract class EntityBase : IDisposable
+    public abstract class EntityBase
     {
         public Guid Id { get; set; }
-
-        public virtual void Dispose()
-        {
-        }
     }
 }

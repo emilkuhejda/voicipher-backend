@@ -7,7 +7,7 @@ using Voicipher.Domain.Models;
 
 namespace Voicipher.DataAccess.Repositories
 {
-    public abstract class Repository<T> : IRepository<T> where T : EntityBase
+    public abstract class Repository<T> : IRepository<T>, IDisposable where T : EntityBase
     {
         protected DatabaseContext Context { get; }
 
