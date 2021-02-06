@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -29,7 +28,6 @@ namespace Voicipher.Host.Controllers.V2
             _logger = logger.ForContext<AuthenticationController>();
         }
 
-        [AllowAnonymous]
         [HttpPost("register")]
         [ProducesResponseType(typeof(UserRegistrationOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
