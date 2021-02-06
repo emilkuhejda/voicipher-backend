@@ -1,14 +1,12 @@
-﻿using Voicipher.Domain.Enums;
-
-namespace Voicipher.Domain.Validation
+﻿namespace Voicipher.Domain.Validation
 {
     public record OperationError
     {
-        public OperationError(ErrorCode errorCode)
+        public OperationError(string errorCode)
         {
             ErrorCode = errorCode;
         }
 
-        public ErrorCode ErrorCode { get; }
+        public string ErrorCode { get; }
     }
 }
