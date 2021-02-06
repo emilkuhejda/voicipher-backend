@@ -19,15 +19,15 @@ namespace Voicipher.Domain.Models
 
         public IList<UserSubscription> UserSubscriptions { get; set; }
 
-        public IList<object> FileItems { get; set; }
+        //public IList<object> FileItems { get; set; }
 
-        public IList<object> RecognizedAudioSamples { get; set; }
+        //public IList<object> RecognizedAudioSamples { get; set; }
 
-        public IList<object> BillingPurchases { get; set; }
+        //public IList<object> BillingPurchases { get; set; }
 
-        public IList<object> InformationMessages { get; set; }
+        //public IList<object> InformationMessages { get; set; }
 
-        public IList<object> UserDevices { get; set; }
+        //public IList<object> UserDevices { get; set; }
 
         public ValidationResult Validate()
         {
