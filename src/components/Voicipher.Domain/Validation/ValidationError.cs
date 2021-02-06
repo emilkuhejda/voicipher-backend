@@ -2,10 +2,12 @@
 
 namespace Voicipher.Domain.Validation
 {
-    public class ValidationError : OperationError
+    public record ValidationError : OperationError
     {
         public ValidationError(ErrorCode errorCode)
-        : base(errorCode) { }
+            : base(errorCode)
+        {
+        }
 
         public ValidationError(ErrorCode errorCode, string field)
             : base(errorCode)

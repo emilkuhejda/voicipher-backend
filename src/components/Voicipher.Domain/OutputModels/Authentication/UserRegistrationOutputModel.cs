@@ -2,16 +2,16 @@
 
 namespace Voicipher.Domain.OutputModels.Authentication
 {
-    public class UserRegistrationOutputModel
+    public record UserRegistrationOutputModel
     {
         [Required]
-        public string Token { get; set; }
+        public string Token { get; init; }
 
         [Required]
-        public string RefreshToken { get; set; }
+        public string RefreshToken { get; init; }
 
-        public IdentityOutputModel Identity { get; set; }
+        public IdentityOutputModel Identity { get; init; }
 
-        public TimeSpanWrapperOutputModel RemainingTime { get; set; }
+        public TimeSpanWrapperOutputModel RemainingTime { get; init; }
     }
 }

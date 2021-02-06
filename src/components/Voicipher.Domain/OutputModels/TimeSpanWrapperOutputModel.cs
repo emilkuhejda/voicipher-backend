@@ -2,9 +2,9 @@
 
 namespace Voicipher.Domain.OutputModels
 {
-    public class TimeSpanWrapperOutputModel
+    public record TimeSpanWrapperOutputModel
     {
         [Required]
-        public long Ticks { get; set; }
+        public long Ticks { get; init; }
     }
 }

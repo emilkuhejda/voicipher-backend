@@ -7,22 +7,22 @@ using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
 namespace Voicipher.Domain.InputModels.Authentication
 {
-    public class UserRegistrationInputModel : IValidatable
+    public record UserRegistrationInputModel : IValidatable
     {
         [Required]
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
 
         [Required]
-        public Guid ApplicationId { get; set; }
+        public Guid ApplicationId { get; init; }
 
         [Required]
-        public string Email { get; set; }
+        public string Email { get; init; }
 
-        public string GivenName { get; set; }
+        public string GivenName { get; init; }
 
-        public string FamilyName { get; set; }
+        public string FamilyName { get; init; }
 
-        public RegistrationDeviceInputModel Device { get; set; }
+        public RegistrationDeviceInputModel Device { get; init; }
 
         public ValidationResult Validate()
         {
