@@ -3,18 +3,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Voicipher.Domain.OutputModels
 {
-    public class IdentityOutputModel
+    public record IdentityOutputModel
     {
         [Required]
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
 
         [Required]
-        public string Email { get; set; }
+        public string Email { get; init; }
 
         [Required]
-        public string GivenName { get; set; }
+        public string GivenName { get; init; }
 
         [Required]
-        public string FamilyName { get; set; }
+        public string FamilyName { get; init; }
     }
 }
