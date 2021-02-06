@@ -2,7 +2,7 @@
 
 namespace Voicipher.Domain.Validation
 {
-    public class OperationError
+    public record OperationError
     {
         public OperationError(ErrorCode errorCode)
         {
