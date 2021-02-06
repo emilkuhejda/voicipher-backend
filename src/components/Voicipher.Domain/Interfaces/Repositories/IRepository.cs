@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Domain.Models;
 
@@ -11,6 +12,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
         T Update(T entity);
 
         void Remove(T entity);
+
+        Task<T> GetAsync(Guid entityId, CancellationToken cancellationToken);
 
         Task<T[]> GetAllAsync(CancellationToken cancellationToken);
 

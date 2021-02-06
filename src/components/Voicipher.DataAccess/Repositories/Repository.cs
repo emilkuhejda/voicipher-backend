@@ -41,6 +41,11 @@ namespace Voicipher.DataAccess.Repositories
             Context.Set<T>().Remove(entity);
         }
 
+        public Task<T> GetAsync(Guid entityId, CancellationToken cancellationToken)
+        {
+            return Context.Set<T>().SingleOrDefaultAsync(x => x.Id == entityId, cancellationToken);
+        }
+
         public Task<T[]> GetAllAsync(CancellationToken cancellationToken)
         {
             return Context.Set<T>().ToArrayAsync(cancellationToken);
