@@ -14,6 +14,8 @@ namespace Voicipher.Domain.Infrastructure
             ValidationErrors = validationErrors?.ToList() ?? new List<ValidationError>();
         }
 
+        public bool IsSuccess => Result == OperationResult.Success;
+
         public OperationResult Result { get; }
 
         public OperationError Error { get; }

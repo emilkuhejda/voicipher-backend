@@ -19,14 +19,14 @@ namespace Voicipher.Host.Controllers.V2
     public class AuthenticationController : ControllerBase
     {
         private readonly Lazy<IUserRegistrationCommand> _userRegistrationCommand;
-        private readonly Lazy<ILogger> _logger;
+        private readonly ILogger _logger;
 
         public AuthenticationController(
             Lazy<IUserRegistrationCommand> userRegistrationCommand,
-            Lazy<ILogger> logger)
+            ILogger logger)
         {
             _userRegistrationCommand = userRegistrationCommand;
-            _logger = logger;
+            _logger = logger.ForContext<AuthenticationController>();
         }
 
         [AllowAnonymous]
@@ -41,12 +41,18 @@ namespace Voicipher.Host.Controllers.V2
             var errors = registrationUserRegistrationModel.Validate();
             if (!errors.IsValid)
             {
-                _logger.Value.Error($"User input is invalid. {errors.ToJson()}");
+                _logger.Error($"User input is invalid. {errors.ToJson()}");
 
                 return BadRequest(errors);
             }
 
             var commandResult = await _userRegistrationCommand.Value.ExecuteAsync(registrationUserRegistrationModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+            {
+                _logger.Error($"Validation errors during processing occurs. {commandResult.ValidationErrors.ToJson()}");
+
+                return BadRequest(commandResult.ValidationErrors);
+            }
 
             return Ok(commandResult.Value);
         }

@@ -6,6 +6,8 @@ namespace Voicipher.Domain.Infrastructure
 {
     public abstract record CommandResultBase
     {
+        public bool IsSuccess => Result == OperationResult.Success;
+
         public OperationResult Result { get; protected init; }
 
         public OperationError Error { get; protected init; }

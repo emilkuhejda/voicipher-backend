@@ -29,14 +29,16 @@ namespace Voicipher.Business.Commands.Authentication
             _getUserQuery = getUserQuery;
             _userRepository = userRepository;
             _mapper = mapper;
-            _logger = logger;
+            _logger = logger.ForContext<UserRegistrationCommand>();
         }
 
         protected override async Task<CommandResult<UserRegistrationOutputModel>> Execute(UserRegistrationInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             _logger.Information($"Start user authentication. User email: '{parameter.Email}'.");
 
-            var user = await _getUserQuery.ExecuteAsync(parameter.Id, principal, cancellationToken);
+            var userQueryResult = await _getUserQuery.ExecuteAsync(parameter.Id, principal, cancellationToken);
+            if (!userQueryResult.IsSuccess)
+                return new CommandResult<UserRegistrationOutputModel>(userQueryResult.ValidationErrors);
 
             var outputModel = new UserRegistrationOutputModel();
 
