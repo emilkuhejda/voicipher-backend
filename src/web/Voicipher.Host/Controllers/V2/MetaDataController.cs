@@ -25,7 +25,7 @@ namespace Voicipher.Host.Controllers.V2
             ILogger logger)
         {
             _appSettings = options.Value;
-            _logger = logger;
+            _logger = logger.ForContext<MetaDataController>();
         }
 
         [AllowAnonymous]
@@ -49,7 +49,7 @@ namespace Voicipher.Host.Controllers.V2
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(180));
 
-            _logger.Information($"Token was created.");
+            _logger.Information("Token was created.");
 
             return Ok(token);
         }
