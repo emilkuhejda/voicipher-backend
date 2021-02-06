@@ -9,6 +9,7 @@ using Voicipher.Domain.InputModels.Authentication;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
 using Voicipher.Domain.Interfaces.Queries;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Authentication;
 
 namespace Voicipher.Business.Commands.Authentication
@@ -39,6 +40,15 @@ namespace Voicipher.Business.Commands.Authentication
             var userQueryResult = await _getUserQuery.ExecuteAsync(parameter.Id, principal, cancellationToken);
             if (!userQueryResult.IsSuccess)
                 return new CommandResult<UserRegistrationOutputModel>(userQueryResult.ValidationErrors);
+
+            if (userQueryResult.Value == null)
+            {
+                _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' not exists.");
+                _logger.Information("Start user registration.");
+
+                var user = _mapper.Map<User>(parameter);
+                await _userRepository.AddAsync(user);
+            }
 
             var outputModel = new UserRegistrationOutputModel();
 
