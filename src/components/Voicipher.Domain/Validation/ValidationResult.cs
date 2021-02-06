@@ -19,7 +19,11 @@ namespace Voicipher.Domain.Validation
             _errors = errors != null ? new ReadOnlyCollection<ValidationError>(errors) : EmptyErrorList;
         }
 
-        public static ValidationResult Success { get; } = default;
+        private ValidationResult() : this(EmptyErrorList)
+        {
+        }
+
+        public static ValidationResult Success { get; } = new();
 
         public bool IsValid => _errors == null || _errors.Count == 0;
 
