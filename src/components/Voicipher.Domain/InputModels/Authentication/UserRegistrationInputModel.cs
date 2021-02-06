@@ -27,6 +27,12 @@ namespace Voicipher.Domain.InputModels.Authentication
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
+
+            errors.ValidateGuid(Id, nameof(Id), nameof(UserRegistrationInputModel));
+            errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
+
+            errors.ValidateRequired(Email, nameof(Email));
+
             errors.Merge(Device.Validate());
 
             return new ValidationResult(errors);

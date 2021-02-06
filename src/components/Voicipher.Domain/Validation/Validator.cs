@@ -5,25 +5,29 @@ namespace Voicipher.Domain.Validation
 {
     public static class Validator
     {
-        public static IList<ValidationError> ValidateRequired(this IList<ValidationError> errorList, string value, string field)
+        public static IList<ValidationError> ValidateRequired(this IList<ValidationError> errorList, string value, string field, string objectName = null)
         {
             if (string.IsNullOrWhiteSpace(value))
-                return errorList.Add(ValidationErrorCodes.EmptyField, field);
+                return errorList.Add(ValidationErrorCodes.EmptyField, field, objectName);
 
             return errorList;
         }
 
-        public static IList<ValidationError> ValidateMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength)
+        public static IList<ValidationError> ValidateMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength, string objectName = null)
         {
             if (maxLength <= 0)
-            {
                 throw new ArgumentOutOfRangeException(nameof(maxLength), maxLength, "MaxLength must be positive value.");
-            }
 
             if (value != null && value.Length > maxLength)
-            {
-                return errorList.Add(ValidationErrorCodes.TextTooLong, field);
-            }
+                return errorList.Add(ValidationErrorCodes.TextTooLong, field, objectName);
+
+            return errorList;
+        }
+
+        public static IList<ValidationError> ValidateGuid(this IList<ValidationError> errorList, Guid value, string field, string objectName = null)
+        {
+            if (value == Guid.Empty)
+                return errorList.Add(ValidationErrorCodes.InvalidId, field, objectName);
 
             return errorList;
         }
@@ -43,9 +47,10 @@ namespace Voicipher.Domain.Validation
             return errors;
         }
 
-        public static IList<ValidationError> Add(this IList<ValidationError> errorList, string code, string field)
+        public static IList<ValidationError> Add(this IList<ValidationError> errorList, string code, string field, string objectName = null)
         {
-            return errorList.AddError(new ValidationError(code, field));
+            var fieldName = string.IsNullOrWhiteSpace(objectName) ? field : objectName + "." + field;
+            return errorList.AddError(new ValidationError(code, fieldName));
         }
 
         public static IList<ValidationError> AddError(this IList<ValidationError> errorList, ValidationError error)
