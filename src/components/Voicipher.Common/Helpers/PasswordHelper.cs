@@ -19,5 +19,32 @@ namespace Voicipher.Common.Helpers
                 return (hmac.ComputeHash(Encoding.UTF8.GetBytes(password)), hmac.Key);
             }
         }
+
+        public static bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
+        {
+            if (password == null)
+                return false;
+
+            if (string.IsNullOrWhiteSpace(password))
+                return false;
+
+            if (storedHash.Length != 64)
+                return false;
+
+            if (storedSalt.Length != 128)
+                return false;
+
+            using (var hmac = new HMACSHA512(storedSalt))
+            {
+                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                for (var i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i])
+                        return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

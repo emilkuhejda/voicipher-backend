@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
@@ -9,6 +7,7 @@ using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
+using Voicipher.Common.Helpers;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.MetaData;
@@ -62,7 +61,7 @@ namespace Voicipher.Business.Commands.ControlPanel
                 return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidStoredValues), validationResult.Errors);
             }
 
-            if (!VerifyPasswordHash(parameter.Password, administrator.PasswordHash, administrator.PasswordSalt))
+            if (!PasswordHelper.VerifyPasswordHash(parameter.Password, administrator.PasswordHash, administrator.PasswordSalt))
             {
                 _logger.Error($"Password verification failed for administrator '{parameter.Username}'.");
 
@@ -80,45 +79,6 @@ namespace Voicipher.Business.Commands.ControlPanel
             _logger.Information($"Token was created for user ID = '{parameter.UserId}'.");
 
             return new CommandResult<AdministratorTokenOutputModel>(new AdministratorTokenOutputModel(token));
-        }
-
-        private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
-        {
-            if (password == null)
-                return false;
-
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                _logger.Error("Value cannot be empty or whitespace only string.");
-
-                return false;
-            }
-
-            if (storedHash.Length != 64)
-            {
-                _logger.Error("Invalid length of password hash (64 bytes expected).");
-
-                return false;
-            }
-
-            if (storedSalt.Length != 128)
-            {
-                _logger.Error("Invalid length of password salt (128 bytes expected).");
-
-                return false;
-            }
-
-            using (var hmac = new HMACSHA512(storedSalt))
-            {
-                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
-                for (var i = 0; i < computedHash.Length; i++)
-                {
-                    if (computedHash[i] != storedHash[i])
-                        return false;
-                }
-            }
-
-            return true;
         }
     }
 }
