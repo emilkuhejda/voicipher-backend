@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Voicipher.Common\Voicipher.Common.csproj" />
     <ProjectReference Include="..\Voicipher.Domain\Voicipher.Domain.csproj" />
   </ItemGroup>
 

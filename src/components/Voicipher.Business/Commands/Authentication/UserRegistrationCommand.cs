@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
@@ -47,6 +48,14 @@ namespace Voicipher.Business.Commands.Authentication
 
         protected override async Task<CommandResult<UserRegistrationOutputModel>> Execute(UserRegistrationInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var inputValidationResult = parameter.Validate();
+            if (!inputValidationResult.IsValid)
+            {
+                _logger.Error($"User input is invalid. {inputValidationResult.ToJson()}");
+
+                return new CommandResult<UserRegistrationOutputModel>(inputValidationResult.Errors);
+            }
+
             _logger.Information($"Start user authentication. User email: '{parameter.Email}'.");
 
             var userQueryResult = await _getUserQuery.ExecuteAsync(parameter.Id, principal, cancellationToken);
@@ -60,9 +69,9 @@ namespace Voicipher.Business.Commands.Authentication
 
                 user = _mapper.Map<User>(parameter);
 
-                var validationResult = user.Validate();
-                if (!validationResult.IsValid)
-                    return new CommandResult<UserRegistrationOutputModel>(validationResult.Errors);
+                var userValidationResult = user.Validate();
+                if (!userValidationResult.IsValid)
+                    return new CommandResult<UserRegistrationOutputModel>(userValidationResult.Errors);
 
                 await _userRepository.AddAsync(user);
             }
@@ -95,6 +104,8 @@ namespace Voicipher.Business.Commands.Authentication
             }
 
             await _userRepository.SaveAsync(cancellationToken);
+
+            _logger.Information($"User '{parameter.Email}' was successfully registered and token was created.");
 
             return new CommandResult<UserRegistrationOutputModel>(outputModel);
         }

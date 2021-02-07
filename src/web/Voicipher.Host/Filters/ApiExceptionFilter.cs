@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
-using Voicipher.Business.Utils;
+using Voicipher.Common.Utils;
 using Voicipher.Domain.Exceptions;
 
 namespace Voicipher.Host.Filters

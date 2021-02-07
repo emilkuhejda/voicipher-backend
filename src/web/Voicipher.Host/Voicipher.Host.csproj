@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\components\Voicipher.Business\Voicipher.Business.csproj" />
+    <ProjectReference Include="..\..\components\Voicipher.Common\Voicipher.Common.csproj" />
     <ProjectReference Include="..\..\components\Voicipher.DataAccess\Voicipher.DataAccess.csproj" />
     <ProjectReference Include="..\..\components\Voicipher.Domain\Voicipher.Domain.csproj" />
   </ItemGroup>
