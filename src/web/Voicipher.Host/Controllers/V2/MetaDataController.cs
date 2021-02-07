@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
-using Voicipher.Business.Utils;
-using Voicipher.Domain.Enums;
-using Voicipher.Domain.Settings;
+using Voicipher.Domain.InputModels.MetaData;
+using Voicipher.Domain.Interfaces.Queries.ControlPanel;
+using Voicipher.Domain.OutputModels;
 
 namespace Voicipher.Host.Controllers.V2
 {
@@ -17,15 +17,15 @@ namespace Voicipher.Host.Controllers.V2
     [ApiController]
     public class MetaDataController : ControllerBase
     {
-        private readonly AppSettings _appSettings;
-        private readonly ILogger _logger;
+        private readonly Lazy<IGetAdministratorQuery> _getAdministratorQuery;
+        private readonly Lazy<IMapper> _mapper;
 
         public MetaDataController(
-            IOptions<AppSettings> options,
-            ILogger logger)
+            Lazy<IGetAdministratorQuery> getAdministratorQuery,
+            Lazy<IMapper> mapper)
         {
-            _appSettings = options.Value;
-            _logger = logger.ForContext<MetaDataController>();
+            _getAdministratorQuery = getAdministratorQuery;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -39,19 +39,13 @@ namespace Voicipher.Host.Controllers.V2
 
         [AllowAnonymous]
         [HttpPost("generate-token")]
-        public IActionResult CreateToken()
+        public async Task<IActionResult> CreateToken([FromForm] CreateTokenInputModel createTokenInputModel, CancellationToken cancellationToken)
         {
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, Role.User.ToString())
-            };
+            var queryResult = await _getAdministratorQuery.Value.ExecuteAsync(createTokenInputModel, null, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return BadRequest(_mapper.Value.Map<ErrorResultOutputModel>(queryResult));
 
-            var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(180));
-
-            _logger.Information("Token was created.");
-
-            return Ok(token);
+            return Ok(queryResult.Value);
         }
     }
 }

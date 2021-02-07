@@ -7,17 +7,22 @@ namespace Voicipher.Domain.Infrastructure
     public record QueryResult<T> : QueryResultBase
     {
         protected QueryResult()
-            : this(OperationResult.Success, null, default, null)
+            : this(OperationResult.Success, null, default, new List<ValidationError>())
         {
         }
 
         public QueryResult(T value)
-            : this(OperationResult.Success, null, value, null)
+            : this(OperationResult.Success, null, value, new List<ValidationError>())
         {
         }
 
         public QueryResult(OperationError error)
-            : this(OperationResult.Error, error, default, null)
+            : this(OperationResult.Error, error, default, new List<ValidationError>())
+        {
+        }
+
+        public QueryResult(OperationError error, IEnumerable<ValidationError> validationErrors)
+            : this(OperationResult.Error, error, default, validationErrors)
         {
         }
 
