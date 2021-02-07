@@ -44,7 +44,11 @@ namespace Voicipher.Business.Profiles
                     var userSubscription = CreateUserSubscription(u, m.ApplicationId);
                     u.UserSubscriptions = new List<UserSubscription> { userSubscription };
                     u.CurrentUserSubscription = CreateCurrentUserSubscription(userSubscription);
-                    u.UserDevices = new List<UserDevice> { CreateUserDevice(u, m.Device) };
+
+                    if (m.Device != null)
+                    {
+                        u.UserDevices = new List<UserDevice> { CreateUserDevice(u, m.Device) };
+                    }
                 });
         }
 
