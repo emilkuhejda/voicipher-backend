@@ -7,3 +7,5 @@ using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Models.Administrator.PasswordHash")]
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Models.Administrator.PasswordSalt")]
+[assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Payloads.GenerateTokenPayload.PasswordHash")]
+[assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Payloads.GenerateTokenPayload.PasswordSalt")]

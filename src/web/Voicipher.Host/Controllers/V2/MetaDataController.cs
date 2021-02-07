@@ -8,7 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.InputModels.MetaData;
 using Voicipher.Domain.Interfaces.Commands.ControlPanel;
+using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.OutputModels;
+using Voicipher.Domain.Payloads;
 
 namespace Voicipher.Host.Controllers.V2
 {
@@ -17,14 +19,17 @@ namespace Voicipher.Host.Controllers.V2
     [ApiController]
     public class MetaDataController : ControllerBase
     {
-        private readonly Lazy<IGenerateTokenCommand> _getAdministratorQuery;
+        private readonly Lazy<IGetAdministratorQuery> _getAdministratorQuery;
+        private readonly Lazy<IGenerateTokenCommand> _generateTokenCommand;
         private readonly Lazy<IMapper> _mapper;
 
         public MetaDataController(
-            Lazy<IGenerateTokenCommand> getAdministratorQuery,
+            Lazy<IGetAdministratorQuery> getAdministratorQuery,
+            Lazy<IGenerateTokenCommand> generateTokenCommand,
             Lazy<IMapper> mapper)
         {
             _getAdministratorQuery = getAdministratorQuery;
+            _generateTokenCommand = generateTokenCommand;
             _mapper = mapper;
         }
 
@@ -45,7 +50,12 @@ namespace Voicipher.Host.Controllers.V2
             if (!queryResult.IsSuccess)
                 return BadRequest(_mapper.Value.Map<ErrorResultOutputModel>(queryResult));
 
-            return Ok(queryResult.Value);
+            var payload = _mapper.Value.Map(createTokenInputModel, _mapper.Value.Map<GenerateTokenPayload>(queryResult.Value));
+            var commandResult = await _generateTokenCommand.Value.ExecuteAsync(payload, null, cancellationToken);
+            if (!commandResult.IsSuccess)
+                return BadRequest(_mapper.Value.Map<ErrorResultOutputModel>(commandResult));
+
+            return Ok(commandResult.Value);
         }
     }
 }
