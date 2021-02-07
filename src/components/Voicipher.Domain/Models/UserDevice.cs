@@ -20,6 +20,13 @@ namespace Voicipher.Domain.Models
 
         public DateTime DateRegisteredUtc { get; set; }
 
+        public void UpdateFrom(UserDevice userDevice)
+        {
+            RuntimePlatform = userDevice.RuntimePlatform;
+            InstalledVersionNumber = userDevice.InstalledVersionNumber;
+            Language = userDevice.Language;
+        }
+
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
