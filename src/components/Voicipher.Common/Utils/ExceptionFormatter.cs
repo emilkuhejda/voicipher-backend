@@ -3,7 +3,7 @@ using System.Collections;
 using System.Globalization;
 using System.Text;
 
-namespace Voicipher.Business.Utils
+namespace Voicipher.Common.Utils
 {
     public static class ExceptionFormatter
     {
