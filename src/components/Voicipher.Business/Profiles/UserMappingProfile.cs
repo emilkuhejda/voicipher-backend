@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.InputModels.Authentication;
@@ -20,17 +21,19 @@ namespace Voicipher.Business.Profiles
                 .ForMember(u => u.DateRegisteredUtc, opt => opt.MapFrom(_ => DateTime.Now))
                 .ForMember(u => u.CurrentUserSubscription, opt => opt.Ignore())
                 .ForMember(u => u.UserSubscriptions, opt => opt.Ignore())
+                .ForMember(u => u.UserDevices, opt => opt.Ignore())
                 .AfterMap((m, u) =>
                 {
                     var userSubscription = CreateUserSubscription(u, m.ApplicationId);
-                    u.UserSubscriptions.Add(userSubscription);
+                    u.UserSubscriptions = new List<UserSubscription> { userSubscription };
                     u.CurrentUserSubscription = CreateCurrentUserSubscription(userSubscription);
+                    u.UserDevices = new List<UserDevice> { CreateUserDevice(u, m.Device) };
                 });
         }
 
         private static UserSubscription CreateUserSubscription(User user, Guid applicationId)
         {
-            return new UserSubscription
+            return new()
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
@@ -43,13 +46,53 @@ namespace Voicipher.Business.Profiles
 
         private static CurrentUserSubscription CreateCurrentUserSubscription(UserSubscription userSubscription)
         {
-            return new CurrentUserSubscription
+            return new()
             {
                 Id = Guid.NewGuid(),
                 UserId = userSubscription.Id,
                 Ticks = userSubscription.Time.Ticks,
                 DateUpdatedUtc = DateTime.UtcNow
             };
+        }
+
+        private static UserDevice CreateUserDevice(User user, RegistrationDeviceInputModel registrationDeviceInputModel)
+        {
+            return new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                InstallationId = registrationDeviceInputModel.InstallationId,
+                RuntimePlatform = GetRuntimePlatform(registrationDeviceInputModel.RuntimePlatform),
+                InstalledVersionNumber = registrationDeviceInputModel.InstalledVersionNumber,
+                Language = GetLanguage(registrationDeviceInputModel.Language),
+                DateRegisteredUtc = DateTime.UtcNow
+            };
+        }
+
+        private static RuntimePlatform GetRuntimePlatform(string runtimePlatform)
+        {
+            switch (runtimePlatform)
+            {
+                case "Android":
+                    return RuntimePlatform.Android;
+                case "iOS":
+                    return RuntimePlatform.Osx;
+                default:
+                    return RuntimePlatform.Undefined;
+            }
+        }
+
+        private static Language GetLanguage(string language)
+        {
+            switch (language)
+            {
+                case "en":
+                    return Language.English;
+                case "sk":
+                    return Language.Slovak;
+                default:
+                    return Language.Undefined;
+            }
         }
     }
 }

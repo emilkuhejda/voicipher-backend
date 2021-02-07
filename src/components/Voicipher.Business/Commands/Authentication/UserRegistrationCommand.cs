@@ -41,20 +41,22 @@ namespace Voicipher.Business.Commands.Authentication
             if (!userQueryResult.IsSuccess)
                 return new CommandResult<UserRegistrationOutputModel>(userQueryResult.ValidationErrors);
 
-            if (userQueryResult.Value == null)
+            var user = userQueryResult.Value;
+            if (user == null)
             {
                 _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' not exists.");
                 _logger.Information("Start user registration.");
 
-                var user = _mapper.Map<User>(parameter);
+                user = _mapper.Map<User>(parameter);
 
                 var validationResult = user.Validate();
                 if (!validationResult.IsValid)
                     return new CommandResult<UserRegistrationOutputModel>(validationResult.Errors);
 
                 await _userRepository.AddAsync(user);
-                await _userRepository.SaveAsync(cancellationToken);
             }
+
+            await _userRepository.SaveAsync(cancellationToken);
 
             var outputModel = new UserRegistrationOutputModel();
 
