@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Voicipher.Domain.Helpers
+namespace Voicipher.Common.Helpers
 {
     public static class PasswordHelper
     {

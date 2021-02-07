@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_global", "_global", "{80C9
 		src\global\Voicipher.CodeAnalysis.ruleset = src\global\Voicipher.CodeAnalysis.ruleset
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Voicipher.Common", "src\components\Voicipher.Common\Voicipher.Common.csproj", "{72BD5CB6-604D-45D2-91B2-EEF228959916}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,6 +44,10 @@ Global
 		{D27D61D5-FF66-4E9F-8038-8D7599EB67E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D27D61D5-FF66-4E9F-8038-8D7599EB67E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D27D61D5-FF66-4E9F-8038-8D7599EB67E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72BD5CB6-604D-45D2-91B2-EEF228959916}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72BD5CB6-604D-45D2-91B2-EEF228959916}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72BD5CB6-604D-45D2-91B2-EEF228959916}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72BD5CB6-604D-45D2-91B2-EEF228959916}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -51,6 +57,7 @@ Global
 		{7B052347-63BE-4349-BA58-4103DFDF77E9} = {3D87C66E-8F92-473F-843D-F5AA986BE154}
 		{2C98E3E6-A813-4B4D-981F-05D249574391} = {3D87C66E-8F92-473F-843D-F5AA986BE154}
 		{D27D61D5-FF66-4E9F-8038-8D7599EB67E0} = {3D87C66E-8F92-473F-843D-F5AA986BE154}
+		{72BD5CB6-604D-45D2-91B2-EEF228959916} = {3D87C66E-8F92-473F-843D-F5AA986BE154}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0701BE99-7471-42A6-B1A4-5F57527FF5AD}

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Voicipher.Domain.Helpers;
+using Voicipher.Common.Helpers;
 using Voicipher.Domain.Models;
 
 namespace Voicipher.DataAccess.Extensions
