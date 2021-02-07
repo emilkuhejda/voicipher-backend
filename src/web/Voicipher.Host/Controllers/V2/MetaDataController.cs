@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.InputModels.MetaData;
-using Voicipher.Domain.Interfaces.Queries.ControlPanel;
+using Voicipher.Domain.Interfaces.Commands.ControlPanel;
 using Voicipher.Domain.OutputModels;
 
 namespace Voicipher.Host.Controllers.V2
@@ -17,11 +17,11 @@ namespace Voicipher.Host.Controllers.V2
     [ApiController]
     public class MetaDataController : ControllerBase
     {
-        private readonly Lazy<IGetAdministratorQuery> _getAdministratorQuery;
+        private readonly Lazy<IGenerateTokenCommand> _getAdministratorQuery;
         private readonly Lazy<IMapper> _mapper;
 
         public MetaDataController(
-            Lazy<IGetAdministratorQuery> getAdministratorQuery,
+            Lazy<IGenerateTokenCommand> getAdministratorQuery,
             Lazy<IMapper> mapper)
         {
             _getAdministratorQuery = getAdministratorQuery;

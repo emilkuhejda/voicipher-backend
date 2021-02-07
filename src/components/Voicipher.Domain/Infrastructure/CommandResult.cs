@@ -47,6 +47,11 @@ namespace Voicipher.Domain.Infrastructure
         {
         }
 
+        public CommandResult(OperationError error, IEnumerable<ValidationError> validationErrors)
+            : this(default, OperationResult.Error, error, validationErrors)
+        {
+        }
+
         public CommandResult(IEnumerable<ValidationError> validationErrors)
             : this(default, OperationResult.Error, null, validationErrors)
         {

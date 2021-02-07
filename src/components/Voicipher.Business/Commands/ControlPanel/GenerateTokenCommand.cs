@@ -12,38 +12,38 @@ using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.MetaData;
-using Voicipher.Domain.Interfaces.Queries.ControlPanel;
+using Voicipher.Domain.Interfaces.Commands.ControlPanel;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels.MetaData;
 using Voicipher.Domain.Settings;
 using Voicipher.Domain.Validation;
 
-namespace Voicipher.Business.Queries.ControlPanel
+namespace Voicipher.Business.Commands.ControlPanel
 {
-    public class GetAdministratorQuery : Query<CreateTokenInputModel, QueryResult<AdministratorTokenOutputModel>>, IGetAdministratorQuery
+    public class GenerateTokenCommand : Command<CreateTokenInputModel, CommandResult<AdministratorTokenOutputModel>>, IGenerateTokenCommand
     {
         private readonly IAdministratorRepository _administratorRepository;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
-        public GetAdministratorQuery(
+        public GenerateTokenCommand(
             IAdministratorRepository administratorRepository,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _administratorRepository = administratorRepository;
             _appSettings = options.Value;
-            _logger = logger.ForContext<GetAdministratorQuery>();
+            _logger = logger.ForContext<GenerateTokenCommand>();
         }
 
-        protected override async Task<QueryResult<AdministratorTokenOutputModel>> Execute(CreateTokenInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<AdministratorTokenOutputModel>> Execute(CreateTokenInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 _logger.Error($"User input is invalid. {validationResult.ToJson()}");
 
-                return new QueryResult<AdministratorTokenOutputModel>(validationResult.Errors);
+                return new CommandResult<AdministratorTokenOutputModel>(validationResult.Errors);
             }
 
             var administrator = await _administratorRepository.GetByNameAsync(parameter.Username, cancellationToken);
@@ -51,7 +51,7 @@ namespace Voicipher.Business.Queries.ControlPanel
             {
                 _logger.Error($"Administrator '{parameter.Username}' was not found.");
 
-                return new QueryResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.NotFound));
+                return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.NotFound));
             }
 
             validationResult = administrator.Validate();
@@ -59,14 +59,14 @@ namespace Voicipher.Business.Queries.ControlPanel
             {
                 _logger.Error($"Administrator '{parameter.Username}' has invalid stored properties.");
 
-                return new QueryResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidStoredValues), validationResult.Errors);
+                return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidStoredValues), validationResult.Errors);
             }
 
             if (!VerifyPasswordHash(parameter.Password, administrator.PasswordHash, administrator.PasswordSalt))
             {
                 _logger.Error($"Password verification failed for administrator '{parameter.Username}'.");
 
-                return new QueryResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidPassword));
+                return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidPassword));
             }
 
             var claims = new[]
@@ -79,7 +79,7 @@ namespace Voicipher.Business.Queries.ControlPanel
 
             _logger.Information($"Token was created for user ID = '{parameter.UserId}'.");
 
-            return new QueryResult<AdministratorTokenOutputModel>(new AdministratorTokenOutputModel(token));
+            return new CommandResult<AdministratorTokenOutputModel>(new AdministratorTokenOutputModel(token));
         }
 
         private bool VerifyPasswordHash(string password, byte[] storedHash, byte[] storedSalt)
