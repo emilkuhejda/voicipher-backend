@@ -32,8 +32,12 @@ namespace Voicipher.Domain.InputModels.Authentication
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
 
             errors.ValidateRequired(Email, nameof(Email));
+            errors.ValidateRequired(Device, nameof(Device));
 
-            errors.Merge(Device.Validate());
+            if (Device != null)
+            {
+                errors.Merge(Device.Validate());
+            }
 
             return new ValidationResult(errors);
         }

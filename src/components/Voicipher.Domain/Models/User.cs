@@ -10,7 +10,9 @@ namespace Voicipher.Domain.Models
     {
         public User()
         {
+            CurrentUserSubscription = new EmptyCurrentUserSubscription();
             UserSubscriptions = new List<UserSubscription>();
+            UserDevices = new List<UserDevice>();
         }
 
         public string Email { get; set; }
@@ -23,7 +25,7 @@ namespace Voicipher.Domain.Models
 
         public CurrentUserSubscription CurrentUserSubscription { get; set; }
 
-        public IList<UserSubscription> UserSubscriptions { get; set; }
+        public IEnumerable<UserSubscription> UserSubscriptions { get; set; }
 
         //public IList<object> FileItems { get; set; }
 
@@ -33,7 +35,7 @@ namespace Voicipher.Domain.Models
 
         //public IList<object> InformationMessages { get; set; }
 
-        //public IList<object> UserDevices { get; set; }
+        public IEnumerable<UserDevice> UserDevices { get; set; }
 
         public ValidationResult Validate()
         {
@@ -54,6 +56,7 @@ namespace Voicipher.Domain.Models
 
             errors.Merge(CurrentUserSubscription.Validate());
             errors.Merge(UserSubscriptions.Select(x => x.Validate()).ToList());
+            errors.Merge(UserDevices.Select(x => x.Validate()).ToList());
 
             return new ValidationResult(errors);
         }

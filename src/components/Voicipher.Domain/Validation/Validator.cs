@@ -13,6 +13,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateRequired<T>(this IList<ValidationError> errorList, T value, string field, string objectName = null) where T : class
+        {
+            if (value == null)
+                return errorList.Add(ValidationErrorCodes.EmptyField, field, objectName);
+
+            return errorList;
+        }
+
         public static IList<ValidationError> ValidateMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength, string objectName = null)
         {
             if (maxLength <= 0)

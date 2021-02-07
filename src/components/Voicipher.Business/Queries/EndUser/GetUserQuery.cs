@@ -4,11 +4,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Domain.Infrastructure;
-using Voicipher.Domain.Interfaces.Queries;
+using Voicipher.Domain.Interfaces.Queries.EndUser;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
-namespace Voicipher.Business.Commands.Queries
+namespace Voicipher.Business.Queries.EndUser
 {
     public class GetUserQuery : Query<Guid, QueryResult<User>>, IGetUserQuery
     {
@@ -19,10 +19,10 @@ namespace Voicipher.Business.Commands.Queries
             _userRepository = userRepository;
         }
 
-        protected override async Task<QueryResult<User>> Execute(Guid parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<QueryResult<Domain.Models.User>> Execute(Guid parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetAsync(parameter, cancellationToken);
-            return new QueryResult<User>(user);
+            return new QueryResult<Domain.Models.User>(user);
         }
     }
 }

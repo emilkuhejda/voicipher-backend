@@ -25,6 +25,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<CurrentUserSubscription> CurrentUserSubscriptions { get; set; }
 
+        public DbSet<UserDevice> UserDevices { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -38,6 +40,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new CurrentUserSubscriptionConfiguration());
+            modelBuilder.ApplyConfiguration(new UserDeviceConfiguration());
         }
     }
 }
