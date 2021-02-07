@@ -33,6 +33,7 @@ namespace Voicipher.Host
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Enable CORS
             services.AddCors(options =>
             {
                 options.AddPolicy(Constants.CorsPolicy,
@@ -143,6 +144,9 @@ namespace Voicipher.Host
 
             // Migrate database
             app.MigrateDatabase();
+
+            // Enable CORS
+            app.UseCors(Constants.CorsPolicy);
 
             app.UseHttpsRedirection();
             app.UseSerilogRequestLogging();

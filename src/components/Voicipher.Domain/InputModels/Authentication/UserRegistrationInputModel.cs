@@ -30,9 +30,7 @@ namespace Voicipher.Domain.InputModels.Authentication
 
             errors.ValidateGuid(Id, nameof(Id), nameof(UserRegistrationInputModel));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
-
             errors.ValidateRequired(Email, nameof(Email));
-            errors.ValidateRequired(Device, nameof(Device));
 
             if (Device != null)
             {
