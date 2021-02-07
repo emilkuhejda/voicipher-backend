@@ -8,7 +8,7 @@ using Voicipher.Domain.Interfaces.Queries;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
-namespace Voicipher.Business.Commands.Queries
+namespace Voicipher.Business.Queries
 {
     public class GetUserQuery : Query<Guid, QueryResult<User>>, IGetUserQuery
     {
