@@ -52,6 +52,8 @@ namespace Voicipher.Host.Controllers.V2
                 return BadRequest(commandResult.ValidationErrors);
             }
 
+            _logger.Information($"User '{registrationUserRegistrationModel.Email}' was successfully registered and token was created.");
+
             return Ok(commandResult.Value);
         }
     }
