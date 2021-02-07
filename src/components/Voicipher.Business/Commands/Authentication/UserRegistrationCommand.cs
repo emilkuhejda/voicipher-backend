@@ -7,7 +7,7 @@ using Voicipher.Business.Infrastructure;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.Authentication;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
-using Voicipher.Domain.Interfaces.Queries;
+using Voicipher.Domain.Interfaces.Queries.EndUser;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Authentication;
