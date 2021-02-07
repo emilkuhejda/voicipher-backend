@@ -33,6 +33,7 @@ namespace Voicipher.Business.Commands.ControlPanel
         protected override async Task<CommandResult<AdministratorTokenOutputModel>> Execute(GenerateTokenPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
+
             if (!PasswordHelper.VerifyPasswordHash(parameter.Password, parameter.PasswordHash, parameter.PasswordSalt))
             {
                 _logger.Error($"Password verification failed for administrator '{parameter.Username}'.");
