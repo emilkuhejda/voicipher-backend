@@ -115,7 +115,7 @@ namespace Voicipher.Business.Commands.Authentication
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, Role.User.ToString())
+                new Claim(ClaimTypes.Role, nameof(Role.User))
             };
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(180));
@@ -123,7 +123,7 @@ namespace Voicipher.Business.Commands.Authentication
             var refreshClaims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Role, Role.Security.ToString())
+                new Claim(ClaimTypes.Role, nameof(Role.Security))
             };
 
             var refreshToken = TokenHelper.Generate(_appSettings.SecretKey, refreshClaims, TimeSpan.FromDays(730));

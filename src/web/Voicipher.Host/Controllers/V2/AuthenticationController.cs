@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -9,11 +10,14 @@ using Voicipher.Domain.InputModels.Authentication;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Authentication;
+using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V2
 {
     [ApiVersion("2.0")]
-    [Route("api/b2c/v{version:apiVersion}/auth")]
+    [Route("api/v{version:apiVersion}/auth")]
+    [Produces("application/json")]
+    [Authorize(Policy = nameof(VoicipherPolicy.AzureAd))]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
@@ -32,6 +36,7 @@ namespace Voicipher.Host.Controllers.V2
         [ProducesResponseType(typeof(UserRegistrationOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "RegisterUser")]
         public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationInputModel registrationUserRegistrationModel, CancellationToken cancellationToken)
