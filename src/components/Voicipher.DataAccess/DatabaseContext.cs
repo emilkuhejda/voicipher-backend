@@ -21,6 +21,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<Administrator> Administrators { get; set; }
 
+        public DbSet<AudioFile> AudioFiles { get; set; }
+
         public DbSet<User> Users { get; set; }
 
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
@@ -40,6 +42,7 @@ namespace Voicipher.DataAccess
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new AdministratorConfiguration());
+            modelBuilder.ApplyConfiguration(new AudioFileConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new CurrentUserSubscriptionConfiguration());

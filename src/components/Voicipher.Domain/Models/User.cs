@@ -12,6 +12,7 @@ namespace Voicipher.Domain.Models
         {
             CurrentUserSubscription = new EmptyCurrentUserSubscription();
             UserSubscriptions = new List<UserSubscription>();
+            AudioFiles = new List<AudioFile>();
             UserDevices = new List<UserDevice>();
         }
 
@@ -27,7 +28,7 @@ namespace Voicipher.Domain.Models
 
         public IEnumerable<UserSubscription> UserSubscriptions { get; set; }
 
-        //public IList<object> FileItems { get; set; }
+        public IEnumerable<AudioFile> AudioFiles { get; set; }
 
         //public IList<object> RecognizedAudioSamples { get; set; }
 
@@ -56,6 +57,7 @@ namespace Voicipher.Domain.Models
 
             errors.Merge(CurrentUserSubscription.Validate());
             errors.Merge(UserSubscriptions.Select(x => x.Validate()).ToList());
+            errors.Merge(AudioFiles.Select(x => x.Validate()).ToList());
             errors.Merge(UserDevices.Select(x => x.Validate()).ToList());
 
             return new ValidationResult(errors);
