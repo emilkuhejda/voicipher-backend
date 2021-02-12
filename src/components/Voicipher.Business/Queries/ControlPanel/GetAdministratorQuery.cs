@@ -41,7 +41,7 @@ namespace Voicipher.Business.Queries.ControlPanel
             {
                 _logger.Error($"Administrator '{parameter.Username}' was not found.");
 
-                return new QueryResult<Administrator>(new OperationError(ValidationErrorCodes.NotFound));
+                return new QueryResult<Administrator>(new OperationError(ValidationErrorCodes.AdministratorNotFound));
             }
 
             validationResult = administrator.Validate();

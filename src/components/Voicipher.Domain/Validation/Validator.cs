@@ -21,6 +21,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateNullableMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength, string objectName = null)
+        {
+            if (value == null)
+                return errorList;
+
+            return ValidateMaxLength(errorList, value, field, maxLength, objectName);
+        }
+
         public static IList<ValidationError> ValidateMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength, string objectName = null)
         {
             if (maxLength <= 0)
