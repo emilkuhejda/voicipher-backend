@@ -15,6 +15,7 @@ namespace Voicipher.Domain.OutputModels.Audio
         [Required]
         public string FileName { get; set; }
 
+        [Required]
         public string Language { get; set; }
 
         [Required]

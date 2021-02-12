@@ -63,6 +63,7 @@ namespace Voicipher.Domain.Models
             errors.ValidateNullableMaxLength(OriginalSourceFileName, nameof(OriginalSourceFileName), 100, nameof(AudioFile));
             errors.ValidateNullableMaxLength(SourceFileName, nameof(FileName), 100, nameof(AudioFile));
             errors.ValidateDateTime(DateCreated, nameof(DateCreated), nameof(AudioFile));
+            errors.ValidateDateTime(DateUpdatedUtc, nameof(DateUpdatedUtc), nameof(AudioFile));
 
             return new ValidationResult(errors);
         }
