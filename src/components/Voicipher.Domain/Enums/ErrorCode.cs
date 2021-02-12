@@ -94,8 +94,13 @@ namespace Voicipher.Domain.Enums
         EC509 = 509,
         EC510 = 510,
 
+        // Invalid input data
         EC600 = 600,
+
+        // Invalid output data
         EC601 = 601,
+
+        // Invalid command result
         EC602 = 602,
         EC603 = 603,
         EC604 = 604,
