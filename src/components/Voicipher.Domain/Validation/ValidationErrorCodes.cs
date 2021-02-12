@@ -10,7 +10,7 @@
 
         public static string InvalidDateTime => nameof(InvalidDateTime);
 
-        public static string NotFound => nameof(NotFound);
+        public static string AdministratorNotFound => nameof(AdministratorNotFound);
 
         public static string InvalidStoredValues => nameof(InvalidStoredValues);
 
