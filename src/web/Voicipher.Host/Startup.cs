@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +14,6 @@ using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
 using Voicipher.Host.Extensions;
 using Voicipher.Host.Filters;
-using Voicipher.Host.Security;
 using Voicipher.Host.Security.Extensions;
 using Voicipher.Host.Utils;
 
@@ -101,31 +99,9 @@ namespace Voicipher.Host
 
             services.AddVoicipherAuthorization(appSettings);
             services.AddAzureAdAuthorization(appSettings);
-            services.AddMvc(options =>
+            services.AddMvcCore(options =>
             {
                 options.Filters.AddService<ApiExceptionFilter>();
-            }).AddFilterProvider(_ =>
-            {
-                var azureAdAuthorizeFilter = new AuthorizeFilter(new[]
-                    {new AuthorizeData {AuthenticationSchemes = Constants.AzureAdScheme}});
-                var rewriteMeAuthorizeFilter = new AuthorizeFilter(new[]
-                    {new AuthorizeData {AuthenticationSchemes = Constants.VoicipherScheme}});
-
-                var filterProviderOptions = new[]
-                {
-                    new FilterProviderOption
-                    {
-                        RoutePrefix = "api/b2c",
-                        Filter = azureAdAuthorizeFilter
-                    },
-                    new FilterProviderOption
-                    {
-                        RoutePrefix = "api",
-                        Filter = rewriteMeAuthorizeFilter
-                    }
-                };
-
-                return new AuthenticationFilterProvider(filterProviderOptions);
             });
         }
 
