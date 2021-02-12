@@ -16,7 +16,7 @@ namespace Voicipher.Business.Services
 
         public Task SendAsync(string method)
         {
-            return _messageHub.Clients.All.SendAsync(method));
+            return _messageHub.Clients.All.SendAsync(method);
         }
 
         public Task SendAsync(string method, object arg1)
