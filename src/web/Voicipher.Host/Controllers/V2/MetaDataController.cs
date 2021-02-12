@@ -16,6 +16,7 @@ namespace Voicipher.Host.Controllers.V2
 {
     [ApiVersion("2.0")]
     [Route("api/v{version:apiVersion}/meta-data")]
+    [Produces("application/json")]
     [ApiController]
     public class MetaDataController : ControllerBase
     {

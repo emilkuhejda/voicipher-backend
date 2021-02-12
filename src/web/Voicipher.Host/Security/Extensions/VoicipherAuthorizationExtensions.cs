@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Utils;
 
@@ -14,7 +15,7 @@ namespace Voicipher.Host.Security.Extensions
             var issuerSigningKey = Encoding.ASCII.GetBytes(appSettings.SecretKey);
 
             services
-                .AddAuthorization(options => { options.AddRewriteMePolicy(); })
+                .AddAuthorization(options => { options.AddVoicipherPolicy(); })
                 .AddAuthentication(x =>
                 {
                     x.DefaultAuthenticateScheme = Constants.VoicipherScheme;
@@ -36,14 +37,27 @@ namespace Voicipher.Host.Security.Extensions
             return services;
         }
 
-        public static AuthorizationOptions AddRewriteMePolicy(this AuthorizationOptions options)
+        public static AuthorizationOptions AddVoicipherPolicy(this AuthorizationOptions options)
         {
-            var policy = new AuthorizationPolicyBuilder()
+            var userPolicy = new AuthorizationPolicyBuilder()
                 .AddAuthenticationSchemes(Constants.VoicipherScheme)
                 .RequireAuthenticatedUser()
+                .RequireRole(nameof(Role.User))
+                .Build();
+            var adminPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(Constants.VoicipherScheme)
+                .RequireAuthenticatedUser()
+                .RequireRole(nameof(Role.Admin))
+                .Build();
+            var securityPolicy = new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes(Constants.VoicipherScheme)
+                .RequireAuthenticatedUser()
+                .RequireRole(nameof(Role.Security))
                 .Build();
 
-            options.AddPolicy(Constants.VoicipherPolicy, policy);
+            options.AddPolicy(nameof(VoicipherPolicy.User), userPolicy);
+            options.AddPolicy(nameof(VoicipherPolicy.Admin), adminPolicy);
+            options.AddPolicy(nameof(VoicipherPolicy.Security), securityPolicy);
             return options;
         }
     }

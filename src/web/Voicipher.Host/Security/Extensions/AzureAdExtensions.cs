@@ -36,7 +36,7 @@ namespace Voicipher.Host.Security.Extensions
                 .RequireAuthenticatedUser()
                 .Build();
 
-            options.AddPolicy(Constants.AzureAdPolicy, policy);
+            options.AddPolicy(nameof(VoicipherPolicy.AzureAd), policy);
             return options;
         }
     }
