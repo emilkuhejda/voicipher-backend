@@ -5,7 +5,7 @@ using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
-namespace Voicipher.Domain.InputModels.AudioFile
+namespace Voicipher.Domain.InputModels.Audio
 {
     public record CreateAudioFileInputModel : IValidatable
     {

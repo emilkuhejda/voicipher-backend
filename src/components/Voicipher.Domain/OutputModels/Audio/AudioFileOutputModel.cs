@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Voicipher.Domain.Enums;
 
-namespace Voicipher.Domain.OutputModels.AudioFile
+namespace Voicipher.Domain.OutputModels.Audio
 {
     public class AudioFileOutputModel
     {

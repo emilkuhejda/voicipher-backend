@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
-using Voicipher.Domain.InputModels.AudioFile;
-using Voicipher.Domain.Interfaces.Commands.AudioFile;
-using Voicipher.Domain.OutputModels.AudioFile;
+using Voicipher.Domain.InputModels.Audio;
+using Voicipher.Domain.Interfaces.Commands.Audio;
+using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V2
