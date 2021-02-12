@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 using Autofac;
 using AutoMapper;
+using Voicipher.Business.Services;
 using Voicipher.Domain.Interfaces.Infrastructure;
+using Voicipher.Domain.Interfaces.Services;
 using Module = Autofac.Module;
 
 namespace Voicipher.Business
@@ -28,6 +30,7 @@ namespace Voicipher.Business
                 .AsImplementedInterfaces();
 
             builder.RegisterAssemblyTypes(assembly).Where(t => t.IsAssignableTo<Profile>()).As<Profile>().AsSelf();
+            builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
         }
     }
 }
