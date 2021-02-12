@@ -7,38 +7,38 @@ namespace Voicipher.Domain.OutputModels.Audio
     public class AudioFileOutputModel
     {
         [Required]
-        public Guid Id { get; set; }
+        public Guid Id { get; init; }
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get; init; }
 
         [Required]
-        public string FileName { get; set; }
+        public string FileName { get; init; }
 
         [Required]
-        public string Language { get; set; }
+        public string Language { get; init; }
 
         [Required]
-        public string RecognitionStateString { get; set; }
+        public string RecognitionStateString { get; init; }
 
         [Required]
-        public UploadStatus UploadStatus { get; set; }
+        public UploadStatus UploadStatus { get; init; }
 
         [Required]
-        public long TotalTimeTicks { get; set; }
+        public long TotalTimeTicks { get; init; }
 
         [Required]
-        public long TranscribedTimeTicks { get; set; }
+        public long TranscribedTimeTicks { get; init; }
 
         [Required]
-        public DateTime DateCreated { get; set; }
+        public DateTime DateCreated { get; init; }
 
-        public DateTime? DateProcessedUtc { get; set; }
-
-        [Required]
-        public DateTime DateUpdatedUtc { get; set; }
+        public DateTime? DateProcessedUtc { get; init; }
 
         [Required]
-        public bool IsDeleted { get; set; }
+        public DateTime DateUpdatedUtc { get; init; }
+
+        [Required]
+        public bool IsDeleted { get; init; }
     }
 }
