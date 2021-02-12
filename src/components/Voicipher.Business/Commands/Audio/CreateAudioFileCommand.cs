@@ -6,12 +6,14 @@ using AutoMapper;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Utils;
@@ -20,15 +22,18 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class CreateAudioFileCommand : Command<CreateAudioFileInputModel, CommandResult<AudioFileOutputModel>>, ICreateAudioFileCommand
     {
+        private readonly IMessageCenterService _messageCenterService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public CreateAudioFileCommand(
+            IMessageCenterService messageCenterService,
             IAudioFileRepository audioFileRepository,
             IMapper mapper,
             ILogger logger)
         {
+            _messageCenterService = messageCenterService;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
             _logger = logger.ForContext<CreateAudioFileCommand>();
@@ -43,10 +48,11 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC200);
             }
 
+            var userId = principal.GetNameIdentifier();
             var audioFile = new AudioFile
             {
                 Id = Guid.NewGuid(),
-                UserId = principal.GetNameIdentifier(),
+                UserId = userId,
                 ApplicationId = parameter.ApplicationId,
                 Name = parameter.Name,
                 FileName = parameter.FileName,
@@ -57,6 +63,7 @@ namespace Voicipher.Business.Commands.Audio
             };
 
             await _audioFileRepository.AddAsync(audioFile);
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
             await _audioFileRepository.SaveAsync(cancellationToken).ConfigureAwait(false);
 
             _logger.Information($"File item '{audioFile.Id}' was created.");

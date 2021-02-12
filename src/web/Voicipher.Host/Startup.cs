@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Voicipher.Business.Polling;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
@@ -50,6 +51,9 @@ namespace Voicipher.Host
             // Database connection
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(appSettings.ConnectionString, providerOptions => providerOptions.CommandTimeout(60)));
 
+            // SignalR
+            services.AddSignalR();
+            
             services.AddControllers();
             services.AddApiVersioning();
 
@@ -138,6 +142,7 @@ namespace Voicipher.Host
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<MessageHub>("/api/message-hub");
             });
         }
     }
