@@ -7,7 +7,7 @@ namespace Voicipher.Domain.Models
 {
     public class FileChunk : EntityBase, IValidatable
     {
-        public Guid FileItemId { get; set; }
+        public Guid AudioFileId { get; set; }
 
         public Guid ApplicationId { get; set; }
 
@@ -22,7 +22,7 @@ namespace Voicipher.Domain.Models
             IList<ValidationError> errors = new List<ValidationError>();
 
             errors.ValidateGuid(Id, nameof(Id));
-            errors.ValidateGuid(FileItemId, nameof(FileItemId));
+            errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
             errors.ValidateRequired(Path, nameof(Path));
             errors.ValidateDateTime(DateCreatedUtc, nameof(DateCreatedUtc));

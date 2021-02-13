@@ -9,13 +9,13 @@ namespace Voicipher.Business.Profiles
     {
         public FileChunkMappingProfile()
         {
-            CreateMap<UploadChunkFilePayload, FileChunk>()
+            CreateMap<UploadFileChunkPayload, FileChunk>()
                 .ForMember(
                     f => f.Id,
                     opt => opt.MapFrom(u => Guid.NewGuid()))
                 .ForMember(
-                    f => f.FileItemId,
-                    opt => opt.MapFrom(u => u.FileItemId))
+                    f => f.AudioFileId,
+                    opt => opt.MapFrom(u => u.AudioFileId))
                 .ForMember(
                     f => f.ApplicationId,
                     opt => opt.MapFrom(u => u.ApplicationId))

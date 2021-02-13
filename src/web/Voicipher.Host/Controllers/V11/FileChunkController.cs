@@ -23,11 +23,15 @@ namespace Voicipher.Host.Controllers.V11
     [ApiController]
     public class FileChunkController : ControllerBase
     {
-        private readonly Lazy<IUploadChunkFileCommand> _uploadChunkFileCommand;
+        private readonly Lazy<IUploadFileChunkCommand> _uploadFileChunkCommand;
+        private readonly Lazy<IDeleteFileChunkCommand> _deleteFileChunkCommand;
 
-        public FileChunkController(Lazy<IUploadChunkFileCommand> uploadChunkFileCommand)
+        public FileChunkController(
+            Lazy<IUploadFileChunkCommand> uploadFileChunkCommand,
+            Lazy<IDeleteFileChunkCommand> deleteFileChunkCommand)
         {
-            _uploadChunkFileCommand = uploadChunkFileCommand;
+            _uploadFileChunkCommand = uploadFileChunkCommand;
+            _deleteFileChunkCommand = deleteFileChunkCommand;
         }
 
         [HttpPost]
@@ -42,16 +46,33 @@ namespace Voicipher.Host.Controllers.V11
         [RequestSizeLimit(int.MaxValue)]
         public async Task<IActionResult> Upload(Guid fileItemId, int order, StorageSetting storageSetting, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
-            var uploadChunkFileInputModel = new UploadChunkFilePayload
+            var uploadFileChunkPayload = new UploadFileChunkPayload
             {
-                FileItemId = fileItemId,
+                AudioFileId = fileItemId,
                 Order = order,
                 StorageSetting = storageSetting,
                 ApplicationId = applicationId,
                 File = file
             };
 
-            var commandResult = await _uploadChunkFileCommand.Value.ExecuteAsync(uploadChunkFileInputModel, HttpContext.User, cancellationToken);
+            var commandResult = await _uploadFileChunkCommand.Value.ExecuteAsync(uploadFileChunkPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
+        }
+
+        [HttpDelete("{fileItemId}")]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(OperationId = "DeleteChunks")]
+        public async Task<IActionResult> DeleteChunks(Guid fileItemId, Guid applicationId, CancellationToken cancellationToken)
+        {
+            var deleteFileChunkPayload = new DeleteFileChunkPayload(fileItemId, applicationId);
+
+            var commandResult = await _deleteFileChunkCommand.Value.ExecuteAsync(deleteFileChunkPayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

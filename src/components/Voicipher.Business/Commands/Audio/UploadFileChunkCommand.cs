@@ -21,14 +21,14 @@ using Voicipher.Domain.Validation;
 
 namespace Voicipher.Business.Commands.Audio
 {
-    public class UploadChunkFileCommand : Command<UploadChunkFilePayload, CommandResult<OkOutputModel>>, IUploadChunkFileCommand
+    public class UploadFileChunkCommand : Command<UploadFileChunkPayload, CommandResult<OkOutputModel>>, IUploadFileChunkCommand
     {
         private readonly IChunkStorage _chunkStorage;
         private readonly IFileChunkRepository _fileChunkRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
-        public UploadChunkFileCommand(
+        public UploadFileChunkCommand(
             IChunkStorage chunkStorage,
             IFileChunkRepository fileChunkRepository,
             IMapper mapper,
@@ -37,15 +37,15 @@ namespace Voicipher.Business.Commands.Audio
             _chunkStorage = chunkStorage;
             _fileChunkRepository = fileChunkRepository;
             _mapper = mapper;
-            _logger = logger.ForContext<UploadChunkFileCommand>();
+            _logger = logger.ForContext<UploadFileChunkCommand>();
         }
 
-        protected override async Task<CommandResult<OkOutputModel>> Execute(UploadChunkFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<OkOutputModel>> Execute(UploadFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
-                if (validationResult.Errors.ContainsError(nameof(UploadChunkFilePayload.File), ValidationErrorCodes.ParameterIsNull))
+                if (validationResult.Errors.ContainsError(nameof(UploadFileChunkPayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
                     _logger.Error("Uploaded file source was not found.");
 
@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.Audio
                 await _fileChunkRepository.AddAsync(fileChunk);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunk for file item '{parameter.FileItemId}' was uploaded.");
+                _logger.Information($"File chunk for audio file '{parameter.AudioFileId}' was uploaded.");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
