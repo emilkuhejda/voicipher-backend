@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
@@ -8,6 +9,11 @@ namespace Voicipher.Domain.Models
 {
     public class AudioFile : EntityBase, IValidatable
     {
+        public AudioFile()
+        {
+            TranscribeItems = new List<TranscribeItem>();
+        }
+
         public Guid UserId { get; set; }
 
         public Guid ApplicationId { get; set; }
@@ -44,7 +50,7 @@ namespace Voicipher.Domain.Models
 
         public bool WasCleaned { get; set; }
 
-        //public virtual IList<TranscribeItemEntity> TranscribeItems { get; set; }
+        public IList<TranscribeItem> TranscribeItems { get; set; }
 
         //public virtual IList<WavPartialFileEntity> WavPartialFiles { get; set; }
 
@@ -64,6 +70,8 @@ namespace Voicipher.Domain.Models
             errors.ValidateNullableMaxLength(SourceFileName, nameof(FileName), 100, nameof(AudioFile));
             errors.ValidateDateTime(DateCreated, nameof(DateCreated), nameof(AudioFile));
             errors.ValidateDateTime(DateUpdatedUtc, nameof(DateUpdatedUtc), nameof(AudioFile));
+
+            errors.Merge(TranscribeItems.Select(x => x.Validate()).ToList());
 
             return new ValidationResult(errors);
         }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Voicipher.DataAccess;
 
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210213205509_CreateTranscribeItemEntity")]
+    partial class CreateTranscribeItemEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -332,13 +334,11 @@ namespace Voicipher.DataAccess.Migrations
 
             modelBuilder.Entity("Voicipher.Domain.Models.TranscribeItem", b =>
                 {
-                    b.HasOne("Voicipher.Domain.Models.AudioFile", "AudioFile")
+                    b.HasOne("Voicipher.Domain.Models.AudioFile", null)
                         .WithMany("TranscribeItems")
                         .HasForeignKey("AudioFileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("AudioFile");
                 });
 
             modelBuilder.Entity("Voicipher.Domain.Models.UserDevice", b =>
