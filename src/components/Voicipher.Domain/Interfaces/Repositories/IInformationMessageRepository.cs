@@ -12,5 +12,7 @@ namespace Voicipher.Domain.Interfaces.Repositories
         Task<InformationMessage[]> GetAllAsync(Guid userId, DateTime updatedAfter, CancellationToken cancellationToken);
 
         Task<InformationMessage[]> GetAllShallowAsync(CancellationToken cancellationToken);
+
+        Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

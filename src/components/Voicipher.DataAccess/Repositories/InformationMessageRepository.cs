@@ -43,5 +43,15 @@ namespace Voicipher.DataAccess.Repositories
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
         }
+
+        public async Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return await Context.InformationMessages
+                .Where(x => (!x.UserId.HasValue || x.UserId.Value == userId) &&
+                            (x.DatePublishedUtc.HasValue || x.DateUpdatedUtc.HasValue))
+                .OrderByDescending(x => x.DateUpdatedUtc)
+                .Select(x => x.DateUpdatedUtc)
+                .FirstOrDefaultAsync(cancellationToken) ?? DateTime.MinValue;
+        }
     }
 }

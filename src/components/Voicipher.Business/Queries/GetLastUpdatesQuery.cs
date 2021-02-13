@@ -16,15 +16,18 @@ namespace Voicipher.Business.Queries
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly IUserSubscriptionRepository _userSubscriptionRepository;
+        private readonly IInformationMessageRepository _informationMessageRepository;
 
         public GetLastUpdatesQuery(
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
-            IUserSubscriptionRepository userSubscriptionRepository)
+            IUserSubscriptionRepository userSubscriptionRepository,
+            IInformationMessageRepository informationMessageRepository)
         {
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
             _userSubscriptionRepository = userSubscriptionRepository;
+            _informationMessageRepository = informationMessageRepository;
         }
 
         protected override async Task<QueryResult<LastUpdatesOutputModel>> Execute(ClaimsPrincipal principal, CancellationToken cancellationToken)
@@ -33,6 +36,7 @@ namespace Voicipher.Business.Queries
             var fileItemUtc = await _audioFileRepository.GetLastUpdateAsync(userId, cancellationToken);
             var transcribeItemUtc = await _transcribeItemRepository.GetLastUpdateAsync(userId, cancellationToken);
             var userSubscriptionUtc = await _userSubscriptionRepository.GetLastUpdateAsync(userId, cancellationToken);
+            var informationMessageUtc = await _informationMessageRepository.GetLastUpdateAsync(userId, cancellationToken);
 
             var lastUpdatesOutputModel = new LastUpdatesOutputModel
             {
@@ -40,7 +44,7 @@ namespace Voicipher.Business.Queries
                 DeletedFileItemUtc = DateTime.MinValue,
                 TranscribeItemUtc = transcribeItemUtc,
                 UserSubscriptionUtc = userSubscriptionUtc,
-                InformationMessageUtc = DateTime.MinValue
+                InformationMessageUtc = informationMessageUtc
             };
 
             return new QueryResult<LastUpdatesOutputModel>(lastUpdatesOutputModel);
