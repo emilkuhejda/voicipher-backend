@@ -8,8 +8,7 @@ using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.0")]
-    [ApiExplorerSettings(GroupName = "v1")]
+    [ApiVersion("1")]
     [Route("api/v{version:apiVersion}/chunks")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
