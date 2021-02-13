@@ -9,7 +9,6 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.OutputModels;
-using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
 
@@ -31,18 +30,6 @@ namespace Voicipher.Host.Controllers.V2
             _uploadChunkFileCommand = uploadChunkFileCommand;
         }
 
-        [HttpGet]
-        [ProducesResponseType(typeof(StorageConfigurationOutputModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(OperationId = "GetChunksStorageConfiguration")]
-        public IActionResult GetChunksStorageConfiguration()
-        {
-            return Ok(new StorageConfigurationOutputModel(StorageSetting.Disk));
-        }
-
-        [AllowAnonymous]
         [HttpPost]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
