@@ -12,7 +12,7 @@ using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V10
+namespace Voicipher.Host.Controllers.V1
 {
     [ApiVersion("1.0")]
     [ApiExplorerSettings(GroupName = "v1")]

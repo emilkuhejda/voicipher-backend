@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace Voicipher.Host.Controllers.V10
+namespace Voicipher.Host.Controllers.V1
 {
     [ApiVersion("1.0")]
     [ApiExplorerSettings(GroupName = "v1")]
