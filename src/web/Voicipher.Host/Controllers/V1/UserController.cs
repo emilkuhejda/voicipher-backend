@@ -12,20 +12,20 @@ using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Authentication;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V2
+namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v2")]
-    [Route("api/v{version:apiVersion}/auth")]
+    [ApiVersion("1")]
+    [Route("api/v{version:apiVersion}/users")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.AzureAd))]
+    [ApiExplorerSettings(GroupName = "v1")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class UserController : ControllerBase
     {
         private readonly Lazy<IUserRegistrationCommand> _userRegistrationCommand;
         private readonly Lazy<IMapper> _mapper;
 
-        public AuthenticationController(
+        public UserController(
             Lazy<IUserRegistrationCommand> userRegistrationCommand,
             Lazy<IMapper> mapper)
         {
@@ -33,14 +33,12 @@ namespace Voicipher.Host.Controllers.V2
             _mapper = mapper;
         }
 
-        [HttpPost("register")]
+        [HttpPost("/api/b2c/v{version:apiVersion}/users/register")]
         [ProducesResponseType(typeof(UserRegistrationOutputModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "RegisterUser")]
-        public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationInputModel registrationUserRegistrationModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] UserRegistrationInputModel registrationUserRegistrationModel, CancellationToken cancellationToken)
         {
             var commandResult = await _userRegistrationCommand.Value.ExecuteAsync(registrationUserRegistrationModel, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
