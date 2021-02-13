@@ -57,5 +57,16 @@ namespace Voicipher.Host.Controllers.V11
 
             return Ok(commandResult.Value);
         }
+
+        [HttpDelete("{fileItemId}")]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(OperationId = "DeleteChunks")]
+        public async Task<IActionResult> DeleteChunks(Guid fileItemId, Guid applicationId, CancellationToken cancellationToken)
+        {
+            var deleteFileChunk = new DeleteFileChunkPayload(fileItemId, applicationId);
+        }
     }
 }
