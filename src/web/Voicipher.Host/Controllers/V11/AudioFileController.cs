@@ -12,10 +12,10 @@ using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V2
+namespace Voicipher.Host.Controllers.V11
 {
     [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v2")]
+    [ApiExplorerSettings(GroupName = "v1.1")]
     [Route("api/v{version:apiVersion}/audio-files")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]

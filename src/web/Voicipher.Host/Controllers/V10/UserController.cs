@@ -12,7 +12,7 @@ using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Authentication;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V1
+namespace Voicipher.Host.Controllers.V10
 {
     [ApiVersion("1")]
     [Route("api/v{version:apiVersion}/users")]
