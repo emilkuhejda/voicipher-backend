@@ -28,12 +28,12 @@ namespace Voicipher.Domain.Models
     {
         public BlobSettings(Guid userId, Guid audioFileId)
         {
-            UserId = userId;
-            AudioFileId = audioFileId;
+            ContainerName = userId.ToString();
+            AudioFileId = audioFileId.ToString();
         }
 
-        public Guid UserId { get; }
+        public string AudioFileId { get; }
 
-        public Guid AudioFileId { get; }
+        public string ContainerName { get; }
     }
 }

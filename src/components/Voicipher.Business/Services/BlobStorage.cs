@@ -12,8 +12,6 @@ namespace Voicipher.Business.Services
 {
     public class BlobStorage : IBlobStorage
     {
-        private const string ContainerName = "voicipher-audio-files";
-
         private readonly AppSettings _appSettings;
 
         public BlobStorage(IOptions<AppSettings> options)
@@ -24,8 +22,8 @@ namespace Voicipher.Business.Services
         public async Task<string> UploadAsync(UploadBlobSettings uploadBlobSettings)
         {
             var fileName = $"{Guid.NewGuid()}.voc";
-            var filePath = Path.Combine(uploadBlobSettings.UserId.ToString(), uploadBlobSettings.AudioFileId.ToString(), fileName);
-            var container = await GetContainerClient();
+            var filePath = Path.Combine(uploadBlobSettings.AudioFileId, fileName);
+            var container = await GetContainerClient(uploadBlobSettings.ContainerName);
             var client = container.GetBlobClient(filePath);
 
             using (var fileStream = File.OpenRead(uploadBlobSettings.FilePath))
@@ -36,15 +34,19 @@ namespace Voicipher.Business.Services
             return fileName;
         }
 
+        public async Task DeleteContainer(BlobSettings blobSettings)
+        {
+            var container = await GetContainerClient(blobSettings.ContainerName);
+            await container.DeleteIfExistsAsync();
+        }
+
         public async Task DeleteAudioFileAsync(BlobSettings blobSettings)
         {
-            var container = await GetContainerClient();
+            var container = await GetContainerClient(blobSettings.ContainerName);
             var blobItems = container.GetBlobs()
                 .AsPages()
                 .SelectMany(x => x.Values)
-                .Where(x =>
-                    x.Name.Contains(blobSettings.UserId.ToString(), StringComparison.InvariantCulture) &&
-                    x.Name.Contains(blobSettings.AudioFileId.ToString(), StringComparison.InvariantCulture));
+                .Where(x => x.Name.Contains(blobSettings.AudioFileId, StringComparison.InvariantCulture));
 
             foreach (var blobItem in blobItems)
             {
@@ -55,15 +57,10 @@ namespace Voicipher.Business.Services
 
         public async Task DeleteFileBlobAsync(DeleteBlobSettings deleteBlobSettings)
         {
-            var filePath = Path.Combine(deleteBlobSettings.UserId.ToString(), deleteBlobSettings.AudioFileId.ToString(), deleteBlobSettings.FileName);
-            var container = await GetContainerClient();
+            var filePath = Path.Combine(deleteBlobSettings.AudioFileId, deleteBlobSettings.FileName);
+            var container = await GetContainerClient(deleteBlobSettings.ContainerName);
             var client = container.GetBlobClient(filePath);
             await client.DeleteIfExistsAsync();
-        }
-
-        private async Task<BlobContainerClient> GetContainerClient()
-        {
-            return await GetContainerClient(ContainerName);
         }
 
         private async Task<BlobContainerClient> GetContainerClient(string containerName)
