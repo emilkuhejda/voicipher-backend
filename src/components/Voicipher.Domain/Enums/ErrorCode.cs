@@ -10,7 +10,7 @@ namespace Voicipher.Domain.Enums
         // Uploaded file not found
         EC100 = 100,
 
-        // File item not found
+        // File not found
         EC101 = 101,
 
         // File is not uploaded correctly
