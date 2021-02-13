@@ -20,7 +20,6 @@ namespace Voicipher.Host.Controllers.V11
     [Route("api/v{version:apiVersion}/chunks")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
-    [AllowAnonymous]
     [ApiController]
     public class FileChunkController : ControllerBase
     {
