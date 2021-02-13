@@ -11,5 +11,7 @@ namespace Voicipher.Domain.Settings
         public string ConnectionString { get; set; }
 
         public Authentication Authentication { get; set; }
+
+        public AzureStorageAccountSettings AzureStorageAccount { get; set; }
     }
 }

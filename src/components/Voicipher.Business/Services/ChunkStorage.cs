@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -19,10 +22,11 @@ namespace Voicipher.Business.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<string> UploadAsync(byte[] bytes, string outputFileName, CancellationToken cancellationToken)
+        public async Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
         {
+            var fileName = $"{Guid.NewGuid()}.tmp";
             var rootPath = GetRootPath();
-            var filePath = Path.Combine(rootPath, outputFileName);
+            var filePath = Path.Combine(rootPath, fileName);
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
             return filePath;
@@ -37,6 +41,18 @@ namespace Voicipher.Business.Services
                     File.Delete(fileChunk.Path);
                 }
             }
+        }
+
+        public async Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken)
+        {
+            var source = new List<byte>();
+            foreach (var fileChunk in fileChunks.OrderBy(x => x.Order))
+            {
+                var bytes = await File.ReadAllBytesAsync(fileChunk.Path, cancellationToken);
+                source.AddRange(bytes);
+            }
+
+            return source.ToArray();
         }
 
         private string GetRootPath()

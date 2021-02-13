@@ -33,6 +33,8 @@ namespace Voicipher.Business
 
             builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
             builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
+            builder.RegisterType<AudioService>().As<IAudioService>();
+            builder.RegisterType<BlobStorage>().As<IBlobStorage>();
         }
     }
 }
