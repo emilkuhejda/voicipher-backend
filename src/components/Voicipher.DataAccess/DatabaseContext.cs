@@ -23,6 +23,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<AudioFile> AudioFiles { get; set; }
 
+        public DbSet<TranscribeItem> TranscribeItems { get; set; }
+
         public DbSet<FileChunk> FileChunks { get; set; }
 
         public DbSet<User> Users { get; set; }
@@ -45,6 +47,7 @@ namespace Voicipher.DataAccess
         {
             modelBuilder.ApplyConfiguration(new AdministratorConfiguration());
             modelBuilder.ApplyConfiguration(new AudioFileConfiguration());
+            modelBuilder.ApplyConfiguration(new TranscribeItemConfiguration());
             modelBuilder.ApplyConfiguration(new FileChunkConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
