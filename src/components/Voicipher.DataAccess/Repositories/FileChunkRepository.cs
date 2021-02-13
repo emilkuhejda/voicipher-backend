@@ -19,7 +19,7 @@ namespace Voicipher.DataAccess.Repositories
             return Context.FileChunks.Where(x => x.FileItemId == audioFileId).ToArrayAsync();
         }
 
-        public void DeleteByAudioFileId(FileChunk[] fileChunks)
+        public void RemoveRange(FileChunk[] fileChunks)
         {
             Context.FileChunks.RemoveRange(fileChunks);
         }

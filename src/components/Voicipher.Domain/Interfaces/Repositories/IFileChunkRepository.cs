@@ -8,6 +8,6 @@ namespace Voicipher.Domain.Interfaces.Repositories
     {
         Task<FileChunk[]> GetByAudioFileIdAsync(Guid audioFileId);
 
-        void DeleteByAudioFileId(FileChunk[] fileChunks);
+        void RemoveRange(FileChunk[] fileChunks);
     }
 }
