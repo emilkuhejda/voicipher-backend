@@ -27,7 +27,7 @@ namespace Voicipher.Business.Queries.Audio
         protected override async Task<QueryResult<AudioFileOutputModel[]>> Execute(AudioFilesPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            var audioFiles = await _audioFileRepository.GetAllAsync(userId, parameter.UpdatedAfter, parameter.ApplicationId);
+            var audioFiles = await _audioFileRepository.GetAllAsync(userId, parameter.UpdatedAfter, parameter.ApplicationId, cancellationToken);
 
             var outputModels = audioFiles.Select(x => _mapper.Map<AudioFileOutputModel>(x)).ToArray();
             return new QueryResult<AudioFileOutputModel[]>(outputModels);

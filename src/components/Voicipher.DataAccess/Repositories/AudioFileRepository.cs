@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -14,13 +15,24 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId)
+        public Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Where(x => !x.IsDeleted)
                 .Where(x => x.UserId == userId && x.DateUpdatedUtc >= updatedAfter && x.ApplicationId != applicationId)
                 .AsNoTracking()
-                .ToArrayAsync();
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.DateUpdatedUtc)
+                .AsNoTracking()
+                .Select(x => x.DateUpdatedUtc)
+                .FirstOrDefaultAsync(cancellationToken);
         }
     }
 }
