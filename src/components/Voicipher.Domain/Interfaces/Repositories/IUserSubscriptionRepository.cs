@@ -7,6 +7,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
 {
     public interface IUserSubscriptionRepository : IRepository<UserSubscription>
     {
+        Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken);
+
         Task<TimeSpan> GetRemainingTimeAsync(Guid userId, CancellationToken cancellationToken);
     }
 }

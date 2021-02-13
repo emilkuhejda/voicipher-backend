@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,15 @@ namespace Voicipher.DataAccess.Repositories
         public UserSubscriptionRepository(DatabaseContext context)
             : base(context)
         {
+        }
+
+        public Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.CurrentUserSubscriptions
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.DateUpdatedUtc)
+                .Select(x => x.DateUpdatedUtc)
+                .FirstOrDefaultAsync(cancellationToken);
         }
 
         public async Task<TimeSpan> GetRemainingTimeAsync(Guid userId, CancellationToken cancellationToken)
