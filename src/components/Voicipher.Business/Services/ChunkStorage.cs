@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -21,10 +22,11 @@ namespace Voicipher.Business.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<string> UploadAsync(byte[] bytes, string outputFileName, CancellationToken cancellationToken)
+        public async Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
         {
+            var fileName = $"{Guid.NewGuid()}.tmp";
             var rootPath = GetRootPath();
-            var filePath = Path.Combine(rootPath, outputFileName);
+            var filePath = Path.Combine(rootPath, fileName);
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
             return filePath;
