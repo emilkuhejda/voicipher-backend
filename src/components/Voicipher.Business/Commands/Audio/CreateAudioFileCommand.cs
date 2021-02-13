@@ -10,17 +10,17 @@ using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
-using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Audio;
+using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Commands.Audio
 {
-    public class CreateAudioFileCommand : Command<CreateAudioFileInputModel, CommandResult<AudioFileOutputModel>>, ICreateAudioFileCommand
+    public class CreateAudioFileCommand : Command<CreateAudioFilePayload, CommandResult<AudioFileOutputModel>>, ICreateAudioFileCommand
     {
         private readonly IMessageCenterService _messageCenterService;
         private readonly IAudioFileRepository _audioFileRepository;
@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.Audio
             _logger = logger.ForContext<CreateAudioFileCommand>();
         }
 
-        protected override async Task<CommandResult<AudioFileOutputModel>> Execute(CreateAudioFileInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<AudioFileOutputModel>> Execute(CreateAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)

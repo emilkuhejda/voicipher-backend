@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
-using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.OutputModels.Audio;
+using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V2
@@ -48,9 +48,18 @@ namespace Voicipher.Host.Controllers.V2
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateAudioFile")]
-        public async Task<IActionResult> CreateAudioFile([FromRoute] CreateAudioFileInputModel createAudioFileInputModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateAudioFile(string name, string language, string fileName, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
         {
-            var commandResult = await _createAudioFileCommand.Value.ExecuteAsync(createAudioFileInputModel, HttpContext.User, cancellationToken);
+            var createAudioFilePayload = new CreateAudioFilePayload
+            {
+                Name = name,
+                Language = language,
+                FileName = fileName,
+                DateCreated = dateCreated,
+                ApplicationId = applicationId
+            };
+
+            var commandResult = await _createAudioFileCommand.Value.ExecuteAsync(createAudioFilePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 
