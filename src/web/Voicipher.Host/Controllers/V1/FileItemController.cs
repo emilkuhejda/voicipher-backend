@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -8,6 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Commands.Audio;
+using Voicipher.Domain.Interfaces.Queries.Audio;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
@@ -21,22 +23,32 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class FileItemController : ControllerBase
     {
+        private readonly Lazy<IGetAudioFilesQuery> _getAudioFilesQuery;
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
 
-        public FileItemController(Lazy<ICreateAudioFileCommand> createAudioFileCommand)
+        public FileItemController(
+            Lazy<IGetAudioFilesQuery> getAudioFilesQuery,
+            Lazy<ICreateAudioFileCommand> createAudioFileCommand)
         {
+            _getAudioFilesQuery = getAudioFilesQuery;
             _createAudioFileCommand = createAudioFileCommand;
         }
 
         [HttpGet]
-        // [ProducesResponseType(typeof(IEnumerable<FileItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<AudioFileOutputModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetFileItems")]
-        public ActionResult Get(DateTime updatedAfter, Guid applicationId)
+        public async Task<ActionResult> Get(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var audioFilesPayload = new AudioFilesPayload(updatedAfter, applicationId);
+            var queryResult = await _getAudioFilesQuery.Value.ExecuteAsync(audioFilesPayload, HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return BadRequest();
+
+            return Ok(queryResult.Value);
         }
 
         [HttpGet("deleted")]
