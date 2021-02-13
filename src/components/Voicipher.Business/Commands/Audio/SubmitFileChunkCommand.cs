@@ -15,6 +15,7 @@ using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 
@@ -23,6 +24,7 @@ namespace Voicipher.Business.Commands.Audio
     public class SubmitFileChunkCommand : Command<SubmitFileChunkPayload, CommandResult<FileItemOutputModel>>, ISubmitFileChunkCommand
     {
         private readonly IAudioService _audioService;
+        private readonly IBlobStorage _blobStorage;
         private readonly IChunkStorage _chunkStorage;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IFileChunkRepository _fileChunkRepository;
@@ -31,6 +33,7 @@ namespace Voicipher.Business.Commands.Audio
 
         public SubmitFileChunkCommand(
             IAudioService audioService,
+            IBlobStorage blobStorage,
             IChunkStorage chunkStorage,
             IAudioFileRepository audioFileRepository,
             IFileChunkRepository fileChunkRepository,
@@ -38,6 +41,7 @@ namespace Voicipher.Business.Commands.Audio
             ILogger logger)
         {
             _audioService = audioService;
+            _blobStorage = blobStorage;
             _chunkStorage = chunkStorage;
             _audioFileRepository = audioFileRepository;
             _fileChunkRepository = fileChunkRepository;
@@ -92,7 +96,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var sourceName = $"{Guid.NewGuid()}.voc";
+                var blobFile = new BlobFile(userId, parameter.AudioFileId, tempFilePath);
+                var sourceName = await _blobStorage.UploadAsync(blobFile);
 
                 audioFile.ApplicationId = parameter.ApplicationId;
                 audioFile.OriginalSourceFileName = sourceName;
