@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -25,6 +26,7 @@ namespace Voicipher.Business.Commands.Audio
         private readonly IChunkStorage _chunkStorage;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IFileChunkRepository _fileChunkRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public SubmitFileChunkCommand(
@@ -32,12 +34,14 @@ namespace Voicipher.Business.Commands.Audio
             IChunkStorage chunkStorage,
             IAudioFileRepository audioFileRepository,
             IFileChunkRepository fileChunkRepository,
+            IMapper mapper,
             ILogger logger)
         {
             _audioService = audioService;
             _chunkStorage = chunkStorage;
             _audioFileRepository = audioFileRepository;
             _fileChunkRepository = fileChunkRepository;
+            _mapper = mapper;
             _logger = logger.ForContext<SubmitFileChunkCommand>();
         }
 
@@ -100,7 +104,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 _logger.Information($"Audio file '{audioFile.Id}' was successfully submitted. [{userId}]");
 
-                return new CommandResult<FileItemOutputModel>(new FileItemOutputModel());
+                var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
+                return new CommandResult<FileItemOutputModel>(outputModel);
             }
             catch (DbUpdateException ex)
             {
