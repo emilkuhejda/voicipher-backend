@@ -22,7 +22,6 @@ namespace Voicipher.Host.Controllers.V11
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
     [ApiController]
-    [AllowAnonymous]
     public class FileChunkController : ControllerBase
     {
         private readonly Lazy<IUploadFileChunkCommand> _uploadFileChunkCommand;

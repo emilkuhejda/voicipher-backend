@@ -5,6 +5,10 @@ namespace Voicipher.Domain.Interfaces.Services
 {
     public interface IBlobStorage
     {
-        Task<string> UploadAsync(BlobFile blobFile);
+        Task<string> UploadAsync(UploadBlobSettings uploadBlobSettings);
+
+        Task DeleteAudioFileAsync(BlobSettings blobSettings);
+
+        Task DeleteFileBlobAsync(DeleteBlobSettings deleteBlobSettings);
     }
 }
