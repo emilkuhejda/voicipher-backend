@@ -11,21 +11,21 @@ using Voicipher.Domain.Interfaces.Commands.ControlPanel;
 using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Payloads;
+using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V11
+namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v1.1")]
-    [Route("api/v{version:apiVersion}/meta-data")]
+    [ApiVersion("1.0")]
     [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/utils")]
     [ApiController]
-    public class MetaDataController : ControllerBase
+    public class UtilsController : ControllerBase
     {
         private readonly Lazy<IGetAdministratorQuery> _getAdministratorQuery;
         private readonly Lazy<IGenerateTokenCommand> _generateTokenCommand;
         private readonly Lazy<IMapper> _mapper;
 
-        public MetaDataController(
+        public UtilsController(
             Lazy<IGetAdministratorQuery> getAdministratorQuery,
             Lazy<IGenerateTokenCommand> generateTokenCommand,
             Lazy<IMapper> mapper)
@@ -35,7 +35,6 @@ namespace Voicipher.Host.Controllers.V11
             _mapper = mapper;
         }
 
-        [AllowAnonymous]
         [HttpGet("is-alive")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [SwaggerOperation(OperationId = "IsAlive")]
@@ -44,7 +43,18 @@ namespace Voicipher.Host.Controllers.V11
             return Ok(true);
         }
 
-        [AllowAnonymous]
+        [HttpGet("refresh-token")]
+        [Authorize(Policy = nameof(VoicipherPolicy.Security))]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(OperationId = "RefreshToken")]
+        public IActionResult RefreshToken()
+        {
+            throw new NotImplementedException();
+        }
+
         [HttpPost("generate-token")]
         public async Task<IActionResult> CreateToken([FromForm] CreateTokenInputModel createTokenInputModel, CancellationToken cancellationToken)
         {

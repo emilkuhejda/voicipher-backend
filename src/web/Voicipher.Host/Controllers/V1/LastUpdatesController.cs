@@ -5,19 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V11
+namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.0")]
-    [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v1.1")]
-    [Route("api/v{version:apiVersion}/last-updates")]
+    [ApiVersion("1")]
     [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/last-updates")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
     [ApiController]
     public class LastUpdatesController : ControllerBase
     {
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        // [ProducesResponseType(typeof(LastUpdatesDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
