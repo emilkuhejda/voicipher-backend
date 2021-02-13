@@ -63,8 +63,8 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadedFileSource = await parameter.File.GetBytesAsync(cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var tempFileName = $"{Guid.NewGuid()}.tmp";
-                filePath = await _chunkStorage.UploadAsync(uploadedFileSource, tempFileName, cancellationToken);
+                filePath = await _chunkStorage.UploadAsync(uploadedFileSource, cancellationToken);
+                _logger.Information($"File chunk was created on destination: '{filePath}'.");
 
                 var fileChunk = _mapper.Map<FileChunk>(
                     parameter,
@@ -95,6 +95,8 @@ namespace Voicipher.Business.Commands.Audio
                 if (File.Exists(filePath))
                 {
                     File.Delete(filePath);
+
+                    _logger.Information($"File chunk was removed on destination: '{filePath}'.");
                 }
 
                 _logger.Error("File chunk was not uploaded correctly.");

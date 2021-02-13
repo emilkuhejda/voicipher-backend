@@ -9,6 +9,7 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.OutputModels;
+using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
 
@@ -25,13 +26,16 @@ namespace Voicipher.Host.Controllers.V11
     {
         private readonly Lazy<IUploadFileChunkCommand> _uploadFileChunkCommand;
         private readonly Lazy<IDeleteFileChunkCommand> _deleteFileChunkCommand;
+        private readonly Lazy<ISubmitFileChunkCommand> _submitFileChunkCommand;
 
         public FileChunkController(
             Lazy<IUploadFileChunkCommand> uploadFileChunkCommand,
-            Lazy<IDeleteFileChunkCommand> deleteFileChunkCommand)
+            Lazy<IDeleteFileChunkCommand> deleteFileChunkCommand,
+            Lazy<ISubmitFileChunkCommand> submitFileChunkCommand)
         {
             _uploadFileChunkCommand = uploadFileChunkCommand;
             _deleteFileChunkCommand = deleteFileChunkCommand;
+            _submitFileChunkCommand = submitFileChunkCommand;
         }
 
         [HttpPost]
@@ -73,6 +77,29 @@ namespace Voicipher.Host.Controllers.V11
             var deleteFileChunkPayload = new DeleteFileChunkPayload(fileItemId, applicationId);
 
             var commandResult = await _deleteFileChunkCommand.Value.ExecuteAsync(deleteFileChunkPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
+        }
+
+        [HttpPut("submit")]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [SwaggerOperation(OperationId = "SubmitChunks")]
+        public async Task<IActionResult> Submit(Guid fileItemId, int chunksCount, StorageSetting _, Guid applicationId, CancellationToken cancellationToken)
+        {
+            var submitFileChunkPayload = new SubmitFileChunkPayload
+            {
+                AudioFileId = fileItemId,
+                ChunksCount = chunksCount,
+                ApplicationId = applicationId
+            };
+
+            var commandResult = await _submitFileChunkCommand.Value.ExecuteAsync(submitFileChunkPayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

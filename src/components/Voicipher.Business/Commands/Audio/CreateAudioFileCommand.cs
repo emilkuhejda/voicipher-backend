@@ -41,8 +41,7 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<AudioFileOutputModel>> Execute(CreateAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var validationResult = parameter.Validate();
-            if (!validationResult.IsValid)
+            if (!parameter.Validate().IsValid)
             {
                 _logger.Error("Invalid input data.");
 

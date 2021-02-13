@@ -34,8 +34,7 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(DeleteFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var validationResult = parameter.Validate();
-            if (!validationResult.IsValid)
+            if (!parameter.Validate().IsValid)
             {
                 _logger.Error("Invalid input data.");
 
