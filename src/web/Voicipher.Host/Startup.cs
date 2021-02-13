@@ -53,13 +53,18 @@ namespace Voicipher.Host
 
             // SignalR
             services.AddSignalR();
-            
+
             services.AddControllers();
             services.AddApiVersioning();
 
             // Swagger
             services.AddSwaggerGen(configuration =>
             {
+                configuration.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Voicipher API",
+                    Version = "v1"
+                });
                 configuration.SwaggerDoc("v2", new OpenApiInfo
                 {
                     Title = "Voicipher API",
@@ -133,7 +138,11 @@ namespace Voicipher.Host
 
             // Swagger
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v2/swagger.json", "Voicipher API V2"); });
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Voicipher API V1");
+                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Voicipher API V2");
+            });
 
             app.UseRouting();
 

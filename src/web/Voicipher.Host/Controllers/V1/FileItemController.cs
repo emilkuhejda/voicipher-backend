@@ -12,32 +12,21 @@ using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V2
+namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v2")]
-    [Route("api/v{version:apiVersion}/audio-files")]
+    [ApiVersion("1.0")]
+    [ApiExplorerSettings(GroupName = "v1")]
+    [Route("api/v{version:apiVersion}/files")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
     [ApiController]
-    public class AudioFileController : ControllerBase
+    public class FileItemController : ControllerBase
     {
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
 
-        public AudioFileController(Lazy<ICreateAudioFileCommand> createAudioFileCommand)
+        public FileItemController(Lazy<ICreateAudioFileCommand> createAudioFileCommand)
         {
             _createAudioFileCommand = createAudioFileCommand;
-        }
-
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(OperationId = "GetAudioFiles")]
-        public IActionResult GetAudioFiles()
-        {
-            return Ok();
         }
 
         [HttpPost("create")]
