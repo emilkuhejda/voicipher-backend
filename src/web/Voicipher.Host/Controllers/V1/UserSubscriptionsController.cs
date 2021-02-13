@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
@@ -15,6 +20,13 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class UserSubscriptionsController : ControllerBase
     {
+        private readonly Lazy<IUserSubscriptionRepository> _userSubscriptionRepository;
+
+        public UserSubscriptionsController(Lazy<IUserSubscriptionRepository> userSubscriptionRepository)
+        {
+            _userSubscriptionRepository = userSubscriptionRepository;
+        }
+
         [HttpPost("create")]
         // [ProducesResponseType(typeof(TimeSpanWrapperDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
@@ -39,14 +51,18 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet("remaining-time")]
-        // [ProducesResponseType(typeof(TimeSpanWrapperDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TimeSpanWrapperOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetSubscriptionRemainingTime")]
-        public IActionResult GetSubscriptionRemainingTime()
+        public async Task<IActionResult> GetSubscriptionRemainingTime(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var remainingTime = await _userSubscriptionRepository.Value.GetRemainingTimeAsync(userId, cancellationToken);
+            var outputModel = new TimeSpanWrapperOutputModel(remainingTime.Ticks);
+
+            return Ok(outputModel);
         }
     }
 }
