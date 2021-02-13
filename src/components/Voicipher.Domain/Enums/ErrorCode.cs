@@ -102,7 +102,10 @@ namespace Voicipher.Domain.Enums
 
         // Invalid command result
         EC602 = 602,
+
+        // Operation error
         EC603 = 603,
+
         EC604 = 604,
         EC605 = 605,
         EC606 = 606,

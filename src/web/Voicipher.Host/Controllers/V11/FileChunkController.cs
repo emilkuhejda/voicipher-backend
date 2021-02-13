@@ -20,14 +20,19 @@ namespace Voicipher.Host.Controllers.V11
     [Route("api/v{version:apiVersion}/chunks")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
+    [AllowAnonymous]
     [ApiController]
     public class FileChunkController : ControllerBase
     {
         private readonly Lazy<IUploadFileChunkCommand> _uploadFileChunkCommand;
+        private readonly Lazy<IDeleteFileChunkCommand> _deleteFileChunkCommand;
 
-        public FileChunkController(Lazy<IUploadFileChunkCommand> uploadFileChunkCommand)
+        public FileChunkController(
+            Lazy<IUploadFileChunkCommand> uploadFileChunkCommand,
+            Lazy<IDeleteFileChunkCommand> deleteFileChunkCommand)
         {
             _uploadFileChunkCommand = uploadFileChunkCommand;
+            _deleteFileChunkCommand = deleteFileChunkCommand;
         }
 
         [HttpPost]
@@ -66,7 +71,13 @@ namespace Voicipher.Host.Controllers.V11
         [SwaggerOperation(OperationId = "DeleteChunks")]
         public async Task<IActionResult> DeleteChunks(Guid fileItemId, Guid applicationId, CancellationToken cancellationToken)
         {
-            var deleteFileChunk = new DeleteFileChunkPayload(fileItemId, applicationId);
+            var deleteFileChunkPayload = new DeleteFileChunkPayload(fileItemId, applicationId);
+
+            var commandResult = await _deleteFileChunkCommand.Value.ExecuteAsync(deleteFileChunkPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }

@@ -1,4 +1,8 @@
-﻿using Voicipher.Domain.Interfaces.Repositories;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
 namespace Voicipher.DataAccess.Repositories
@@ -8,6 +12,16 @@ namespace Voicipher.DataAccess.Repositories
         public FileChunkRepository(DatabaseContext context)
             : base(context)
         {
+        }
+
+        public Task<FileChunk[]> GetByAudioFileIdAsync(Guid audioFileId)
+        {
+            return Context.FileChunks.Where(x => x.FileItemId == audioFileId).ToArrayAsync();
+        }
+
+        public void DeleteByAudioFileId(FileChunk[] fileChunks)
+        {
+            Context.FileChunks.RemoveRange(fileChunks);
         }
     }
 }

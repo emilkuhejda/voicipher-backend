@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Models;
 
 namespace Voicipher.Business.Services
 {
@@ -25,6 +26,17 @@ namespace Voicipher.Business.Services
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
             return filePath;
+        }
+
+        public void RemoveRange(FileChunk[] fileChunks)
+        {
+            foreach (var fileChunk in fileChunks)
+            {
+                if (File.Exists(fileChunk.Path))
+                {
+                    File.Delete(fileChunk.Path);
+                }
+            }
         }
 
         private string GetRootPath()
