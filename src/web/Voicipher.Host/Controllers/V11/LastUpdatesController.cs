@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Host.Utils;
 
-namespace Voicipher.Host.Controllers.V2
+namespace Voicipher.Host.Controllers.V11
 {
     [ApiVersion("1.0")]
     [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v2")]
+    [ApiExplorerSettings(GroupName = "v1.1")]
     [Route("api/v{version:apiVersion}/last-updates")]
     [Produces("application/json")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]

@@ -30,7 +30,9 @@ namespace Voicipher.Business
                 .AsImplementedInterfaces();
 
             builder.RegisterAssemblyTypes(assembly).Where(t => t.IsAssignableTo<Profile>()).As<Profile>().AsSelf();
+
             builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
+            builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
         }
     }
 }

@@ -12,10 +12,10 @@ using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Payloads;
 
-namespace Voicipher.Host.Controllers.V2
+namespace Voicipher.Host.Controllers.V11
 {
     [ApiVersion("1.1")]
-    [ApiExplorerSettings(GroupName = "v2")]
+    [ApiExplorerSettings(GroupName = "v1.1")]
     [Route("api/v{version:apiVersion}/meta-data")]
     [Produces("application/json")]
     [ApiController]

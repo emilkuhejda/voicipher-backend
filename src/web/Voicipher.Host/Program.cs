@@ -50,6 +50,7 @@ namespace Voicipher.Host
                     webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
                     webBuilder.UseIISIntegration();
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseWebRoot("wwwroot");
                 });
     }
 }
