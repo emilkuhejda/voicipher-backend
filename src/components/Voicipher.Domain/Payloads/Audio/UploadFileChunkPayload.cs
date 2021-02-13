@@ -9,10 +9,10 @@ using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
 namespace Voicipher.Domain.Payloads.Audio
 {
-    public class UploadChunkFilePayload : IValidatable
+    public class UploadFileChunkPayload : IValidatable
     {
         [Required]
-        public Guid FileItemId { get; set; }
+        public Guid AudioFileId { get; set; }
 
         [Required]
         public int Order { get; set; }
@@ -29,7 +29,7 @@ namespace Voicipher.Domain.Payloads.Audio
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
-            errors.ValidateGuid(FileItemId, nameof(FileItemId));
+            errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
             errors.ValidateNotNull(File, nameof(File));
 
