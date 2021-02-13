@@ -65,10 +65,10 @@ namespace Voicipher.Host
                     Title = "Voicipher API",
                     Version = "v1"
                 });
-                configuration.SwaggerDoc("v2", new OpenApiInfo
+                configuration.SwaggerDoc("v1.1", new OpenApiInfo
                 {
                     Title = "Voicipher API",
-                    Version = "v2"
+                    Version = "v1.1"
                 });
 
                 configuration.EnableAnnotations();
@@ -141,7 +141,7 @@ namespace Voicipher.Host
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Voicipher API V1");
-                c.SwaggerEndpoint("/swagger/v2/swagger.json", "Voicipher API V2");
+                c.SwaggerEndpoint("/swagger/v1.1/swagger.json", "Voicipher API V1.1");
             });
 
             app.UseRouting();

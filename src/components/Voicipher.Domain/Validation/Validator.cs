@@ -56,6 +56,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateNotNull(this IList<ValidationError> errorList, object value, string field, string objectName = null)
+        {
+            if (value == null)
+                return errorList.Add(ValidationErrorCodes.ParameterIsNull, field, objectName);
+
+            return errorList;
+        }
+
         public static IList<ValidationError> Merge(this IList<ValidationError> errorList, ValidationResult validationResult)
         {
             var errors = errorList ?? new List<ValidationError>();

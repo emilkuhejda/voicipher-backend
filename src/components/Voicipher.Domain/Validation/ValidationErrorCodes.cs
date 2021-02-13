@@ -15,5 +15,7 @@
         public static string InvalidStoredValues => nameof(InvalidStoredValues);
 
         public static string InvalidPassword => nameof(InvalidPassword);
+
+        public static string ParameterIsNull => nameof(ParameterIsNull);
     }
 }
