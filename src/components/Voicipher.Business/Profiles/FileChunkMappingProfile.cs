@@ -14,8 +14,8 @@ namespace Voicipher.Business.Profiles
                     f => f.Id,
                     opt => opt.MapFrom(u => Guid.NewGuid()))
                 .ForMember(
-                    f => f.FileItemId,
-                    opt => opt.MapFrom(u => u.FileItemId))
+                    f => f.AudioFileId,
+                    opt => opt.MapFrom(u => u.AudioFileId))
                 .ForMember(
                     f => f.ApplicationId,
                     opt => opt.MapFrom(u => u.ApplicationId))

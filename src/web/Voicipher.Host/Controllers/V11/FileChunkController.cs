@@ -49,7 +49,7 @@ namespace Voicipher.Host.Controllers.V11
         {
             var uploadFileChunkPayload = new UploadFileChunkPayload
             {
-                FileItemId = fileItemId,
+                AudioFileId = fileItemId,
                 Order = order,
                 StorageSetting = storageSetting,
                 ApplicationId = applicationId,

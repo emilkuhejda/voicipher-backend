@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.Audio
                 await _fileChunkRepository.AddAsync(fileChunk);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunk for file item '{parameter.FileItemId}' was uploaded.");
+                _logger.Information($"File chunk for file item '{parameter.AudioFileId}' was uploaded.");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }

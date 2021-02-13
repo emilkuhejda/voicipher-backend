@@ -7,13 +7,13 @@ namespace Voicipher.Domain.Payloads.Audio
 {
     public record DeleteFileChunkPayload : IValidatable
     {
-        public DeleteFileChunkPayload(Guid fileItemId, Guid applicationId)
+        public DeleteFileChunkPayload(Guid audioFileId, Guid applicationId)
         {
-            FileItemId = fileItemId;
+            AudioFileId = audioFileId;
             ApplicationId = applicationId;
         }
 
-        public Guid FileItemId { get; }
+        public Guid AudioFileId { get; }
 
         public Guid ApplicationId { get; }
 
@@ -21,7 +21,7 @@ namespace Voicipher.Domain.Payloads.Audio
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
-            errors.ValidateGuid(FileItemId, nameof(FileItemId));
+            errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
 
             return new ValidationResult(errors);

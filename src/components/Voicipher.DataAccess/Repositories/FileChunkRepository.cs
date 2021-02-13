@@ -16,7 +16,7 @@ namespace Voicipher.DataAccess.Repositories
 
         public Task<FileChunk[]> GetByAudioFileIdAsync(Guid audioFileId)
         {
-            return Context.FileChunks.Where(x => x.FileItemId == audioFileId).ToArrayAsync();
+            return Context.FileChunks.Where(x => x.AudioFileId == audioFileId).ToArrayAsync();
         }
 
         public void RemoveRange(FileChunk[] fileChunks)

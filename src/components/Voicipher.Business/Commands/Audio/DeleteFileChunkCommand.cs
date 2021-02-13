@@ -44,13 +44,13 @@ namespace Voicipher.Business.Commands.Audio
 
             try
             {
-                var fileChunks = await _fileChunkRepository.GetByAudioFileIdAsync(parameter.FileItemId);
+                var fileChunks = await _fileChunkRepository.GetByAudioFileIdAsync(parameter.AudioFileId);
 
                 _chunkStorage.RemoveRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file '{parameter.FileItemId}'.");
+                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file '{parameter.AudioFileId}'.");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
