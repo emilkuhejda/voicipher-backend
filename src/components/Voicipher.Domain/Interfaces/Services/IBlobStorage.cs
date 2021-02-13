@@ -7,6 +7,8 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         Task<string> UploadAsync(UploadBlobSettings uploadBlobSettings);
 
+        Task DeleteContainer(BlobSettings blobSettings);
+
         Task DeleteAudioFileAsync(BlobSettings blobSettings);
 
         Task DeleteFileBlobAsync(DeleteBlobSettings deleteBlobSettings);
