@@ -1,8 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Voicipher.Business.Extensions;
+using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
@@ -14,15 +22,30 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class TranscribeItemsController : ControllerBase
     {
+        private readonly Lazy<ITranscribeItemRepository> _transcribeItemRepository;
+        private readonly Lazy<IMapper> _mapper;
+
+        public TranscribeItemsController(
+            Lazy<ITranscribeItemRepository> transcribeItemRepository,
+            Lazy<IMapper> mapper)
+        {
+            _transcribeItemRepository = transcribeItemRepository;
+            _mapper = mapper;
+        }
+
         [HttpGet]
-        // [ProducesResponseType(typeof(IEnumerable<TranscribeItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<TranscribeItemOutputModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItemsAll")]
-        public ActionResult GetAll(DateTime updatedAfter, Guid applicationId)
+        public async Task<ActionResult> GetAll(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var transcribeItems = await _transcribeItemRepository.Value.GetAllAfterDateAsync(userId, updatedAfter, applicationId, cancellationToken);
+            var outputModel = transcribeItems.Select(x => _mapper.Value.Map<TranscribeItemOutputModel>(x));
+
+            return Ok(outputModel);
         }
 
         [HttpGet("{fileItemId}")]
