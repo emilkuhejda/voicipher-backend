@@ -30,6 +30,8 @@ namespace Voicipher.Domain.Models
 
         public DateTime DateUpdatedUtc { get; set; }
 
+        public AudioFile AudioFile { get; set; }
+
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
