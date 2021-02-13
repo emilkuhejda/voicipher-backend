@@ -48,12 +48,8 @@ namespace Voicipher.Host.Controllers.V2
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateAudioFile")]
-        public async Task<IActionResult> CreateAudioFile([FromQuery] CreateAudioFileInputModel createAudioFileInputModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateAudioFile([FromRoute] CreateAudioFileInputModel createAudioFileInputModel, CancellationToken cancellationToken)
         {
-            var validationResult = createAudioFileInputModel.Validate();
-            if (!validationResult.IsValid)
-                throw new OperationErrorException(ErrorCode.EC600);
-
             var commandResult = await _createAudioFileCommand.Value.ExecuteAsync(createAudioFileInputModel, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);

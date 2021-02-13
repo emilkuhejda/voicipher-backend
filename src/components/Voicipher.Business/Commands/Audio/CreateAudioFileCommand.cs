@@ -41,6 +41,14 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<AudioFileOutputModel>> Execute(CreateAudioFileInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var validationResult = parameter.Validate();
+            if (!validationResult.IsValid)
+            {
+                _logger.Error("Invalid input data.");
+
+                throw new OperationErrorException(ErrorCode.EC600);
+            }
+
             if (!string.IsNullOrWhiteSpace(parameter.Language) && !SupportedLanguages.IsSupported(parameter.Language))
             {
                 _logger.Error($"Language '{parameter.Language}' is not supported.");
