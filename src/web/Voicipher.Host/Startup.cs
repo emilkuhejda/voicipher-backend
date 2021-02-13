@@ -65,11 +65,6 @@ namespace Voicipher.Host
                     Title = "Voicipher API",
                     Version = "v1"
                 });
-                configuration.SwaggerDoc("v1.1", new OpenApiInfo
-                {
-                    Title = "Voicipher API",
-                    Version = "v1.1"
-                });
 
                 configuration.EnableAnnotations();
                 configuration.CustomSchemaIds(tpye =>
@@ -141,7 +136,6 @@ namespace Voicipher.Host
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Voicipher API V1");
-                c.SwaggerEndpoint("/swagger/v1.1/swagger.json", "Voicipher API V1.1");
             });
 
             app.UseRouting();
