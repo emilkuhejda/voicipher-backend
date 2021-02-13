@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -37,6 +39,18 @@ namespace Voicipher.Business.Services
                     File.Delete(fileChunk.Path);
                 }
             }
+        }
+
+        public async Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken)
+        {
+            var source = new List<byte>();
+            foreach (var fileChunk in fileChunks.OrderBy(x => x.Order))
+            {
+                var bytes = await File.ReadAllBytesAsync(fileChunk.Path, cancellationToken);
+                source.AddRange(bytes);
+            }
+
+            return source.ToArray();
         }
 
         private string GetRootPath()
