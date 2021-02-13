@@ -14,22 +14,28 @@ namespace Voicipher.Business.Queries
     public class GetLastUpdatesQuery : Query<QueryResult<LastUpdatesOutputModel>>, IGetLastUpdatesQuery
     {
         private readonly IAudioFileRepository _audioFileRepository;
+        private readonly IUserSubscriptionRepository _userSubscriptionRepository;
 
-        public GetLastUpdatesQuery(IAudioFileRepository audioFileRepository)
+        public GetLastUpdatesQuery(
+            IAudioFileRepository audioFileRepository,
+            IUserSubscriptionRepository userSubscriptionRepository)
         {
             _audioFileRepository = audioFileRepository;
+            _userSubscriptionRepository = userSubscriptionRepository;
         }
 
         protected override async Task<QueryResult<LastUpdatesOutputModel>> Execute(ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var fileItemUtc = await _audioFileRepository.GetLastUpdateAsync(principal.GetNameIdentifier(), cancellationToken);
+            var userId = principal.GetNameIdentifier();
+            var fileItemUtc = await _audioFileRepository.GetLastUpdateAsync(userId, cancellationToken);
+            var userSubscriptionUtc = await _userSubscriptionRepository.GetLastUpdateAsync(userId, cancellationToken);
 
             var lastUpdatesOutputModel = new LastUpdatesOutputModel
             {
                 FileItemUtc = fileItemUtc,
                 DeletedFileItemUtc = DateTime.MinValue,
                 TranscribeItemUtc = DateTime.MinValue,
-                UserSubscriptionUtc = DateTime.MinValue,
+                UserSubscriptionUtc = userSubscriptionUtc,
                 InformationMessageUtc = DateTime.MinValue
             };
 

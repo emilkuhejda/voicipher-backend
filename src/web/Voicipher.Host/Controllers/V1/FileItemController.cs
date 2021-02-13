@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Commands.Audio;
-using Voicipher.Domain.Interfaces.Queries.Audio;
+using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
@@ -23,15 +26,18 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class FileItemController : ControllerBase
     {
-        private readonly Lazy<IGetAudioFilesQuery> _getAudioFilesQuery;
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
+        private readonly Lazy<IAudioFileRepository> _audioFileRepository;
+        private readonly Lazy<IMapper> _mapper;
 
         public FileItemController(
-            Lazy<IGetAudioFilesQuery> getAudioFilesQuery,
-            Lazy<ICreateAudioFileCommand> createAudioFileCommand)
+            Lazy<ICreateAudioFileCommand> createAudioFileCommand,
+            Lazy<IAudioFileRepository> audioFileRepository,
+            Lazy<IMapper> mapper)
         {
-            _getAudioFilesQuery = getAudioFilesQuery;
             _createAudioFileCommand = createAudioFileCommand;
+            _audioFileRepository = audioFileRepository;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -43,12 +49,11 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "GetFileItems")]
         public async Task<ActionResult> Get(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
-            var audioFilesPayload = new AudioFilesPayload(updatedAfter, applicationId);
-            var queryResult = await _getAudioFilesQuery.Value.ExecuteAsync(audioFilesPayload, HttpContext.User, cancellationToken);
-            if (!queryResult.IsSuccess)
-                return BadRequest();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFiles = await _audioFileRepository.Value.GetAllAsync(userId, updatedAfter, applicationId, cancellationToken);
 
-            return Ok(queryResult.Value);
+            var outputModels = audioFiles.Select(x => _mapper.Value.Map<AudioFileOutputModel>(x)).ToArray();
+            return Ok(outputModels);
         }
 
         [HttpGet("deleted")]
