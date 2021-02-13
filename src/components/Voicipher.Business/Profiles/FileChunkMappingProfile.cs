@@ -9,7 +9,7 @@ namespace Voicipher.Business.Profiles
     {
         public FileChunkMappingProfile()
         {
-            CreateMap<UploadChunkFilePayload, FileChunk>()
+            CreateMap<UploadFileChunkPayload, FileChunk>()
                 .ForMember(
                     f => f.Id,
                     opt => opt.MapFrom(u => Guid.NewGuid()))

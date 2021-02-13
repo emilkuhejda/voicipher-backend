@@ -23,11 +23,11 @@ namespace Voicipher.Host.Controllers.V11
     [ApiController]
     public class FileChunkController : ControllerBase
     {
-        private readonly Lazy<IUploadChunkFileCommand> _uploadChunkFileCommand;
+        private readonly Lazy<IUploadFileChunkCommand> _uploadFileChunkCommand;
 
-        public FileChunkController(Lazy<IUploadChunkFileCommand> uploadChunkFileCommand)
+        public FileChunkController(Lazy<IUploadFileChunkCommand> uploadFileChunkCommand)
         {
-            _uploadChunkFileCommand = uploadChunkFileCommand;
+            _uploadFileChunkCommand = uploadFileChunkCommand;
         }
 
         [HttpPost]
@@ -42,7 +42,7 @@ namespace Voicipher.Host.Controllers.V11
         [RequestSizeLimit(int.MaxValue)]
         public async Task<IActionResult> Upload(Guid fileItemId, int order, StorageSetting storageSetting, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
-            var uploadChunkFileInputModel = new UploadChunkFilePayload
+            var uploadFileChunkPayload = new UploadFileChunkPayload
             {
                 FileItemId = fileItemId,
                 Order = order,
@@ -51,7 +51,7 @@ namespace Voicipher.Host.Controllers.V11
                 File = file
             };
 
-            var commandResult = await _uploadChunkFileCommand.Value.ExecuteAsync(uploadChunkFileInputModel, HttpContext.User, cancellationToken);
+            var commandResult = await _uploadFileChunkCommand.Value.ExecuteAsync(uploadFileChunkPayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

@@ -9,7 +9,7 @@ using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
 namespace Voicipher.Domain.Payloads.Audio
 {
-    public class UploadChunkFilePayload : IValidatable
+    public class UploadFileChunkPayload : IValidatable
     {
         [Required]
         public Guid FileItemId { get; set; }

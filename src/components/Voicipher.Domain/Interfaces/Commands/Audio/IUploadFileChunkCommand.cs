@@ -5,7 +5,7 @@ using Voicipher.Domain.Payloads.Audio;
 
 namespace Voicipher.Domain.Interfaces.Commands.Audio
 {
-    public interface IUploadChunkFileCommand : ICommand<UploadChunkFilePayload, CommandResult<OkOutputModel>>
+    public interface IUploadFileChunkCommand : ICommand<UploadFileChunkPayload, CommandResult<OkOutputModel>>
     {
     }
 }
