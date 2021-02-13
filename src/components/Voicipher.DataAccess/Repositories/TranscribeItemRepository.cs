@@ -23,5 +23,14 @@ namespace Voicipher.DataAccess.Repositories
                 .OrderBy(x => x.StartTime)
                 .ToArrayAsync(cancellationToken);
         }
+
+        public Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.TranscribeItems
+                .Where(x => x.AudioFile.UserId == userId)
+                .OrderByDescending(x => x.DateUpdatedUtc)
+                .Select(x => x.DateUpdatedUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }
