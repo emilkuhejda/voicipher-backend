@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,6 +78,14 @@ namespace Voicipher.DataAccess.Repositories
             return Context.AudioFiles
                 .Where(x => !x.IsDeleted)
                 .Where(x => audioFileIds.Contains(x.Id) && x.UserId == userId)
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetForPermanentDeleteAllAsync(Guid userId, IEnumerable<Guid> fileItemIds, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
+                .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
         }
 

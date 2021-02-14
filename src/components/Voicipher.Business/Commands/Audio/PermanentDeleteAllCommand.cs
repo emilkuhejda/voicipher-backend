@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -12,6 +13,7 @@ using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Payloads.Audio;
 
@@ -45,13 +47,36 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
+            try
+            {
+                var userId = principal.GetNameIdentifier();
 
-            await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId)).ConfigureAwait(false);
+                var audioFilesToDelete = await _audioFileRepository.GetForPermanentDeleteAllAsync(userId, parameter.AudioFilesIds, parameter.ApplicationId, cancellationToken);
+                foreach (var audioFile in audioFilesToDelete)
+                {
+                    await _blobStorage.DeleteAudioFileAsync(new BlobSettings(userId, audioFile.Id));
 
-            _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted.");
+                    var deletedEntity = audioFile.CreateDeletedEntity(parameter.ApplicationId);
+                    _audioFileRepository.Remove(audioFile);
+                    await _audioFileRepository.AddAsync(deletedEntity);
 
-            return new CommandResult<OkOutputModel>(new OkOutputModel());
+                    _logger.Information($"Delete audio file source from blob storage. Audio file ID = '{audioFile.Id}', User ID = '{userId}'.");
+                }
+
+                await _audioFileRepository.SaveAsync(cancellationToken);
+
+                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId)).ConfigureAwait(false);
+
+                _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted.");
+
+                return new CommandResult<OkOutputModel>(new OkOutputModel());
+            }
+            catch (Exception ex)
+            {
+                _logger.Fatal(ex, "Permanent audio files deletion failed.");
+
+                throw new OperationErrorException(ErrorCode.EC603);
+            }
         }
     }
 }
