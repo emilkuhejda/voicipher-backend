@@ -77,7 +77,7 @@ namespace Voicipher.Host.Controllers.V1
             var userId = HttpContext.User.GetNameIdentifier();
             var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedFileItemsAsync(userId, cancellationToken);
 
-            var outputModels = _mapper.Value.Map<AudioFileOutputModel>(audioFiles);
+            var outputModels = audioFiles.Select(x => _mapper.Value.Map<FileItemOutputModel>(x));
             return Ok(outputModels);
         }
 
