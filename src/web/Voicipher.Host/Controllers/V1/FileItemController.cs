@@ -92,7 +92,7 @@ namespace Voicipher.Host.Controllers.V1
         public async Task<IActionResult> GetTemporaryDeletedFileItems(CancellationToken cancellationToken)
         {
             var userId = HttpContext.User.GetNameIdentifier();
-            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedFileItemsAsync(userId, cancellationToken);
+            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedAudioFilesAsync(userId, cancellationToken);
 
             var outputModels = audioFiles.Select(x => _mapper.Value.Map<FileItemOutputModel>(x));
             return Ok(outputModels);

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,6 @@ using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
-using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Payloads.Audio;
 
@@ -49,9 +49,20 @@ namespace Voicipher.Business.Commands.Audio
             }
 
             var userId = principal.GetNameIdentifier();
-            var audioFiles = parameter.AudioFiles.Select(x => _mapper.Map<DeletedAudioFile>(x)).ToArray();
+            var audioFileIds = parameter.AudioFiles.Select(x => x.Id).ToArray();
+            var audioFiles = await _audioFileRepository.GetForDeleteAllAsync(userId, audioFileIds, parameter.ApplicationId, cancellationToken);
 
-            await _audioFileRepository.DeleteAllAsync(userId, audioFiles, parameter.ApplicationId, cancellationToken);
+            foreach (var audioFile in audioFiles)
+            {
+                var deletedAudioFile = parameter.AudioFiles.Single(x => x.Id == audioFile.Id);
+                if (deletedAudioFile.DeletedDate < audioFile.DateUpdatedUtc)
+                    continue;
+
+                audioFile.ApplicationId = parameter.ApplicationId;
+                audioFile.DateUpdatedUtc = DateTime.UtcNow;
+                audioFile.IsDeleted = true;
+            }
+
             await _audioFileRepository.SaveAsync(cancellationToken);
 
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));

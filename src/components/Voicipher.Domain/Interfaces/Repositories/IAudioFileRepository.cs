@@ -17,10 +17,10 @@ namespace Voicipher.Domain.Interfaces.Repositories
 
         Task<Guid[]> GetAllDeletedIdsAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
 
-        Task<AudioFile[]> GetTemporaryDeletedFileItemsAsync(Guid userId, CancellationToken cancellationToken);
+        Task<AudioFile[]> GetTemporaryDeletedAudioFilesAsync(Guid userId, CancellationToken cancellationToken);
 
-        Task DeleteAllAsync(Guid userId, DeletedAudioFile[] audioFiles, Guid applicationId, CancellationToken cancellationToken);
+        Task<AudioFile[]> GetForDeleteAllAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken);
 
-        Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] fileItemIds, Guid applicationId, CancellationToken cancellationToken);
+        Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken);
     }
 }
