@@ -8,8 +8,7 @@ namespace Voicipher.Domain.InputModels
 {
     public record SendMailInputModel : IValidatable
     {
-        [BindProperty(Name = "FileItemId")]
-        public Guid AudioFileId { get; init; }
+        public Guid FileItemId { get; init; }
 
         public string Recipient { get; init; }
 
@@ -17,7 +16,7 @@ namespace Voicipher.Domain.InputModels
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
-            errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
+            errors.ValidateGuid(FileItemId, nameof(FileItemId));
             errors.ValidateRequired(Recipient, nameof(Recipient));
             errors.ValidateEmail(Recipient, nameof(Recipient));
 

@@ -54,10 +54,10 @@ namespace Voicipher.Business.Commands
             }
 
             var userId = principal.GetNameIdentifier();
-            var audioFile = await _audioFileRepository.GetWithTranscribeItemsAsync(userId, parameter.AudioFileId, cancellationToken);
+            var audioFile = await _audioFileRepository.GetWithTranscribeItemsAsync(userId, parameter.FileItemId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.AudioFileId}' was not found.");
+                _logger.Error($"Audio file '{parameter.FileItemId}' was not found.");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
