@@ -21,7 +21,7 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(x => x.WasOpened))
                 .ForMember(
                     o => o.DateUpdatedUtc,
-                    opt => opt.MapFrom(x => x.DateUpdatedUtc))
+                    opt => opt.MapFrom(x => x.DateUpdatedUtc.GetValueOrDefault()))
                 .ForMember(
                     o => o.DatePublishedUtc,
                     opt => opt.MapFrom(x => x.DatePublishedUtc.GetValueOrDefault()))
