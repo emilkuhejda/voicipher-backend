@@ -23,6 +23,7 @@ namespace Voicipher.Domain.InputModels
 
             errors.ValidateRequired(Name, nameof(Name));
             errors.ValidateRequired(Email, nameof(Email));
+            errors.ValidateEmail(Email, nameof(Email));
             errors.ValidateRequired(Message, nameof(Message));
 
             return new ValidationResult(errors);
