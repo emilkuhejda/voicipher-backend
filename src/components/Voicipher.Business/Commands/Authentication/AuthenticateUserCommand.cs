@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -23,15 +24,18 @@ namespace Voicipher.Business.Commands.Authentication
     {
         private readonly IAdministratorRepository _administratorRepository;
         private readonly AppSettings _appSettings;
+        private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public AuthenticateUserCommand(
             IAdministratorRepository administratorRepository,
             IOptions<AppSettings> options,
+            IMapper mapper,
             ILogger logger)
         {
             _administratorRepository = administratorRepository;
             _appSettings = options.Value;
+            _mapper = mapper;
             _logger = logger.ForContext<AuthenticateUserCommand>();
         }
 
@@ -71,14 +75,12 @@ namespace Voicipher.Business.Commands.Authentication
 
             _logger.Information($"User authentication for '{parameter.Username}' was successful.");
 
-            var outputModel = new AdministratorOutputModel
-            {
-                Id = administrator.Id,
-                Username = administrator.Username,
-                FirstName = administrator.FirstName,
-                LastName = administrator.LastName,
-                Token = token
-            };
+            var outputModel = _mapper.Map<AdministratorOutputModel>(
+                administrator,
+                opt => opt.AfterMap((_, o) =>
+                {
+                    o.Token = token;
+                }));
 
             return new CommandResult<AdministratorOutputModel>(outputModel);
         }
