@@ -95,5 +95,14 @@ namespace Voicipher.DataAccess.Repositories
                 .Where(x => audioFileIds.Contains(x.Id) && x.UserId == userId)
                 .ToArrayAsync(cancellationToken);
         }
+
+        public Task<AudioFile> GetWithTranscribeItemsAsync(Guid userId, Guid audioFileId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => !x.IsDeleted)
+                .Include(x => x.TranscribeItems)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == audioFileId && x.UserId == userId, cancellationToken);
+        }
     }
 }
