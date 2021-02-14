@@ -3,7 +3,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -24,18 +23,15 @@ namespace Voicipher.Business.Commands.Audio
     {
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMessageCenterService _messageCenterService;
-        private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public DeleteAllAudioFileCommand(
             IAudioFileRepository audioFileRepository,
             IMessageCenterService messageCenterService,
-            IMapper mapper,
             ILogger logger)
         {
             _audioFileRepository = audioFileRepository;
             _messageCenterService = messageCenterService;
-            _mapper = mapper;
             _logger = logger;
         }
 
@@ -68,7 +64,7 @@ namespace Voicipher.Business.Commands.Audio
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
             var audioFilesIds = audioFiles.Select(x => x.Id).ToList();
-            _logger.Information($"File items '{JsonConvert.SerializeObject(audioFilesIds)}' were deleted.");
+            _logger.Information($"Audio files '{JsonConvert.SerializeObject(audioFilesIds)}' were deleted.");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
