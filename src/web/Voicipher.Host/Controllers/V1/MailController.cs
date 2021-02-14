@@ -16,7 +16,6 @@ namespace Voicipher.Host.Controllers.V1
     [Route("api/v{version:apiVersion}/mail")]
     [Authorize(Policy = nameof(VoicipherPolicy.User))]
     //[ApiExplorerSettings(IgnoreApi = true)]
-    [AllowAnonymous]
     [ApiController]
     public class MailController : ControllerBase
     {

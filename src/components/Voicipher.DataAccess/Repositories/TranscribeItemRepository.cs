@@ -15,6 +15,15 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
+        public Task<TranscribeItem[]> GetAllByAudioFileIdAsync(Guid audioFileId, CancellationToken cancellationToken)
+        {
+            return Context.TranscribeItems
+                .Where(x => x.AudioFileId == audioFileId)
+                .AsNoTracking()
+                .OrderBy(x => x.StartTime)
+                .ToArrayAsync(cancellationToken);
+        }
+
         public Task<TranscribeItem[]> GetAllAfterDateAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
             return Context.TranscribeItems
@@ -29,6 +38,7 @@ namespace Voicipher.DataAccess.Repositories
             return Context.TranscribeItems
                 .Where(x => x.AudioFile.UserId == userId)
                 .OrderByDescending(x => x.DateUpdatedUtc)
+                .AsNoTracking()
                 .Select(x => x.DateUpdatedUtc)
                 .FirstOrDefaultAsync(cancellationToken);
         }
