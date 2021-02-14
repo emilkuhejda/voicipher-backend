@@ -14,6 +14,7 @@ using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
@@ -30,6 +31,7 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
         private readonly Lazy<IUploadAudioFileCommand> _uploadAudioFileCommand;
         private readonly Lazy<IUpdateAudioFileCommand> _updateAudioFileCommand;
+        private readonly Lazy<IDeleteAudioFileCommand> _deleteAudioFileCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
@@ -37,14 +39,17 @@ namespace Voicipher.Host.Controllers.V1
             Lazy<ICreateAudioFileCommand> createAudioFileCommand,
             Lazy<IUploadAudioFileCommand> uploadAudioFileCommand,
             Lazy<IUpdateAudioFileCommand> updateAudioFileCommand,
+            Lazy<IDeleteAudioFileCommand> deleteAudioFileCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
             _createAudioFileCommand = createAudioFileCommand;
             _uploadAudioFileCommand = uploadAudioFileCommand;
             _updateAudioFileCommand = updateAudioFileCommand;
+            _deleteAudioFileCommand = deleteAudioFileCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
+            _deleteAudioFileCommand = deleteAudioFileCommand;
         }
 
         [HttpGet]
@@ -176,15 +181,20 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpDelete("delete")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "DeleteFileItem")]
-        public IActionResult Delete(Guid fileItemId, Guid applicationId)
+        public async Task<IActionResult> Delete(Guid fileItemId, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var deleteAudioFilePayload = new DeleteAudioFilePayload(fileItemId, applicationId);
+            var commandResult = await _deleteAudioFileCommand.Value.ExecuteAsync(deleteAudioFilePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpDelete("delete-all")]

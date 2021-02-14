@@ -15,11 +15,11 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<AudioFile> GetAsync(Guid userId, Guid fileItemId, CancellationToken cancellationToken)
+        public Task<AudioFile> GetAsync(Guid userId, Guid audioFileId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Where(x => !x.IsDeleted)
-                .FirstOrDefaultAsync(x => x.Id == fileItemId && x.UserId == userId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == audioFileId && x.UserId == userId, cancellationToken);
         }
 
         public Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
