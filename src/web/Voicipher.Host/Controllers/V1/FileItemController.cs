@@ -14,6 +14,7 @@ using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Host.Utils;
@@ -30,6 +31,11 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
         private readonly Lazy<IUploadAudioFileCommand> _uploadAudioFileCommand;
         private readonly Lazy<IUpdateAudioFileCommand> _updateAudioFileCommand;
+        private readonly Lazy<IDeleteAudioFileCommand> _deleteAudioFileCommand;
+        private readonly Lazy<IDeleteAllAudioFileCommand> _deleteAllAudioFileCommand;
+        private readonly Lazy<IPermanentDeleteAllCommand> _permanentDeleteAllCommand;
+        private readonly Lazy<IRestoreAllCommand> _restoreAllCommand;
+        private readonly Lazy<ITranscribeCommand> _transcribeCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
@@ -37,12 +43,22 @@ namespace Voicipher.Host.Controllers.V1
             Lazy<ICreateAudioFileCommand> createAudioFileCommand,
             Lazy<IUploadAudioFileCommand> uploadAudioFileCommand,
             Lazy<IUpdateAudioFileCommand> updateAudioFileCommand,
+            Lazy<IDeleteAudioFileCommand> deleteAudioFileCommand,
+            Lazy<IDeleteAllAudioFileCommand> deleteAllAudioFileCommand,
+            Lazy<IPermanentDeleteAllCommand> permanentDeleteAllCommand,
+            Lazy<IRestoreAllCommand> restoreAllCommand,
+            Lazy<ITranscribeCommand> transcribeCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
             _createAudioFileCommand = createAudioFileCommand;
             _uploadAudioFileCommand = uploadAudioFileCommand;
             _updateAudioFileCommand = updateAudioFileCommand;
+            _deleteAudioFileCommand = deleteAudioFileCommand;
+            _deleteAllAudioFileCommand = deleteAllAudioFileCommand;
+            _permanentDeleteAllCommand = permanentDeleteAllCommand;
+            _restoreAllCommand = restoreAllCommand;
+            _transcribeCommand = transcribeCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
         }
@@ -82,7 +98,7 @@ namespace Voicipher.Host.Controllers.V1
         public async Task<IActionResult> GetTemporaryDeletedFileItems(CancellationToken cancellationToken)
         {
             var userId = HttpContext.User.GetNameIdentifier();
-            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedFileItemsAsync(userId, cancellationToken);
+            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedAudioFilesAsync(userId, cancellationToken);
 
             var outputModels = audioFiles.Select(x => _mapper.Value.Map<FileItemOutputModel>(x));
             return Ok(outputModels);
@@ -176,52 +192,77 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpDelete("delete")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "DeleteFileItem")]
-        public IActionResult Delete(Guid fileItemId, Guid applicationId)
+        public async Task<IActionResult> Delete(Guid fileItemId, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var deleteAudioFilePayload = new DeleteAudioFilePayload(fileItemId, applicationId);
+            var commandResult = await _deleteAudioFileCommand.Value.ExecuteAsync(deleteAudioFilePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpDelete("delete-all")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "DeleteAllFileItems")]
-        public IActionResult DeleteAll(object fileItems, Guid applicationId)
+        public async Task<IActionResult> DeleteAll(IEnumerable<DeletedAudioFileInputModel> audioFileInputModels, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var deleteAllAudioFilePayload = new DeleteAllAudioFilePayload(audioFileInputModels, applicationId);
+            var commandResult = await _deleteAllAudioFileCommand.Value.ExecuteAsync(deleteAllAudioFilePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("permanent-delete-all")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult PermanentDeleteAll(object fileItemIds, Guid applicationId)
+        public async Task<IActionResult> PermanentDeleteAll(IEnumerable<Guid> audioFilesIds, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var permanentDeleteAllPayload = new PermanentDeleteAllPayload(audioFilesIds, applicationId);
+            var commandResult = await _permanentDeleteAllCommand.Value.ExecuteAsync(permanentDeleteAllPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("restore-all")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult RestoreAll(object fileItemIds, Guid applicationId)
+        public async Task<IActionResult> RestoreAll(IEnumerable<Guid> audioFilesIds, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var restoreAllPayload = new RestoreAllPayload(audioFilesIds, applicationId);
+            var commandResult = await _restoreAllCommand.Value.ExecuteAsync(restoreAllPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("transcribe")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "TranscribeFileItem")]
-        public IActionResult Transcribe(Guid fileItemId, string language, Guid applicationId)
+        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var transcribePayload = new TranscribePayload(fileItemId, language, applicationId);
+            var commandResult = await _transcribeCommand.Value.ExecuteAsync(transcribePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }

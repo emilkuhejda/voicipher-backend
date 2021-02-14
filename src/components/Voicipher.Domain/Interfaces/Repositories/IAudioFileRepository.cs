@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Domain.Models;
@@ -7,7 +8,7 @@ namespace Voicipher.Domain.Interfaces.Repositories
 {
     public interface IAudioFileRepository : IRepository<AudioFile>
     {
-        Task<AudioFile> GetAsync(Guid userId, Guid fileItemId, CancellationToken cancellationToken);
+        Task<AudioFile> GetAsync(Guid userId, Guid audioFileId, CancellationToken cancellationToken);
 
         Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
 
@@ -17,6 +18,12 @@ namespace Voicipher.Domain.Interfaces.Repositories
 
         Task<Guid[]> GetAllDeletedIdsAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
 
-        Task<AudioFile[]> GetTemporaryDeletedFileItemsAsync(Guid userId, CancellationToken cancellationToken);
+        Task<AudioFile[]> GetTemporaryDeletedAudioFilesAsync(Guid userId, CancellationToken cancellationToken);
+
+        Task<AudioFile[]> GetForDeleteAllAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken);
+
+        Task<AudioFile[]> GetForPermanentDeleteAllAsync(Guid userId, IEnumerable<Guid> fileItemIds, Guid applicationId, CancellationToken cancellationToken);
+
+        Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken);
     }
 }
