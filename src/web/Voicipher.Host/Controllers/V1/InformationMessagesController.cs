@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
+using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Host.Utils;
@@ -22,13 +25,16 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class InformationMessagesController : ControllerBase
     {
+        private readonly Lazy<IMarkMessageAsOpenedCommand> _markMessageAsOpenedCommand;
         private readonly Lazy<IInformationMessageRepository> _informationMessageRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public InformationMessagesController(
+            Lazy<IMarkMessageAsOpenedCommand> markMessageAsOpenedCommand,
             Lazy<IInformationMessageRepository> informationMessageRepository,
             Lazy<IMapper> mapper)
         {
+            _markMessageAsOpenedCommand = markMessageAsOpenedCommand;
             _informationMessageRepository = informationMessageRepository;
             _mapper = mapper;
         }
@@ -49,35 +55,43 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet("{informationMessageId}")]
-        // [ProducesResponseType(typeof(InformationMessageDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InformationMessageOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult Get(Guid informationMessageId)
+        public async Task<IActionResult> Get(Guid informationMessageId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var informationMessage = await _informationMessageRepository.Value.GetAsync(informationMessageId, cancellationToken);
+            var outputModel = _mapper.Value.Map<InformationMessageOutputModel>(informationMessage);
+
+            return Ok(outputModel);
         }
 
         [HttpPut("mark-as-opened")]
-        // [ProducesResponseType(typeof(InformationMessageDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InformationMessageOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "MarkMessageAsOpened")]
-        public IActionResult MarkAsOpened(Guid informationMessageId)
+        public async Task<IActionResult> MarkAsOpened(Guid informationMessageId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _markMessageAsOpenedCommand.Value.ExecuteAsync(informationMessageId, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("mark-messages-as-opened")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "MarkMessagesAsOpened")]
-        public IActionResult MarkMessagesAsOpened(IEnumerable<Guid> ids)
+        public async Task<IActionResult> MarkMessagesAsOpened(IEnumerable<Guid> ids)
         {
             throw new NotImplementedException();
         }

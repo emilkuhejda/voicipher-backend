@@ -7,6 +7,7 @@ namespace Voicipher.Domain.Exceptions
     public class OperationErrorException : Exception
     {
         public OperationErrorException()
+            : this((int)StatusCode.BadRequest)
         {
         }
 
