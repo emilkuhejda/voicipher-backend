@@ -19,7 +19,6 @@ namespace Voicipher.DataAccess.Repositories
         {
             return Context.AudioFiles
                 .Where(x => !x.IsDeleted)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == fileItemId && x.UserId == userId, cancellationToken);
         }
 

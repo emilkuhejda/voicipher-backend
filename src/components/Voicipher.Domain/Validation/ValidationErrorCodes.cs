@@ -17,5 +17,7 @@
         public static string InvalidPassword => nameof(InvalidPassword);
 
         public static string ParameterIsNull => nameof(ParameterIsNull);
+
+        public static string NotSupportedLanguage => nameof(NotSupportedLanguage);
     }
 }
