@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Voicipher.Common.Utils;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Domain.Validation
@@ -61,6 +62,14 @@ namespace Voicipher.Domain.Validation
         {
             if (value == null)
                 return errorList.Add(ValidationErrorCodes.ParameterIsNull, field, objectName);
+
+            return errorList;
+        }
+
+        public static IList<ValidationError> ValidateEmail(this IList<ValidationError> errorList, string value, string field, string objectName = null)
+        {
+            if (!RegexUtilities.IsValidEmail(value))
+                return errorList.Add(ValidationErrorCodes.InvalidEmail, field, objectName);
 
             return errorList;
         }

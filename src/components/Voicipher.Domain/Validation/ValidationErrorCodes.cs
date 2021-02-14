@@ -16,6 +16,8 @@
 
         public static string InvalidPassword => nameof(InvalidPassword);
 
+        public static string InvalidEmail => nameof(InvalidEmail);
+
         public static string ParameterIsNull => nameof(ParameterIsNull);
 
         public static string NotSupportedLanguage => nameof(NotSupportedLanguage);
