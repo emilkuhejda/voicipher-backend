@@ -71,5 +71,29 @@ namespace Voicipher.DataAccess.Repositories
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
         }
+
+        public async Task DeleteAllAsync(Guid userId, DeletedAudioFile[] audioFiles, Guid applicationId, CancellationToken cancellationToken)
+        {
+            var fileItemIds = audioFiles.Select(x => x.Id);
+            var entities = await Context.AudioFiles
+                .Where(x => !x.IsDeleted)
+                .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            if (!entities.Any())
+                return;
+
+            foreach (var entity in entities)
+            {
+                var deletedFileItem = audioFiles.Single(x => x.Id == entity.Id);
+                if (deletedFileItem.DeletedDate < entity.DateUpdatedUtc)
+                    continue;
+
+                entity.ApplicationId = applicationId;
+                entity.DateUpdatedUtc = DateTime.UtcNow;
+                entity.IsDeleted = true;
+            }
+        }
     }
 }
