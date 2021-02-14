@@ -63,7 +63,7 @@ namespace Voicipher.Host.Controllers.V1
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> Get(Guid informationMessageId, CancellationToken cancellationToken)
         {
-            var informationMessage = await _informationMessageRepository.Value.GetAsync(informationMessageId, cancellationToken);
+            var informationMessage = await _informationMessageRepository.Value.GetByIdAsync(informationMessageId, cancellationToken);
             var outputModel = _mapper.Value.Map<InformationMessageOutputModel>(informationMessage);
 
             return Ok(outputModel);

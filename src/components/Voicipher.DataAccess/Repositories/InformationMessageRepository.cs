@@ -15,6 +15,15 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
+        public Task<InformationMessage> GetByIdAsync(Guid informationMessageId, CancellationToken cancellationToken)
+        {
+            return Context.InformationMessages
+                .Where(x => x.Id == informationMessageId)
+                .Include(x => x.LanguageVersions)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
         public Task<InformationMessage[]> GetByUserIdAsync(Guid userId, Guid[] ids, CancellationToken cancellationToken)
         {
             return Context.InformationMessages
