@@ -1,7 +1,13 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.InputModels.Authentication;
+using Voicipher.Domain.Interfaces.Commands.Authentication;
+using Voicipher.Domain.OutputModels.MetaData;
 
 namespace Voicipher.Host.Controllers.V1
 {
@@ -12,13 +18,25 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
+        private readonly Lazy<IAuthenticateUserCommand> _authenticateUserCommand;
+
+        public AuthenticationController(Lazy<IAuthenticateUserCommand> authenticateUserCommand)
+        {
+            _authenticateUserCommand = authenticateUserCommand;
+        }
+
         [HttpPost]
-        // [ProducesResponseType(typeof(AdministratorDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(AdministratorOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public IActionResult Authenticate([FromBody] object authenticationModel)
+        public async Task<IActionResult> Authenticate([FromBody] AuthenticateUserInputModel authenticateUserInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _authenticateUserCommand.Value.ExecuteAsync(authenticateUserInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }
