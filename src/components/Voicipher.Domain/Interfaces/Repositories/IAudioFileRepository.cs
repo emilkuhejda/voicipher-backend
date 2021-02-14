@@ -20,5 +20,7 @@ namespace Voicipher.Domain.Interfaces.Repositories
         Task<AudioFile[]> GetTemporaryDeletedFileItemsAsync(Guid userId, CancellationToken cancellationToken);
 
         Task DeleteAllAsync(Guid userId, DeletedAudioFile[] audioFiles, Guid applicationId, CancellationToken cancellationToken);
+
+        Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] fileItemIds, Guid applicationId, CancellationToken cancellationToken);
     }
 }

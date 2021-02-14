@@ -95,5 +95,12 @@ namespace Voicipher.DataAccess.Repositories
                 entity.IsDeleted = true;
             }
         }
+
+        public Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] fileItemIds, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
+                .ToArrayAsync(cancellationToken);
+        }
     }
 }

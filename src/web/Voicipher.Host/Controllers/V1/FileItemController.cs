@@ -33,6 +33,7 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<IUpdateAudioFileCommand> _updateAudioFileCommand;
         private readonly Lazy<IDeleteAudioFileCommand> _deleteAudioFileCommand;
         private readonly Lazy<IDeleteAllAudioFileCommand> _deleteAllAudioFileCommand;
+        private readonly Lazy<IRestoreAllCommand> _restoreAllCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
@@ -42,6 +43,7 @@ namespace Voicipher.Host.Controllers.V1
             Lazy<IUpdateAudioFileCommand> updateAudioFileCommand,
             Lazy<IDeleteAudioFileCommand> deleteAudioFileCommand,
             Lazy<IDeleteAllAudioFileCommand> deleteAllAudioFileCommand,
+            Lazy<IRestoreAllCommand> restoreAllCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
@@ -50,6 +52,7 @@ namespace Voicipher.Host.Controllers.V1
             _updateAudioFileCommand = updateAudioFileCommand;
             _deleteAudioFileCommand = deleteAudioFileCommand;
             _deleteAllAudioFileCommand = deleteAllAudioFileCommand;
+            _restoreAllCommand = restoreAllCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
         }
@@ -224,9 +227,14 @@ namespace Voicipher.Host.Controllers.V1
 
         [HttpPut("restore-all")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult RestoreAll(object fileItemIds, Guid applicationId)
+        public async Task<IActionResult> RestoreAll(IEnumerable<Guid> audioFilesIds, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var restoreAllPayload = new RestoreAllPayload(audioFilesIds, applicationId);
+            var commandResult = await _restoreAllCommand.Value.ExecuteAsync(restoreAllPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("transcribe")]
