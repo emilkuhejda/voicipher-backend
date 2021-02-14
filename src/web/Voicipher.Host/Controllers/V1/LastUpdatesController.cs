@@ -35,7 +35,7 @@ namespace Voicipher.Host.Controllers.V1
         {
             var queryResult = await _getLastUpdatesQuery.Value.ExecuteAsync(HttpContext.User, cancellationToken);
 
-            return Ok(queryResult);
+            return Ok(queryResult.Value);
         }
     }
 }
