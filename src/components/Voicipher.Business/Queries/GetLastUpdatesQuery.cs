@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Business.Extensions;
@@ -34,6 +33,7 @@ namespace Voicipher.Business.Queries
         {
             var userId = principal.GetNameIdentifier();
             var fileItemUtc = await _audioFileRepository.GetLastUpdateAsync(userId, cancellationToken);
+            var deletedFileItemUtc = await _audioFileRepository.GetDeletedLastUpdateAsync(userId, cancellationToken);
             var transcribeItemUtc = await _transcribeItemRepository.GetLastUpdateAsync(userId, cancellationToken);
             var userSubscriptionUtc = await _userSubscriptionRepository.GetLastUpdateAsync(userId, cancellationToken);
             var informationMessageUtc = await _informationMessageRepository.GetLastUpdateAsync(userId, cancellationToken);
@@ -41,7 +41,7 @@ namespace Voicipher.Business.Queries
             var lastUpdatesOutputModel = new LastUpdatesOutputModel
             {
                 FileItemUtc = fileItemUtc,
-                DeletedFileItemUtc = DateTime.MinValue,
+                DeletedFileItemUtc = deletedFileItemUtc,
                 TranscribeItemUtc = transcribeItemUtc,
                 UserSubscriptionUtc = userSubscriptionUtc,
                 InformationMessageUtc = informationMessageUtc
