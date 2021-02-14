@@ -9,6 +9,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
     {
         Task<InformationMessage> GetByIdAsync(Guid informationMessageId, CancellationToken cancellationToken);
 
+        Task<InformationMessage[]> GetByUserIdAsync(Guid userId, Guid[] ids, CancellationToken cancellationToken);
+
         Task<InformationMessage[]> GetAllAsync(Guid userId, DateTime updatedAfter, CancellationToken cancellationToken);
 
         Task<InformationMessage[]> GetAllShallowAsync(CancellationToken cancellationToken);
