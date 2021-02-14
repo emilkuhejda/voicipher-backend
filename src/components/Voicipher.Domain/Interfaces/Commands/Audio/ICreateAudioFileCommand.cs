@@ -5,7 +5,7 @@ using Voicipher.Domain.Payloads.Audio;
 
 namespace Voicipher.Domain.Interfaces.Commands.Audio
 {
-    public interface ICreateAudioFileCommand : ICommand<CreateAudioFilePayload, CommandResult<AudioFileOutputModel>>
+    public interface ICreateAudioFileCommand : ICommand<CreateAudioFilePayload, CommandResult<FileItemOutputModel>>
     {
     }
 }

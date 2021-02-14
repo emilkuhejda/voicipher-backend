@@ -20,7 +20,7 @@ using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Commands.Audio
 {
-    public class CreateAudioFileCommand : Command<CreateAudioFilePayload, CommandResult<AudioFileOutputModel>>, ICreateAudioFileCommand
+    public class CreateAudioFileCommand : Command<CreateAudioFilePayload, CommandResult<FileItemOutputModel>>, ICreateAudioFileCommand
     {
         private readonly IMessageCenterService _messageCenterService;
         private readonly IAudioFileRepository _audioFileRepository;
@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.Audio
             _logger = logger.ForContext<CreateAudioFileCommand>();
         }
 
-        protected override async Task<CommandResult<AudioFileOutputModel>> Execute(CreateAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<FileItemOutputModel>> Execute(CreateAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             if (!parameter.Validate().IsValid)
             {
@@ -75,7 +75,7 @@ namespace Voicipher.Business.Commands.Audio
 
             _logger.Information($"Audio file '{audioFile.Id}' was created.");
 
-            return new CommandResult<AudioFileOutputModel>(_mapper.Map<AudioFileOutputModel>(audioFile));
+            return new CommandResult<FileItemOutputModel>(_mapper.Map<FileItemOutputModel>(audioFile));
         }
     }
 }

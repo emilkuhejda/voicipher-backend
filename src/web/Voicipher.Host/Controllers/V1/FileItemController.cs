@@ -41,7 +41,7 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<AudioFileOutputModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<FileItemOutputModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -52,41 +52,52 @@ namespace Voicipher.Host.Controllers.V1
             var userId = HttpContext.User.GetNameIdentifier();
             var audioFiles = await _audioFileRepository.Value.GetAllAsync(userId, updatedAfter, applicationId, cancellationToken);
 
-            var outputModels = audioFiles.Select(x => _mapper.Value.Map<AudioFileOutputModel>(x)).ToArray();
+            var outputModels = audioFiles.Select(x => _mapper.Value.Map<FileItemOutputModel>(x)).ToArray();
             return Ok(outputModels);
         }
 
         [HttpGet("deleted")]
-        // [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetDeletedFileItemIds")]
-        public IActionResult GetDeletedFileItemIds(DateTime updatedAfter, Guid applicationId)
+        public async Task<IActionResult> GetDeletedFileItemIds(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFileIds = await _audioFileRepository.Value.GetAllDeletedIdsAsync(userId, updatedAfter, applicationId, cancellationToken);
+
+            return Ok(audioFileIds);
         }
 
         [HttpGet("temporary-deleted")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult GetTemporaryDeletedFileItems()
+        public async Task<IActionResult> GetTemporaryDeletedFileItems(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedFileItemsAsync(userId, cancellationToken);
+
+            var outputModels = audioFiles.Select(x => _mapper.Value.Map<FileItemOutputModel>(x));
+            return Ok(outputModels);
         }
 
         [HttpGet("{fileItemId}")]
-        // [ProducesResponseType(typeof(FileItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetFileItem")]
-        public IActionResult Get(Guid fileItemId)
+        public async Task<IActionResult> Get(Guid fileItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFile = await _audioFileRepository.Value.GetAsync(userId, fileItemId, cancellationToken);
+
+            var outputModel = _mapper.Value.Map<FileItemOutputModel>(audioFile);
+            return Ok(outputModel);
         }
 
         [HttpPost("create")]
-        [ProducesResponseType(typeof(AudioFileOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
