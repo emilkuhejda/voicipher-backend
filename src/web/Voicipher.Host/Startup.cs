@@ -125,6 +125,9 @@ namespace Voicipher.Host
             // Migrate database
             app.MigrateDatabase();
 
+            // Clean temporary data
+            app.CleanTemporaryData();
+
             // Enable CORS
             app.UseCors(Constants.CorsPolicy);
 

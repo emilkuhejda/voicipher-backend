@@ -11,5 +11,7 @@ namespace Voicipher.Domain.Interfaces.Services
         void RemoveRange(FileChunk[] fileChunks);
 
         Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken);
+
+        void RemoveTemporaryFolder();
     }
 }
