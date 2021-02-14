@@ -11,6 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels.Audio;
@@ -28,17 +29,20 @@ namespace Voicipher.Host.Controllers.V1
     {
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
         private readonly Lazy<IUploadAudioFileCommand> _uploadAudioFileCommand;
+        private readonly Lazy<IUpdateAudioFileCommand> _updateAudioFileCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public FileItemController(
             Lazy<ICreateAudioFileCommand> createAudioFileCommand,
             Lazy<IUploadAudioFileCommand> uploadAudioFileCommand,
+            Lazy<IUpdateAudioFileCommand> updateAudioFileCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
             _createAudioFileCommand = createAudioFileCommand;
             _uploadAudioFileCommand = uploadAudioFileCommand;
+            _updateAudioFileCommand = updateAudioFileCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
         }
@@ -126,7 +130,7 @@ namespace Voicipher.Host.Controllers.V1
 
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
-        // [ProducesResponseType(typeof(FileItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -155,16 +159,20 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpPut("update")]
-        // [ProducesResponseType(typeof(FileItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateFileItem")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult Update([FromForm] object updateFileItemModel)
+        public async Task<IActionResult> Update([FromForm] UpdateAudioFileInputModel updateAudioFileInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _updateAudioFileCommand.Value.ExecuteAsync(updateAudioFileInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpDelete("delete")]

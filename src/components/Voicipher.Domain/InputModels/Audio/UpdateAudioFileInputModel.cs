@@ -1,38 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
 
-namespace Voicipher.Domain.Payloads.Audio
+namespace Voicipher.Domain.InputModels.Audio
 {
-    public record CreateAudioFilePayload : IValidatable
+    public record UpdateAudioFileInputModel : IValidatable
     {
         [Required]
-        public string Name { get; init; }
+        [BindProperty(Name = "FileItemId")]
+        public Guid AudioFileId { get; set; }
 
         [Required]
-        public string Language { get; init; }
+        public string Name { get; set; }
 
         [Required]
-        public string FileName { get; init; }
+        public string Language { get; set; }
 
         [Required]
-        public DateTime DateCreated { get; init; }
-
-        [Required]
-        public Guid ApplicationId { get; init; }
+        public Guid ApplicationId { get; set; }
 
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
 
+            errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
             errors.ValidateRequired(Name, nameof(Name));
             errors.ValidateRequired(Language, nameof(Language));
             errors.ValidateLanguage(Language, nameof(Language));
-            errors.ValidateRequired(FileName, nameof(FileName));
-            errors.ValidateDateTime(DateCreated, nameof(DateCreated));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
 
             return new ValidationResult(errors);
