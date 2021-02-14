@@ -6,9 +6,9 @@ using Voicipher.Domain.Validation;
 
 namespace Voicipher.Domain.Payloads.Audio
 {
-    public record DeletedAudioFilePayload : IValidatable
+    public record DeleteAllAudioFilePayload : IValidatable
     {
-        public DeletedAudioFilePayload(IEnumerable<DeletedAudioFileInputModel> audioFiles, Guid applicationId)
+        public DeleteAllAudioFilePayload(IEnumerable<DeletedAudioFileInputModel> audioFiles, Guid applicationId)
         {
             AudioFiles = audioFiles;
             ApplicationId = applicationId;

@@ -5,7 +5,7 @@ using Voicipher.Domain.Payloads.Audio;
 
 namespace Voicipher.Domain.Interfaces.Commands.Audio
 {
-    public interface IDeleteAllAudioFileCommand : ICommand<DeletedAudioFilePayload, CommandResult<OkOutputModel>>
+    public interface IDeleteAllAudioFileCommand : ICommand<DeleteAllAudioFilePayload, CommandResult<OkOutputModel>>
     {
     }
 }

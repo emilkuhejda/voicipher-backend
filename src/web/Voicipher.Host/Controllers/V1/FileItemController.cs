@@ -207,8 +207,8 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "DeleteAllFileItems")]
         public async Task<IActionResult> DeleteAll(IEnumerable<DeletedAudioFileInputModel> audioFileInputModels, Guid applicationId, CancellationToken cancellationToken)
         {
-            var deletedAudioFilePayload = new DeletedAudioFilePayload(audioFileInputModels, applicationId);
-            var commandResult = await _deleteAllAudioFileCommand.Value.ExecuteAsync(deletedAudioFilePayload, HttpContext.User, cancellationToken);
+            var deleteAllAudioFilePayload = new DeleteAllAudioFilePayload(audioFileInputModels, applicationId);
+            var commandResult = await _deleteAllAudioFileCommand.Value.ExecuteAsync(deleteAllAudioFilePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

@@ -20,7 +20,7 @@ using Voicipher.Domain.Payloads.Audio;
 
 namespace Voicipher.Business.Commands.Audio
 {
-    public class DeleteAllAudioFileCommand : Command<DeletedAudioFilePayload, CommandResult<OkOutputModel>>, IDeleteAllAudioFileCommand
+    public class DeleteAllAudioFileCommand : Command<DeleteAllAudioFilePayload, CommandResult<OkOutputModel>>, IDeleteAllAudioFileCommand
     {
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMessageCenterService _messageCenterService;
@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.Audio
             _logger = logger;
         }
 
-        protected override async Task<CommandResult<OkOutputModel>> Execute(DeletedAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<OkOutputModel>> Execute(DeleteAllAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             if (!parameter.Validate().IsValid)
             {
