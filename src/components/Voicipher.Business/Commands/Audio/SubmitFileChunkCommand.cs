@@ -58,6 +58,8 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
+            _logger.Information("Start submitting audio file to blob storage.");
+
             var userId = principal.GetNameIdentifier();
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
