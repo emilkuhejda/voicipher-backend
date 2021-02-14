@@ -44,7 +44,7 @@ namespace Voicipher.Business.Commands.Audio
             _chunkStorage = chunkStorage;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
-            _logger = logger;
+            _logger = logger.ForContext<UploadAudioFileCommand>();
         }
 
         protected override async Task<CommandResult<FileItemOutputModel>> Execute(UploadAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)

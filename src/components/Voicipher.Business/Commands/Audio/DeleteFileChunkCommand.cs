@@ -18,17 +18,17 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class DeleteFileChunkCommand : Command<DeleteFileChunkPayload, CommandResult<OkOutputModel>>, IDeleteFileChunkCommand
     {
-        private readonly IFileChunkRepository _fileChunkRepository;
         private readonly IChunkStorage _chunkStorage;
+        private readonly IFileChunkRepository _fileChunkRepository;
         private readonly ILogger _logger;
 
         public DeleteFileChunkCommand(
-            IFileChunkRepository fileChunkRepository,
             IChunkStorage chunkStorage,
+            IFileChunkRepository fileChunkRepository,
             ILogger logger)
         {
-            _fileChunkRepository = fileChunkRepository;
             _chunkStorage = chunkStorage;
+            _fileChunkRepository = fileChunkRepository;
             _logger = logger.ForContext<DeleteFileChunkCommand>();
         }
 

@@ -31,7 +31,7 @@ namespace Voicipher.Business.Commands.Audio
             _messageCenterService = messageCenterService;
             _audioFileRepository = audioFileRepository;
             _blobStorage = blobStorage;
-            _logger = logger;
+            _logger = logger.ForContext<PermanentDeleteAllCommand>();
         }
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(PermanentDeleteAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)

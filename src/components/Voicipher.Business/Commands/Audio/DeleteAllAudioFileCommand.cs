@@ -21,18 +21,18 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class DeleteAllAudioFileCommand : Command<DeleteAllAudioFilePayload, CommandResult<OkOutputModel>>, IDeleteAllAudioFileCommand
     {
-        private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMessageCenterService _messageCenterService;
+        private readonly IAudioFileRepository _audioFileRepository;
         private readonly ILogger _logger;
 
         public DeleteAllAudioFileCommand(
-            IAudioFileRepository audioFileRepository,
             IMessageCenterService messageCenterService,
+            IAudioFileRepository audioFileRepository,
             ILogger logger)
         {
-            _audioFileRepository = audioFileRepository;
             _messageCenterService = messageCenterService;
-            _logger = logger;
+            _audioFileRepository = audioFileRepository;
+            _logger = logger.ForContext<DeleteAllAudioFileCommand>();
         }
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(DeleteAllAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)

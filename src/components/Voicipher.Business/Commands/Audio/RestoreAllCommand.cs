@@ -21,18 +21,18 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class RestoreAllCommand : Command<RestoreAllPayload, CommandResult<OkOutputModel>>, IRestoreAllCommand
     {
-        private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMessageCenterService _messageCenterService;
+        private readonly IAudioFileRepository _audioFileRepository;
         private readonly ILogger _logger;
 
         public RestoreAllCommand(
-            IAudioFileRepository audioFileRepository,
             IMessageCenterService messageCenterService,
+            IAudioFileRepository audioFileRepository,
             ILogger logger)
         {
-            _audioFileRepository = audioFileRepository;
             _messageCenterService = messageCenterService;
-            _logger = logger;
+            _audioFileRepository = audioFileRepository;
+            _logger = logger.ForContext<RestoreAllCommand>();
         }
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(RestoreAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
