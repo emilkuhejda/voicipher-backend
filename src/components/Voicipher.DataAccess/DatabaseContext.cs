@@ -35,6 +35,10 @@ namespace Voicipher.DataAccess
 
         public DbSet<UserDevice> UserDevices { get; set; }
 
+        public DbSet<InformationMessage> InformationMessages { get; set; }
+
+        public DbSet<LanguageVersion> LanguageVersions { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -53,6 +57,8 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new CurrentUserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new UserDeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new InformationMessageConfiguration());
+            modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
         }
     }
 }

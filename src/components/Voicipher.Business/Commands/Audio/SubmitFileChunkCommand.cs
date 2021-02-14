@@ -58,6 +58,8 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
+            _logger.Information("Start submitting audio file to blob storage.");
+
             var userId = principal.GetNameIdentifier();
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
@@ -86,7 +88,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 _logger.Information($"Audio file was created on destination: '{tempFilePath}'.");
 
-                var audioFileTime = _audioService.GetTotalTime(fileChunks[0].Path);
+                var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
                     _logger.Error($"Audio file '{audioFile.FileName}' is not supported. [{userId}]");

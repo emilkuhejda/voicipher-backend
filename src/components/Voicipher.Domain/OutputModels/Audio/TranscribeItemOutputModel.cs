@@ -6,6 +6,11 @@ namespace Voicipher.Domain.OutputModels.Audio
 {
     public record TranscribeItemOutputModel
     {
+        public TranscribeItemOutputModel()
+        {
+            Alternatives = new List<RecognitionAlternativeOutputModel>();
+        }
+
         [Required]
         public Guid Id { get; init; }
 
@@ -13,7 +18,7 @@ namespace Voicipher.Domain.OutputModels.Audio
         public Guid FileItemId { get; init; }
 
         [Required]
-        public IList<RecognitionAlternativeOutputModel> Alternatives { get; init; }
+        public IList<RecognitionAlternativeOutputModel> Alternatives { get; }
 
         public string UserTranscript { get; init; }
 

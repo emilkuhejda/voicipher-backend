@@ -1,9 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Voicipher.Business.Extensions;
+using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
@@ -15,15 +22,30 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class InformationMessagesController : ControllerBase
     {
+        private readonly Lazy<IInformationMessageRepository> _informationMessageRepository;
+        private readonly Lazy<IMapper> _mapper;
+
+        public InformationMessagesController(
+            Lazy<IInformationMessageRepository> informationMessageRepository,
+            Lazy<IMapper> mapper)
+        {
+            _informationMessageRepository = informationMessageRepository;
+            _mapper = mapper;
+        }
+
         [HttpGet]
-        // [ProducesResponseType(typeof(IEnumerable<InformationMessageDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<InformationMessageOutputModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetInformationMessages")]
-        public IActionResult GetAll(DateTime updatedAfter)
+        public async Task<IActionResult> GetAll(DateTime updatedAfter, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var informationMessages = await _informationMessageRepository.Value.GetAllAsync(userId, updatedAfter, cancellationToken);
+
+            var outputModels = informationMessages.Select(x => _mapper.Value.Map<InformationMessageOutputModel>(x));
+            return Ok(outputModels);
         }
 
         [HttpGet("{informationMessageId}")]
