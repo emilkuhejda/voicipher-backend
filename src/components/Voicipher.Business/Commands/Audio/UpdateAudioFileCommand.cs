@@ -30,7 +30,7 @@ namespace Voicipher.Business.Commands.Audio
         {
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
-            _logger = logger;
+            _logger = logger.ForContext<UpdateAudioFileCommand>();
         }
 
         protected override async Task<CommandResult<FileItemOutputModel>> Execute(UpdateAudioFileInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)

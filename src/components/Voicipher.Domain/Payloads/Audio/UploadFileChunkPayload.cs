@@ -12,18 +12,18 @@ namespace Voicipher.Domain.Payloads.Audio
     public class UploadFileChunkPayload : IValidatable
     {
         [Required]
-        public Guid AudioFileId { get; set; }
+        public Guid AudioFileId { get; init; }
 
         [Required]
-        public int Order { get; set; }
+        public int Order { get; init; }
 
         [Required]
-        public StorageSetting StorageSetting { get; set; }
+        public StorageSetting StorageSetting { get; init; }
 
         [Required]
-        public Guid ApplicationId { get; set; }
+        public Guid ApplicationId { get; init; }
 
-        public IFormFile File { get; set; }
+        public IFormFile File { get; init; }
 
         public ValidationResult Validate()
         {

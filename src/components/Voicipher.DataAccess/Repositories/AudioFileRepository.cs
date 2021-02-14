@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,11 +16,11 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<AudioFile> GetAsync(Guid userId, Guid fileItemId, CancellationToken cancellationToken)
+        public Task<AudioFile> GetAsync(Guid userId, Guid audioFileId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Where(x => !x.IsDeleted)
-                .FirstOrDefaultAsync(x => x.Id == fileItemId && x.UserId == userId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == audioFileId && x.UserId == userId, cancellationToken);
         }
 
         public Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
@@ -63,12 +64,35 @@ namespace Voicipher.DataAccess.Repositories
                 .ToArrayAsync(cancellationToken);
         }
 
-        public Task<AudioFile[]> GetTemporaryDeletedFileItemsAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<AudioFile[]> GetTemporaryDeletedAudioFilesAsync(Guid userId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Where(x => x.UserId == userId)
                 .Where(x => x.IsDeleted && !x.IsPermanentlyDeleted)
                 .AsNoTracking()
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetForDeleteAllAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => !x.IsDeleted)
+                .Where(x => audioFileIds.Contains(x.Id) && x.UserId == userId)
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetForPermanentDeleteAllAsync(Guid userId, IEnumerable<Guid> fileItemIds, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
+                .AsNoTracking()
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetForRestoreAsync(Guid userId, Guid[] audioFileIds, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => audioFileIds.Contains(x.Id) && x.UserId == userId)
                 .ToArrayAsync(cancellationToken);
         }
     }
