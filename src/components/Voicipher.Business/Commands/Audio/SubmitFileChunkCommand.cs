@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 _logger.Information($"Audio file was created on destination: '{tempFilePath}'.");
 
-                var audioFileTime = _audioService.GetTotalTime(fileChunks[0].Path);
+                var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
                     _logger.Error($"Audio file '{audioFile.FileName}' is not supported. [{userId}]");
