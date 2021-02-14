@@ -1,9 +1,11 @@
 ﻿using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -45,7 +47,10 @@ namespace Voicipher.Business.Commands.Audio
 
             var userId = principal.GetNameIdentifier();
 
-            await Task.CompletedTask;
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId)).ConfigureAwait(false);
+
+            _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted.");
+
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
     }
