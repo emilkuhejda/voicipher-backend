@@ -82,14 +82,18 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet("{fileItemId}")]
-        // [ProducesResponseType(typeof(FileItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(FileItemOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetFileItem")]
-        public IActionResult Get(Guid fileItemId)
+        public async Task<IActionResult> Get(Guid fileItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFile = await _audioFileRepository.Value.GetAsync(userId, fileItemId, cancellationToken);
+
+            var outputModel = _mapper.Value.Map<FileItemOutputModel>(audioFile);
+            return Ok(outputModel);
         }
 
         [HttpPost("create")]

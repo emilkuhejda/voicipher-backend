@@ -7,6 +7,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
 {
     public interface IAudioFileRepository : IRepository<AudioFile>
     {
+        Task<AudioFile> GetAsync(Guid userId, Guid fileItemId, CancellationToken cancellationToken);
+
         Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
 
         Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken);
