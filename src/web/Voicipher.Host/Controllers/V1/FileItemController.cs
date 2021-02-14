@@ -33,6 +33,7 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<IUpdateAudioFileCommand> _updateAudioFileCommand;
         private readonly Lazy<IDeleteAudioFileCommand> _deleteAudioFileCommand;
         private readonly Lazy<IDeleteAllAudioFileCommand> _deleteAllAudioFileCommand;
+        private readonly Lazy<IPermanentDeleteAllCommand> _permanentDeleteAllCommand;
         private readonly Lazy<IRestoreAllCommand> _restoreAllCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
@@ -43,6 +44,7 @@ namespace Voicipher.Host.Controllers.V1
             Lazy<IUpdateAudioFileCommand> updateAudioFileCommand,
             Lazy<IDeleteAudioFileCommand> deleteAudioFileCommand,
             Lazy<IDeleteAllAudioFileCommand> deleteAllAudioFileCommand,
+            Lazy<IPermanentDeleteAllCommand> permanentDeleteAllCommand,
             Lazy<IRestoreAllCommand> restoreAllCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
@@ -52,6 +54,7 @@ namespace Voicipher.Host.Controllers.V1
             _updateAudioFileCommand = updateAudioFileCommand;
             _deleteAudioFileCommand = deleteAudioFileCommand;
             _deleteAllAudioFileCommand = deleteAllAudioFileCommand;
+            _permanentDeleteAllCommand = permanentDeleteAllCommand;
             _restoreAllCommand = restoreAllCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
@@ -220,9 +223,14 @@ namespace Voicipher.Host.Controllers.V1
 
         [HttpPut("permanent-delete-all")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult PermanentDeleteAll(object fileItemIds, Guid applicationId)
+        public async Task<IActionResult> PermanentDeleteAll(IEnumerable<Guid> audioFilesIds, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var permanentDeleteAllPayload = new PermanentDeleteAllPayload(audioFilesIds, applicationId);
+            var commandResult = await _permanentDeleteAllCommand.Value.ExecuteAsync(permanentDeleteAllPayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("restore-all")]
