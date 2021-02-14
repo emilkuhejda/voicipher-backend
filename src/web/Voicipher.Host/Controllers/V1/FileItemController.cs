@@ -35,6 +35,7 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<IDeleteAllAudioFileCommand> _deleteAllAudioFileCommand;
         private readonly Lazy<IPermanentDeleteAllCommand> _permanentDeleteAllCommand;
         private readonly Lazy<IRestoreAllCommand> _restoreAllCommand;
+        private readonly Lazy<ITranscribeCommand> _transcribeCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
@@ -46,6 +47,7 @@ namespace Voicipher.Host.Controllers.V1
             Lazy<IDeleteAllAudioFileCommand> deleteAllAudioFileCommand,
             Lazy<IPermanentDeleteAllCommand> permanentDeleteAllCommand,
             Lazy<IRestoreAllCommand> restoreAllCommand,
+            Lazy<ITranscribeCommand> transcribeCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
@@ -56,6 +58,7 @@ namespace Voicipher.Host.Controllers.V1
             _deleteAllAudioFileCommand = deleteAllAudioFileCommand;
             _permanentDeleteAllCommand = permanentDeleteAllCommand;
             _restoreAllCommand = restoreAllCommand;
+            _transcribeCommand = transcribeCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
         }
@@ -246,15 +249,20 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpPut("transcribe")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "TranscribeFileItem")]
-        public IActionResult Transcribe(Guid fileItemId, string language, Guid applicationId)
+        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var transcribePayload = new TranscribePayload(fileItemId, language, applicationId);
+            var commandResult = await _transcribeCommand.Value.ExecuteAsync(transcribePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }
