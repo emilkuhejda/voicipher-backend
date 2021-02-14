@@ -34,5 +34,16 @@ namespace Voicipher.DataAccess.Repositories
                 .Select(x => x.DateUpdatedUtc)
                 .FirstOrDefaultAsync(cancellationToken);
         }
+
+        public Task<DateTime> GetDeletedLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => x.IsDeleted)
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.DateUpdatedUtc)
+                .AsNoTracking()
+                .Select(x => x.DateUpdatedUtc)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }
