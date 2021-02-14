@@ -12,6 +12,7 @@ using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Validation;
 
@@ -21,13 +22,16 @@ namespace Voicipher.Business.Commands
     {
         private const string Transcription = "Transcription";
 
+        private readonly IMailService _mailService;
         private readonly IAudioFileRepository _audioFileRepository;
-        private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly ILogger _logger;
 
-        public SendMailCommand(ILogger logger, ITranscribeItemRepository transcribeItemRepository, IAudioFileRepository audioFileRepository)
+        public SendMailCommand(
+            IMailService mailService,
+            IAudioFileRepository audioFileRepository,
+            ILogger logger)
         {
-            _transcribeItemRepository = transcribeItemRepository;
+            _mailService = mailService;
             _audioFileRepository = audioFileRepository;
             _logger = logger.ForContext<SendMailCommand>();
         }
@@ -70,6 +74,10 @@ namespace Voicipher.Business.Commands
             }
 
             var subject = $"{Transcription}: {audioFile.Name}";
+
+            await _mailService.SendAsync(parameter.Recipient, subject, body.ToString());
+
+            _logger.Information($"Email for user '{parameter.Recipient}' was sent.");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
