@@ -6,6 +6,11 @@ namespace Voicipher.Domain.OutputModels
 {
     public record InformationMessageOutputModel
     {
+        public InformationMessageOutputModel()
+        {
+            LanguageVersions = new List<LanguageVersionOutputModel>();
+        }
+
         [Required]
         public Guid Id { get; init; }
 
@@ -21,6 +26,6 @@ namespace Voicipher.Domain.OutputModels
         [Required]
         public DateTime DatePublishedUtc { get; init; }
 
-        public IList<LanguageVersionOutputModel> LanguageVersions { get; init; }
+        public IList<LanguageVersionOutputModel> LanguageVersions { get; }
     }
 }
