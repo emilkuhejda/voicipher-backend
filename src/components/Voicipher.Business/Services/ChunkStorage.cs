@@ -55,6 +55,15 @@ namespace Voicipher.Business.Services
             return source.ToArray();
         }
 
+        public void RemoveTemporaryFolder()
+        {
+            var rootPath = GetRootPath();
+            if (Directory.Exists(rootPath))
+            {
+                Directory.Delete(rootPath, true);
+            }
+        }
+
         private string GetRootPath()
         {
             var rootDirectoryPath = Path.Combine(_webHostEnvironment.WebRootPath, UploadedFilesDirectory, ChunksDirectory);
