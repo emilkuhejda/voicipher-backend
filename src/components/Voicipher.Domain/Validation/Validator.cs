@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Domain.Validation
 {
@@ -60,6 +61,14 @@ namespace Voicipher.Domain.Validation
         {
             if (value == null)
                 return errorList.Add(ValidationErrorCodes.ParameterIsNull, field, objectName);
+
+            return errorList;
+        }
+
+        public static IList<ValidationError> ValidateLanguage(this IList<ValidationError> errorList, string value, string field, string objectName = null)
+        {
+            if (!SupportedLanguages.IsSupported(value))
+                return errorList.Add(ValidationErrorCodes.NotSupportedLanguage, field, objectName);
 
             return errorList;
         }

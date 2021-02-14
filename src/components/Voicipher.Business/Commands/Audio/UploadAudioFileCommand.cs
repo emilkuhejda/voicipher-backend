@@ -18,7 +18,6 @@ using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Payloads.Audio;
-using Voicipher.Domain.Utils;
 using Voicipher.Domain.Validation;
 
 namespace Voicipher.Business.Commands.Audio
@@ -60,16 +59,16 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
+                {
+                    _logger.Error($"Language '{parameter.Language}' is not supported.");
+
+                    throw new OperationErrorException(ErrorCode.EC200);
+                }
+
                 _logger.Error("Invalid input data.");
 
                 throw new OperationErrorException(ErrorCode.EC600);
-            }
-
-            if (!string.IsNullOrWhiteSpace(parameter.Language) && !SupportedLanguages.IsSupported(parameter.Language))
-            {
-                _logger.Error($"Language '{parameter.Language}' is not supported.");
-
-                throw new OperationErrorException(ErrorCode.EC200);
             }
 
             var userId = principal.GetNameIdentifier();
