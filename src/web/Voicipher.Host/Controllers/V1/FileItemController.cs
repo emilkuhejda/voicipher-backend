@@ -27,15 +27,18 @@ namespace Voicipher.Host.Controllers.V1
     public class FileItemController : ControllerBase
     {
         private readonly Lazy<ICreateAudioFileCommand> _createAudioFileCommand;
+        private readonly Lazy<IUploadAudioFileCommand> _uploadAudioFileCommand;
         private readonly Lazy<IAudioFileRepository> _audioFileRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public FileItemController(
             Lazy<ICreateAudioFileCommand> createAudioFileCommand,
+            Lazy<IUploadAudioFileCommand> uploadAudioFileCommand,
             Lazy<IAudioFileRepository> audioFileRepository,
             Lazy<IMapper> mapper)
         {
             _createAudioFileCommand = createAudioFileCommand;
+            _uploadAudioFileCommand = uploadAudioFileCommand;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
         }
@@ -132,9 +135,23 @@ namespace Voicipher.Host.Controllers.V1
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         [RequestSizeLimit(int.MaxValue)]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult Upload(string name, string language, string fileName, DateTime dateCreated, Guid applicationId, IFormFile file)
+        public async Task<IActionResult> Upload(string name, string language, string fileName, DateTime dateCreated, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var createAudioFilePayload = new UploadAudioFilePayload
+            {
+                Name = name,
+                Language = language,
+                FileName = fileName,
+                DateCreated = dateCreated,
+                ApplicationId = applicationId,
+                File = file
+            };
+
+            var commandResult = await _uploadAudioFileCommand.Value.ExecuteAsync(createAudioFilePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("update")]
