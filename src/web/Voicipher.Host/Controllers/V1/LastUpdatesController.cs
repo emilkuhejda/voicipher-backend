@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Queries;
 using Voicipher.Domain.Payloads;
 using Voicipher.Host.Utils;
@@ -27,6 +29,7 @@ namespace Voicipher.Host.Controllers.V1
 
         [HttpGet]
         [ProducesResponseType(typeof(LastUpdatesOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -34,6 +37,8 @@ namespace Voicipher.Host.Controllers.V1
         public async Task<ActionResult> Get(CancellationToken cancellationToken)
         {
             var queryResult = await _getLastUpdatesQuery.Value.ExecuteAsync(HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
 
             return Ok(queryResult.Value);
         }

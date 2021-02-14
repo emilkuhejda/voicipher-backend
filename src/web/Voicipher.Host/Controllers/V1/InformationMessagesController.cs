@@ -78,11 +78,14 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "MarkMessageAsOpened")]
         public async Task<IActionResult> MarkAsOpened(Guid informationMessageId, CancellationToken cancellationToken)
         {
-            var commandResult = await _markMessageAsOpenedCommand.Value.ExecuteAsync(informationMessageId, HttpContext.User, cancellationToken);
+            var commandResult = await _markMessageAsOpenedCommand.Value.ExecuteAsync(new[] { informationMessageId }, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 
-            return Ok(commandResult.Value);
+            if (!commandResult.Value.Any())
+                return BadRequest();
+
+            return Ok(commandResult.Value.First());
         }
 
         [HttpPut("mark-messages-as-opened")]
@@ -91,9 +94,13 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "MarkMessagesAsOpened")]
-        public async Task<IActionResult> MarkMessagesAsOpened(IEnumerable<Guid> ids)
+        public async Task<IActionResult> MarkMessagesAsOpened(IEnumerable<Guid> ids, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _markMessageAsOpenedCommand.Value.ExecuteAsync(ids.ToArray(), HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }

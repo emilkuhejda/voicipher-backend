@@ -5,7 +5,7 @@ using Voicipher.Domain.OutputModels;
 
 namespace Voicipher.Domain.Interfaces.Commands
 {
-    public interface IMarkMessageAsOpenedCommand : ICommand<Guid, CommandResult<InformationMessageOutputModel>>
+    public interface IMarkMessageAsOpenedCommand : ICommand<Guid[], CommandResult<InformationMessageOutputModel[]>>
     {
     }
 }
