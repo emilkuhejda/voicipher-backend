@@ -57,21 +57,28 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet("deleted")]
-        // [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<Guid>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetDeletedFileItemIds")]
-        public IActionResult GetDeletedFileItemIds(DateTime updatedAfter, Guid applicationId)
+        public async Task<IActionResult> GetDeletedFileItemIds(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFileIds = await _audioFileRepository.Value.GetAllDeletedIdsAsync(userId, updatedAfter, applicationId, cancellationToken);
+
+            return Ok(audioFileIds);
         }
 
         [HttpGet("temporary-deleted")]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public IActionResult GetTemporaryDeletedFileItems()
+        public async Task<IActionResult> GetTemporaryDeletedFileItems(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var userId = HttpContext.User.GetNameIdentifier();
+            var audioFiles = await _audioFileRepository.Value.GetTemporaryDeletedFileItemsAsync(userId, cancellationToken);
+
+            var outputModels = _mapper.Value.Map<AudioFileOutputModel>(audioFiles);
+            return Ok(outputModels);
         }
 
         [HttpGet("{fileItemId}")]

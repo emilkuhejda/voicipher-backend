@@ -45,5 +45,24 @@ namespace Voicipher.DataAccess.Repositories
                 .Select(x => x.DateUpdatedUtc)
                 .FirstOrDefaultAsync(cancellationToken);
         }
+
+        public Task<Guid[]> GetAllDeletedIdsAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => x.IsDeleted)
+                .Where(x => x.UserId == userId && x.DateUpdatedUtc >= updatedAfter && x.ApplicationId != applicationId)
+                .AsNoTracking()
+                .Select(x => x.Id)
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetTemporaryDeletedFileItemsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => x.UserId == userId)
+                .Where(x => x.IsDeleted && !x.IsPermanentlyDeleted)
+                .AsNoTracking()
+                .ToArrayAsync(cancellationToken);
+        }
     }
 }
