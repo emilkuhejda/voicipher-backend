@@ -39,6 +39,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<LanguageVersion> LanguageVersions { get; set; }
 
+        public DbSet<ContactForm> ContactForms { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -59,6 +61,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new UserDeviceConfiguration());
             modelBuilder.ApplyConfiguration(new InformationMessageConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
+            modelBuilder.ApplyConfiguration(new ContactFormConfiguration());
         }
     }
 }
