@@ -20,7 +20,7 @@ namespace Voicipher.Business.Commands.Audio
 
         public TranscribeCommand(ILogger logger)
         {
-            _logger = logger;
+            _logger = logger.ForContext<TranscribeCommand>();
         }
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(TranscribePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)

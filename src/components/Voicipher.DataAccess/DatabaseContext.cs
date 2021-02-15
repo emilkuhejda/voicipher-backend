@@ -39,6 +39,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<UserDevice> UserDevices { get; set; }
 
+        public DbSet<DeletedAccount> DeletedAccounts { get; set; }
+
         public DbSet<InformationMessage> InformationMessages { get; set; }
 
         public DbSet<LanguageVersion> LanguageVersions { get; set; }
@@ -65,6 +67,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new CurrentUserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new UserDeviceConfiguration());
+            modelBuilder.ApplyConfiguration(new DeletedAccountConfiguration());
             modelBuilder.ApplyConfiguration(new InformationMessageConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
             modelBuilder.ApplyConfiguration(new ContactFormConfiguration());
