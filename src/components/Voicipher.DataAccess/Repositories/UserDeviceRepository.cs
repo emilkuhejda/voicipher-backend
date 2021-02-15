@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -27,6 +28,11 @@ namespace Voicipher.DataAccess.Repositories
             {
                 entity.UpdateFrom(userDevice);
             }
+        }
+
+        public Task<UserDevice> GetByInstallationIdAsync(Guid userId, Guid installationId, CancellationToken cancellationToken)
+        {
+            return Context.UserDevices.SingleOrDefaultAsync(x => x.UserId == userId && x.InstallationId == installationId, cancellationToken);
         }
     }
 }
