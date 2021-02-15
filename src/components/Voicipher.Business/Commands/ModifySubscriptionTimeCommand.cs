@@ -7,6 +7,7 @@ using AutoMapper;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -20,17 +21,20 @@ namespace Voicipher.Business.Commands
     {
         private readonly IUserSubscriptionRepository _userSubscriptionRepository;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public ModifySubscriptionTimeCommand(
             IUserSubscriptionRepository userSubscriptionRepository,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
             _userSubscriptionRepository = userSubscriptionRepository;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger.ForContext<ModifySubscriptionTimeCommand>();
         }
@@ -71,6 +75,8 @@ namespace Voicipher.Business.Commands
 
             var currentUserSubscription = new CurrentUserSubscription(userId, newRemainingTicks);
             await _currentUserSubscriptionRepository.AddAsync(currentUserSubscription);
+
+            await _unitOfWork.SaveAsync(cancellationToken);
 
             _logger.Information($"Current user subscription was updated to time: {currentUserSubscription.Time}. User ID = {userId}.");
 
