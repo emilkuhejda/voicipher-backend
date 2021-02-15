@@ -9,8 +9,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
+using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.InputModels;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Queries.TranscribeItems;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
 
@@ -24,15 +29,18 @@ namespace Voicipher.Host.Controllers.V1
     public class TranscribeItemsController : ControllerBase
     {
         private readonly Lazy<IGetTranscribeItemSourceQuery> _getTranscribeItemSourceQuery;
+        private readonly Lazy<IUpdateUserTranscriptCommand> _updateUserTranscriptCommand;
         private readonly Lazy<ITranscribeItemRepository> _transcribeItemRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public TranscribeItemsController(
             Lazy<IGetTranscribeItemSourceQuery> getTranscribeItemSourceQuery,
+            Lazy<IUpdateUserTranscriptCommand> updateUserTranscriptCommand,
             Lazy<ITranscribeItemRepository> transcribeItemRepository,
             Lazy<IMapper> mapper)
         {
             _getTranscribeItemSourceQuery = getTranscribeItemSourceQuery;
+            _updateUserTranscriptCommand = updateUserTranscriptCommand;
             _transcribeItemRepository = transcribeItemRepository;
             _mapper = mapper;
         }
@@ -99,14 +107,19 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpPut("update-transcript")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateUserTranscript")]
-        public ActionResult UpdateUserTranscript(object updateTranscribeItemModel)
+        public async Task<ActionResult> UpdateUserTranscript(UpdateUserTranscriptInputModel updateUserTranscriptInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _updateUserTranscriptCommand.Value.ExecuteAsync(updateUserTranscriptInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }
