@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -47,10 +48,10 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
+            var userId = principal.GetNameIdentifier();
+
             try
             {
-                var userId = principal.GetNameIdentifier();
-
                 var audioFilesToDelete = await _audioFileRepository.GetForPermanentDeleteAllAsync(userId, parameter.AudioFilesIds, parameter.ApplicationId, cancellationToken);
                 foreach (var audioFile in audioFilesToDelete)
                 {
@@ -70,6 +71,12 @@ namespace Voicipher.Business.Commands.Audio
                 _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted.");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
+            }
+            catch (RequestFailedException ex)
+            {
+                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}.");
+
+                throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (Exception ex)
             {
