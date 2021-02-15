@@ -115,6 +115,7 @@ namespace Voicipher.Domain.Enums
         EC609 = 609,
         EC610 = 610,
 
+        // Unavailable blob storage
         EC700 = 700,
         EC701 = 701,
         EC702 = 702,

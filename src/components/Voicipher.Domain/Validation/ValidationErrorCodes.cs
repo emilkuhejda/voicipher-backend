@@ -6,6 +6,8 @@
 
         public static string TextTooLong => nameof(TextTooLong);
 
+        public static string NotFound => nameof(NotFound);
+
         public static string AdministratorNotFound => nameof(AdministratorNotFound);
 
         public static string ParameterIsNull => nameof(ParameterIsNull);
