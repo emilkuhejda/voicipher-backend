@@ -54,7 +54,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItems")]
-        public async Task<ActionResult> GetAllByFileItemId(Guid fileItemId, CancellationToken cancellationToken)
+        public async Task<ActionResult> GetAllByAudioFileId(Guid fileItemId, CancellationToken cancellationToken)
         {
             var transcribeItems = await _transcribeItemRepository.Value.GetAllByAudioFileIdAsync(fileItemId, cancellationToken);
             var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
