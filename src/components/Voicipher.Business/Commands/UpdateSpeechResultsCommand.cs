@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -55,32 +56,41 @@ namespace Voicipher.Business.Commands
         {
             var userId = principal.GetNameIdentifier();
 
-            using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
+            try
             {
-                var speechResults = parameter.Select(_mapper.Map<SpeechResult>).ToArray();
-                _speechResultRepository.UpdateAll(speechResults);
-                await _unitOfWork.SaveAsync(cancellationToken);
-
-                var totalTime = TimeSpan.FromTicks(parameter.Sum(x => x.Ticks));
-                var payload = new ModifySubscriptionTimePayload
+                using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
                 {
-                    ApplicationId = _appSettings.ApplicationId,
-                    Time = totalTime,
-                    Operation = SubscriptionOperation.Remove
-                };
+                    var speechResults = parameter.Select(_mapper.Map<SpeechResult>).ToArray();
+                    _speechResultRepository.UpdateAll(speechResults);
+                    await _unitOfWork.SaveAsync(cancellationToken);
 
-                var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(payload, principal, cancellationToken);
-                if (!commandResult.IsSuccess)
-                {
-                    if (commandResult.Error.ErrorCode == ValidationErrorCodes.NotEnoughSubscriptionTime)
-                        throw new OperationErrorException(ErrorCode.EC300);
+                    var totalTime = TimeSpan.FromTicks(parameter.Sum(x => x.Ticks));
+                    var payload = new ModifySubscriptionTimePayload
+                    {
+                        ApplicationId = _appSettings.ApplicationId,
+                        Time = totalTime,
+                        Operation = SubscriptionOperation.Remove
+                    };
 
-                    throw new OperationErrorException(ErrorCode.EC603);
+                    var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(payload, principal, cancellationToken);
+                    if (!commandResult.IsSuccess)
+                    {
+                        if (commandResult.Error.ErrorCode == ValidationErrorCodes.NotEnoughSubscriptionTime)
+                            throw new OperationErrorException(ErrorCode.EC300);
+
+                        throw new OperationErrorException(ErrorCode.EC603);
+                    }
+
+                    _logger.Information($"Update speech results total time. [{userId}]");
+
+                    await transaction.CommitAsync(cancellationToken);
                 }
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.Error(ex, "An error occurred while updating the entries.");
 
-                _logger.Information($"Update speech results total time. [{userId}]");
-
-                await transaction.CommitAsync(cancellationToken);
+                throw new OperationErrorException(ErrorCode.EC400);
             }
 
             var remainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(userId, cancellationToken);
