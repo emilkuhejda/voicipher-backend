@@ -12,7 +12,7 @@ namespace Voicipher.Business.Profiles
             CreateMap<CreateSpeechResultInputModel, SpeechResult>()
                 .ForMember(
                     s => s.Id,
-                    opt => opt.MapFrom(c => Guid.NewGuid()))
+                    opt => opt.MapFrom(c => c.SpeechResultId))
                 .ForMember(
                     s => s.RecognizedAudioSampleId,
                     opt => opt.MapFrom(c => c.RecognizedAudioSampleId))

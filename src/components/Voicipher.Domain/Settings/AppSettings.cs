@@ -15,5 +15,7 @@ namespace Voicipher.Domain.Settings
         public AzureStorageAccountSettings AzureStorageAccount { get; set; }
 
         public MailConfiguration MailConfiguration { get; set; }
+
+        public AzureRecognitionSpeechConfiguration AzureSpeechConfiguration { get; set; }
     }
 }
