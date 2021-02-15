@@ -20,11 +20,11 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class UserSubscriptionsController : ControllerBase
     {
-        private readonly Lazy<IUserSubscriptionRepository> _userSubscriptionRepository;
+        private readonly Lazy<ICurrentUserSubscriptionRepository> _currentUserSubscriptionRepository;
 
-        public UserSubscriptionsController(Lazy<IUserSubscriptionRepository> userSubscriptionRepository)
+        public UserSubscriptionsController(Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository)
         {
-            _userSubscriptionRepository = userSubscriptionRepository;
+            _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
         }
 
         [HttpPost("create")]
@@ -59,7 +59,7 @@ namespace Voicipher.Host.Controllers.V1
         public async Task<IActionResult> GetSubscriptionRemainingTime(CancellationToken cancellationToken)
         {
             var userId = HttpContext.User.GetNameIdentifier();
-            var remainingTime = await _userSubscriptionRepository.Value.GetRemainingTimeAsync(userId, cancellationToken);
+            var remainingTime = await _currentUserSubscriptionRepository.Value.GetRemainingTimeAsync(userId, cancellationToken);
             var outputModel = new TimeSpanWrapperOutputModel(remainingTime.Ticks);
 
             return Ok(outputModel);

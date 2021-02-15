@@ -10,12 +10,12 @@ namespace Voicipher.Domain.InputModels
     public record CreateSpeechResultInputModel : IValidatable
     {
         [Required]
-        public Guid SpeechResultId { get; set; }
+        public Guid SpeechResultId { get; init; }
 
         [Required]
-        public Guid RecognizedAudioSampleId { get; set; }
+        public Guid RecognizedAudioSampleId { get; init; }
 
-        public string DisplayText { get; set; }
+        public string DisplayText { get; init; }
 
         public ValidationResult Validate()
         {

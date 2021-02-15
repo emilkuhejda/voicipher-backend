@@ -9,7 +9,7 @@ namespace Voicipher.Domain.Models
             Id = Guid.NewGuid();
             UserId = Guid.Empty;
             Ticks = TimeSpan.Zero.Ticks;
-            DateUpdatedUtc = DateTime.Now;
+            DateUpdatedUtc = DateTime.UtcNow;
         }
     }
 }

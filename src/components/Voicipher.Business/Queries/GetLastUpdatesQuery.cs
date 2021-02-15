@@ -14,18 +14,18 @@ namespace Voicipher.Business.Queries
     {
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
-        private readonly IUserSubscriptionRepository _userSubscriptionRepository;
+        private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
         private readonly IInformationMessageRepository _informationMessageRepository;
 
         public GetLastUpdatesQuery(
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
-            IUserSubscriptionRepository userSubscriptionRepository,
+            ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
             IInformationMessageRepository informationMessageRepository)
         {
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
-            _userSubscriptionRepository = userSubscriptionRepository;
+            _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
             _informationMessageRepository = informationMessageRepository;
         }
 
@@ -35,7 +35,7 @@ namespace Voicipher.Business.Queries
             var fileItemUtc = await _audioFileRepository.GetLastUpdateAsync(userId, cancellationToken);
             var deletedFileItemUtc = await _audioFileRepository.GetDeletedLastUpdateAsync(userId, cancellationToken);
             var transcribeItemUtc = await _transcribeItemRepository.GetLastUpdateAsync(userId, cancellationToken);
-            var userSubscriptionUtc = await _userSubscriptionRepository.GetLastUpdateAsync(userId, cancellationToken);
+            var userSubscriptionUtc = await _currentUserSubscriptionRepository.GetLastUpdateAsync(userId, cancellationToken);
             var informationMessageUtc = await _informationMessageRepository.GetLastUpdateAsync(userId, cancellationToken);
 
             var lastUpdatesOutputModel = new LastUpdatesOutputModel
