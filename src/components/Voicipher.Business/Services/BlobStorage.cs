@@ -53,7 +53,7 @@ namespace Voicipher.Business.Services
             return fileName;
         }
 
-        public async Task DeleteContainer(BlobSettings blobSettings, CancellationToken cancellationToken)
+        public async Task DeleteContainer(BlobContainerSettings blobSettings, CancellationToken cancellationToken)
         {
             var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             await container.DeleteIfExistsAsync(cancellationToken: cancellationToken);

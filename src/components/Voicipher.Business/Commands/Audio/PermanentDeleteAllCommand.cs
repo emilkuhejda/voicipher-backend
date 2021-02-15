@@ -55,7 +55,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFilesToDelete = await _audioFileRepository.GetForPermanentDeleteAllAsync(userId, parameter.AudioFilesIds, parameter.ApplicationId, cancellationToken);
                 foreach (var audioFile in audioFilesToDelete)
                 {
-                    await _blobStorage.DeleteAudioFileAsync(new BlobSettings(userId, audioFile.Id), cancellationToken);
+                    await _blobStorage.DeleteAudioFileAsync(new BlobSettings(audioFile.Id, userId), cancellationToken);
 
                     var deletedEntity = audioFile.CreateDeletedEntity(parameter.ApplicationId);
                     _audioFileRepository.Remove(audioFile);
