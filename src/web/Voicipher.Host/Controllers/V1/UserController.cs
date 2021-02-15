@@ -7,8 +7,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.InputModels.Authentication;
+using Voicipher.Domain.InputModels.EndUser;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
+using Voicipher.Domain.Interfaces.Commands.EndUser;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Authentication;
 using Voicipher.Host.Utils;
@@ -22,28 +26,34 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class UserController : ControllerBase
     {
+        private readonly Lazy<IUpdateUserCommand> _updateUserCommand;
         private readonly Lazy<IUserRegistrationCommand> _userRegistrationCommand;
         private readonly Lazy<IMapper> _mapper;
 
         public UserController(
             Lazy<IUserRegistrationCommand> userRegistrationCommand,
-            Lazy<IMapper> mapper)
+            Lazy<IMapper> mapper, Lazy<IUpdateUserCommand> updateUserCommand)
         {
             _userRegistrationCommand = userRegistrationCommand;
             _mapper = mapper;
+            _updateUserCommand = updateUserCommand;
         }
 
         [HttpPut("update")]
         [Authorize(Policy = nameof(VoicipherPolicy.User))]
-        // [ProducesResponseType(typeof(IdentityDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IdentityOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateUser")]
-        public IActionResult UpdateUser([FromBody] object updateUserModel)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdateUserInputModel updateUserInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _updateUserCommand.Value.ExecuteAsync(updateUserInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPost("/api/b2c/v{version:apiVersion}/users/register")]
@@ -70,7 +80,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateLanguage")]
-        public IActionResult UpdateLanguage(Guid installationId, int language)
+        public async Task<IActionResult> UpdateLanguage(Guid installationId, int language, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -83,7 +93,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "DeleteUser")]
-        public IActionResult DeleteUser(string email)
+        public async Task<IActionResult> DeleteUser(string email, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
