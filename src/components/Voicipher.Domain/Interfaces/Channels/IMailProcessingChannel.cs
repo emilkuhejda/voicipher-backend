@@ -7,8 +7,8 @@ namespace Voicipher.Domain.Interfaces.Channels
 {
     public interface IMailProcessingChannel
     {
-        IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken);
+        IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken = default);
 
-        Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken);
+        Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken = default);
     }
 }

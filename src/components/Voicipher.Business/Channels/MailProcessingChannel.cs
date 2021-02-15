@@ -13,18 +13,12 @@ namespace Voicipher.Business.Channels
 
         public MailProcessingChannel()
         {
-            var options = new BoundedChannelOptions(100)
-            {
-                SingleWriter = true,
-                SingleReader = true
-            };
-
-            _channel = Channel.CreateBounded<MailData>(options);
+            _channel = Channel.CreateUnbounded<MailData>();
         }
 
-        public IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken) => _channel.Reader.ReadAllAsync(cancellationToken);
+        public IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken = default) => _channel.Reader.ReadAllAsync(cancellationToken);
 
-        public async Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken)
+        public async Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken = default)
         {
             while (await _channel.Writer.WaitToWriteAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
             {

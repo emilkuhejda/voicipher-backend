@@ -33,28 +33,30 @@ namespace Voicipher.Business.BackgroundServices
             await foreach (var mailData in _mailProcessingChannel.ReadAllAsync(stoppingToken))
             {
                 await SendAsync(mailData, stoppingToken);
-
-                _logger.Information("Email was successfully sent.");
             }
         }
 
-        private Task SendAsync(MailData mailData, CancellationToken cancellationToken)
+        private async Task SendAsync(MailData mailData, CancellationToken cancellationToken)
         {
             try
             {
+                _logger.Information("Start sending email.");
+
                 var mailConfiguration = _appSettings.MailConfiguration;
                 using (var client = new SmtpClient(mailConfiguration.SmtpServer, mailConfiguration.Port))
                 {
                     client.UseDefaultCredentials = false;
                     client.Credentials = new NetworkCredential(mailConfiguration.Username, mailConfiguration.Password);
 
-                    using (MailMessage mailMessage = new MailMessage())
+                    using (var mailMessage = new MailMessage())
                     {
                         mailMessage.From = new MailAddress(mailConfiguration.From, mailConfiguration.DisplayName);
                         mailMessage.To.Add(mailData.Recipient);
                         mailMessage.Body = mailData.Body;
                         mailMessage.Subject = mailData.Subject;
-                        return client.SendMailAsync(mailMessage, cancellationToken);
+                        await client.SendMailAsync(mailMessage, cancellationToken);
+
+                        _logger.Information("Email was successfully sent.");
                     }
                 }
             }
@@ -62,8 +64,6 @@ namespace Voicipher.Business.BackgroundServices
             {
                 _logger.Error(ex, "Exception occurred during sending email.");
             }
-
-            return Task.CompletedTask;
         }
     }
 }
