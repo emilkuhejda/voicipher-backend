@@ -19,14 +19,28 @@ namespace Voicipher.Business.Services
             _appSettings = options.Value;
         }
 
-        public async Task<string> UploadAsync(UploadBlobSettings uploadBlobSettings)
+        public async Task<byte[]> GetAsync(GetBlobSettings blobSettings)
         {
-            var fileName = $"{Guid.NewGuid()}.voc";
-            var filePath = Path.Combine(uploadBlobSettings.AudioFileId, fileName);
-            var container = await GetContainerClient(uploadBlobSettings.ContainerName);
+            var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
+            var container = await GetContainerClient(blobSettings.ContainerName);
             var client = container.GetBlobClient(filePath);
 
-            using (var fileStream = File.OpenRead(uploadBlobSettings.FilePath))
+            using (var memoryStream = new MemoryStream())
+            {
+                await client.DownloadToAsync(memoryStream).ConfigureAwait(false);
+
+                return memoryStream.ToArray();
+            }
+        }
+
+        public async Task<string> UploadAsync(UploadBlobSettings blobSettings)
+        {
+            var fileName = $"{Guid.NewGuid()}.voc";
+            var filePath = Path.Combine(blobSettings.AudioFileId, fileName);
+            var container = await GetContainerClient(blobSettings.ContainerName);
+            var client = container.GetBlobClient(filePath);
+
+            using (var fileStream = File.OpenRead(blobSettings.FilePath))
             {
                 await client.UploadAsync(fileStream, true).ConfigureAwait(false);
             }
@@ -55,10 +69,10 @@ namespace Voicipher.Business.Services
             }
         }
 
-        public async Task DeleteFileBlobAsync(DeleteBlobSettings deleteBlobSettings)
+        public async Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings)
         {
-            var filePath = Path.Combine(deleteBlobSettings.AudioFileId, deleteBlobSettings.FileName);
-            var container = await GetContainerClient(deleteBlobSettings.ContainerName);
+            var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
+            var container = await GetContainerClient(blobSettings.ContainerName);
             var client = container.GetBlobClient(filePath);
             await client.DeleteIfExistsAsync();
         }
