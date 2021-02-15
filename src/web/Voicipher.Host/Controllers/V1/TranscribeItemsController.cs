@@ -43,20 +43,23 @@ namespace Voicipher.Host.Controllers.V1
         {
             var userId = HttpContext.User.GetNameIdentifier();
             var transcribeItems = await _transcribeItemRepository.Value.GetAllAfterDateAsync(userId, updatedAfter, applicationId, cancellationToken);
-            var outputModel = transcribeItems.Select(x => _mapper.Value.Map<TranscribeItemOutputModel>(x));
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
 
-            return Ok(outputModel);
+            return Ok(outputModels);
         }
 
         [HttpGet("{fileItemId}")]
-        // [ProducesResponseType(typeof(IEnumerable<TranscribeItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<TranscribeItemOutputModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItems")]
-        public ActionResult GetAllByFileItemId(Guid fileItemId)
+        public async Task<ActionResult> GetAllByFileItemId(Guid fileItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var transcribeItems = await _transcribeItemRepository.Value.GetAllByAudioFileIdAsync(fileItemId, cancellationToken);
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
+
+            return Ok(outputModels);
         }
 
         [HttpGet("audio/{transcribeItemId}")]
