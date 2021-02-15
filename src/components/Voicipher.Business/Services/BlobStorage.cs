@@ -1,9 +1,11 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
@@ -19,44 +21,47 @@ namespace Voicipher.Business.Services
             _appSettings = options.Value;
         }
 
-        public async Task<byte[]> GetAsync(GetBlobSettings blobSettings)
+        public async Task<byte[]> GetAsync(GetBlobSettings blobSettings, CancellationToken cancellationToken)
         {
             var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
-            var container = await GetContainerClient(blobSettings.ContainerName);
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);
+            var exists = await client.ExistsAsync(cancellationToken);
+            if (!exists)
+                throw new BlobNotExistsException();
 
             using (var memoryStream = new MemoryStream())
             {
-                await client.DownloadToAsync(memoryStream).ConfigureAwait(false);
+                await client.DownloadToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
 
                 return memoryStream.ToArray();
             }
         }
 
-        public async Task<string> UploadAsync(UploadBlobSettings blobSettings)
+        public async Task<string> UploadAsync(UploadBlobSettings blobSettings, CancellationToken cancellationToken)
         {
             var fileName = $"{Guid.NewGuid()}.voc";
             var filePath = Path.Combine(blobSettings.AudioFileId, fileName);
-            var container = await GetContainerClient(blobSettings.ContainerName);
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);
 
             using (var fileStream = File.OpenRead(blobSettings.FilePath))
             {
-                await client.UploadAsync(fileStream, true).ConfigureAwait(false);
+                await client.UploadAsync(fileStream, true, cancellationToken).ConfigureAwait(false);
             }
 
             return fileName;
         }
 
-        public async Task DeleteContainer(BlobSettings blobSettings)
+        public async Task DeleteContainer(BlobSettings blobSettings, CancellationToken cancellationToken)
         {
-            var container = await GetContainerClient(blobSettings.ContainerName);
-            await container.DeleteIfExistsAsync();
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
+            await container.DeleteIfExistsAsync(cancellationToken: cancellationToken);
         }
 
-        public async Task DeleteAudioFileAsync(BlobSettings blobSettings)
+        public async Task DeleteAudioFileAsync(BlobSettings blobSettings, CancellationToken cancellationToken)
         {
-            var container = await GetContainerClient(blobSettings.ContainerName);
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var blobItems = container.GetBlobs()
                 .AsPages()
                 .SelectMany(x => x.Values)
@@ -65,23 +70,23 @@ namespace Voicipher.Business.Services
             foreach (var blobItem in blobItems)
             {
                 var client = container.GetBlobClient(blobItem.Name);
-                await client.DeleteIfExistsAsync();
+                await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
             }
         }
 
-        public async Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings)
+        public async Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings, CancellationToken cancellationToken)
         {
             var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
-            var container = await GetContainerClient(blobSettings.ContainerName);
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);
-            await client.DeleteIfExistsAsync();
+            await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
         }
 
-        private async Task<BlobContainerClient> GetContainerClient(string containerName)
+        private async Task<BlobContainerClient> GetContainerClient(string containerName, CancellationToken cancellationToken)
         {
             var blobServiceClient = new BlobServiceClient(_appSettings.AzureStorageAccount.ConnectionString);
             var container = blobServiceClient.GetBlobContainerClient(containerName);
-            await container.CreateIfNotExistsAsync();
+            await container.CreateIfNotExistsAsync(cancellationToken: cancellationToken);
 
             return container;
         }
