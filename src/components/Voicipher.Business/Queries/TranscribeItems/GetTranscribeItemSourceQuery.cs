@@ -54,7 +54,7 @@ namespace Voicipher.Business.Queries.TranscribeItems
             }
             catch (RequestFailedException ex)
             {
-                _logger.Warning(ex, $"Cannot connect to blob storage. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}, Transcribe file name = {transcribeItem.SourceFileName}.");
+                _logger.Warning(ex, $"Blob storage is unavailable. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}, Transcribe file name = {transcribeItem.SourceFileName}.");
 
                 return new QueryResult<byte[]>(new byte[0]);
             }
