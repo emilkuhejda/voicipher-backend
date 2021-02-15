@@ -10,7 +10,6 @@ using Voicipher.Business.Infrastructure;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
-using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Validation;
@@ -21,22 +20,19 @@ namespace Voicipher.Business.Commands
     {
         private readonly IUserSubscriptionRepository _userSubscriptionRepository;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public ModifySubscriptionTimeCommand(
             IUserSubscriptionRepository userSubscriptionRepository,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
-            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
             _userSubscriptionRepository = userSubscriptionRepository;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
-            _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _logger = logger.ForContext<IModifySubscriptionTimeCommand>();
+            _logger = logger.ForContext<ModifySubscriptionTimeCommand>();
         }
 
         protected override async Task<CommandResult> Execute(ModifySubscriptionTimePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
@@ -70,19 +66,11 @@ namespace Voicipher.Business.Commands
             userSubscriptions.Add(userSubscription);
             var newRemainingTicks = userSubscriptions.CalculateRemainingTicks();
 
-            var currentUserSubscription = await _currentUserSubscriptionRepository.GetByUserIdAsync(userId, cancellationToken);
-            if (currentUserSubscription == null)
-            {
-                currentUserSubscription = new EmptyCurrentUserSubscription { Ticks = remainingTicks };
-                await _currentUserSubscriptionRepository.AddAsync(currentUserSubscription);
-            }
-            else
-            {
-                currentUserSubscription.Ticks = newRemainingTicks;
-                currentUserSubscription.DateUpdatedUtc = DateTime.UtcNow;
-            }
+            var currentUserSubscriptions = await _currentUserSubscriptionRepository.GetByUserIdAsync(userId, cancellationToken);
+            _currentUserSubscriptionRepository.RemoveRange(currentUserSubscriptions);
 
-            await _unitOfWork.SaveAsync(cancellationToken);
+            var currentUserSubscription = new CurrentUserSubscription(userId, newRemainingTicks);
+            await _currentUserSubscriptionRepository.AddAsync(currentUserSubscription);
 
             _logger.Information($"Current user subscription was updated to time: {currentUserSubscription.Time}. User ID = {userId}.");
 

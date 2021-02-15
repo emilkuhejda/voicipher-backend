@@ -15,9 +15,11 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<CurrentUserSubscription> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<CurrentUserSubscription[]> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return Context.CurrentUserSubscriptions.SingleOrDefaultAsync(x => x.UserId == userId, cancellationToken);
+            return Context.CurrentUserSubscriptions
+                .Where(x => x.UserId == userId)
+                .ToArrayAsync(cancellationToken);
         }
 
         public Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
@@ -36,6 +38,11 @@ namespace Voicipher.DataAccess.Repositories
                 return TimeSpan.Zero;
 
             return entity.Time;
+        }
+
+        public void RemoveRange(CurrentUserSubscription[] currentUserSubscriptions)
+        {
+            Context.CurrentUserSubscriptions.RemoveRange(currentUserSubscriptions);
         }
     }
 }
