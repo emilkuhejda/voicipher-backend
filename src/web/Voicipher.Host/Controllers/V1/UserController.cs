@@ -10,11 +10,11 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.InputModels.Authentication;
 using Voicipher.Domain.InputModels.EndUser;
-using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Commands.Authentication;
 using Voicipher.Domain.Interfaces.Commands.EndUser;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Authentication;
+using Voicipher.Domain.Payloads.EndUser;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
@@ -28,15 +28,21 @@ namespace Voicipher.Host.Controllers.V1
     {
         private readonly Lazy<IUpdateUserCommand> _updateUserCommand;
         private readonly Lazy<IUserRegistrationCommand> _userRegistrationCommand;
+        private readonly Lazy<IUpdateLanguageCommand> _updateLanguageCommand;
+        private readonly Lazy<IDeleteUserCommand> _deleteUserCommand;
         private readonly Lazy<IMapper> _mapper;
 
         public UserController(
+            Lazy<IUpdateUserCommand> updateUserCommand,
             Lazy<IUserRegistrationCommand> userRegistrationCommand,
-            Lazy<IMapper> mapper, Lazy<IUpdateUserCommand> updateUserCommand)
+            Lazy<IUpdateLanguageCommand> updateLanguageCommand,
+            Lazy<IDeleteUserCommand> deleteUserCommand, Lazy<IMapper> mapper)
         {
-            _userRegistrationCommand = userRegistrationCommand;
-            _mapper = mapper;
             _updateUserCommand = updateUserCommand;
+            _userRegistrationCommand = userRegistrationCommand;
+            _updateLanguageCommand = updateLanguageCommand;
+            _deleteUserCommand = deleteUserCommand;
+            _mapper = mapper;
         }
 
         [HttpPut("update")]
@@ -74,7 +80,7 @@ namespace Voicipher.Host.Controllers.V1
 
         [HttpPut("update-language")]
         [Authorize(Policy = nameof(VoicipherPolicy.User))]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -82,12 +88,17 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "UpdateLanguage")]
         public async Task<IActionResult> UpdateLanguage(Guid installationId, int language, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var updateLanguagePayload = new UpdateLanguagePayload(installationId, language);
+            var commandResult = await _updateLanguageCommand.Value.ExecuteAsync(updateLanguagePayload, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpDelete]
         [Authorize(Policy = nameof(VoicipherPolicy.User))]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -95,7 +106,11 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "DeleteUser")]
         public async Task<IActionResult> DeleteUser(string email, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _deleteUserCommand.Value.ExecuteAsync(email, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }
