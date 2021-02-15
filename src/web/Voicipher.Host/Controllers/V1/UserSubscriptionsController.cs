@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ using Voicipher.Domain.InputModels;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels;
+using Voicipher.Domain.Payloads;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
@@ -26,15 +28,18 @@ namespace Voicipher.Host.Controllers.V1
         private readonly Lazy<ICreateUserSubscriptionCommand> _createUserSubscriptionCommand;
         private readonly Lazy<ICreateSpeechConfigurationCommand> _createSpeechConfigurationCommand;
         private readonly Lazy<ICurrentUserSubscriptionRepository> _currentUserSubscriptionRepository;
+        private readonly Lazy<IMapper> _mapper;
 
         public UserSubscriptionsController(
             Lazy<ICreateUserSubscriptionCommand> createUserSubscriptionCommand,
             Lazy<ICreateSpeechConfigurationCommand> createSpeechConfigurationCommand,
-            Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository)
+            Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository,
+            Lazy<IMapper> mapper)
         {
             _createUserSubscriptionCommand = createUserSubscriptionCommand;
             _createSpeechConfigurationCommand = createSpeechConfigurationCommand;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
+            _mapper = mapper;
         }
 
         [HttpPost("create")]
@@ -47,8 +52,8 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "CreateUserSubscription")]
         public async Task<IActionResult> Create([FromBody] CreateUserSubscriptionInputModel createUserSubscriptionInputModel, Guid applicationId, CancellationToken cancellationToken)
         {
-            var appId = applicationId;
-            var commandResult = await _createUserSubscriptionCommand.Value.ExecuteAsync(createUserSubscriptionInputModel, HttpContext.User, cancellationToken);
+            var createUserSubscriptionPayload = _mapper.Value.Map<CreateUserSubscriptionPayload>(createUserSubscriptionInputModel) with { ApplicationId = applicationId };
+            var commandResult = await _createUserSubscriptionCommand.Value.ExecuteAsync(createUserSubscriptionPayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

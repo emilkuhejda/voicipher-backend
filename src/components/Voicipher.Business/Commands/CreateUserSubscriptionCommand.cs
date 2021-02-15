@@ -6,13 +6,13 @@ using Voicipher.Business.Infrastructure;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
-using Voicipher.Domain.InputModels;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.OutputModels;
+using Voicipher.Domain.Payloads;
 
 namespace Voicipher.Business.Commands
 {
-    public class CreateUserSubscriptionCommand : Command<CreateUserSubscriptionInputModel, CommandResult<TimeSpanWrapperOutputModel>>, ICreateUserSubscriptionCommand
+    public class CreateUserSubscriptionCommand : Command<CreateUserSubscriptionPayload, CommandResult<TimeSpanWrapperOutputModel>>, ICreateUserSubscriptionCommand
     {
         private readonly ILogger _logger;
 
@@ -21,7 +21,7 @@ namespace Voicipher.Business.Commands
             _logger = logger.ForContext<CreateUserSubscriptionCommand>();
         }
 
-        protected override async Task<CommandResult<TimeSpanWrapperOutputModel>> Execute(CreateUserSubscriptionInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<TimeSpanWrapperOutputModel>> Execute(CreateUserSubscriptionPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             if (!parameter.Validate().IsValid)
             {
