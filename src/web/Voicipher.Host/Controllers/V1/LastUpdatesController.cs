@@ -34,7 +34,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetLastUpdates")]
-        public async Task<ActionResult> Get(CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
         {
             var queryResult = await _getLastUpdatesQuery.Value.ExecuteAsync(HttpContext.User, cancellationToken);
             if (!queryResult.IsSuccess)

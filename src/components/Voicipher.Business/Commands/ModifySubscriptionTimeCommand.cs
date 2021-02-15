@@ -8,6 +8,7 @@ using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.DataAccess;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -42,12 +43,7 @@ namespace Voicipher.Business.Commands
         protected override async Task<CommandResult> Execute(ModifySubscriptionTimePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            var userSubscription = _mapper.Map<UserSubscription>(
-                parameter,
-                opt => opt.AfterMap((_, u) =>
-                {
-                    u.UserId = userId;
-                }));
+            var userSubscription = _mapper.Map<UserSubscription>(parameter);
 
             if (!userSubscription.Validate().IsValid)
             {
@@ -58,7 +54,7 @@ namespace Voicipher.Business.Commands
 
             var userSubscriptions = (await _userSubscriptionRepository.GetAllAsync(userId, cancellationToken)).ToList();
             var remainingTicks = userSubscriptions.CalculateRemainingTicks();
-            if (remainingTicks < userSubscription.Time.Ticks)
+            if (parameter.Operation == SubscriptionOperation.Remove && remainingTicks < userSubscription.Time.Ticks)
             {
                 _logger.Error($"Not enough subscription time for user ID = {userId}. Required time: {parameter.Time}, Remaining time: {TimeSpan.FromTicks(remainingTicks)}.");
 
