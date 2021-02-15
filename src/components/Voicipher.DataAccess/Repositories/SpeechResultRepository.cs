@@ -9,5 +9,14 @@ namespace Voicipher.DataAccess.Repositories
             : base(context)
         {
         }
+
+        public void UpdateAll(SpeechResult[] speechResults)
+        {
+            foreach (var speechResult in speechResults)
+            {
+                Context.Attach(speechResult);
+                Context.Entry(speechResult).Property(x => x.TotalTime).IsModified = true;
+            }
+        }
     }
 }

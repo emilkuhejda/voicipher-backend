@@ -22,6 +22,20 @@ namespace Voicipher.Business.Profiles
                 .ForMember(
                     s => s.TotalTime,
                     opt => opt.MapFrom(c => TimeSpan.Zero));
+
+            CreateMap<SpeechResultInputModel, SpeechResult>()
+                .ForMember(
+                    s => s.Id,
+                    opt => opt.MapFrom(c => c.Id))
+                .ForMember(
+                    s => s.RecognizedAudioSampleId,
+                    opt => opt.Ignore())
+                .ForMember(
+                    s => s.DisplayText,
+                    opt => opt.Ignore())
+                .ForMember(
+                    s => s.TotalTime,
+                    opt => opt.MapFrom(c => TimeSpan.FromTicks(c.Ticks)));
         }
     }
 }
