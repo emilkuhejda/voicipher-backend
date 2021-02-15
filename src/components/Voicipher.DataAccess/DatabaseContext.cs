@@ -27,6 +27,10 @@ namespace Voicipher.DataAccess
 
         public DbSet<FileChunk> FileChunks { get; set; }
 
+        public DbSet<RecognizedAudioSample> RecognizedAudioSamples { get; set; }
+
+        public DbSet<SpeechResult> SpeechResults { get; set; }
+
         public DbSet<User> Users { get; set; }
 
         public DbSet<UserSubscription> UserSubscriptions { get; set; }
@@ -55,6 +59,8 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new AudioFileConfiguration());
             modelBuilder.ApplyConfiguration(new TranscribeItemConfiguration());
             modelBuilder.ApplyConfiguration(new FileChunkConfiguration());
+            modelBuilder.ApplyConfiguration(new RecognizedAudioSampleConfiguration());
+            modelBuilder.ApplyConfiguration(new SpeechResultConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserSubscriptionConfiguration());
             modelBuilder.ApplyConfiguration(new CurrentUserSubscriptionConfiguration());
