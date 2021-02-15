@@ -49,6 +49,8 @@ namespace Voicipher.Business.Commands
         protected override async Task<CommandResult<TimeSpanWrapperOutputModel>> Execute(CreateUserSubscriptionPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
+
+            _logger.Information($"Start billing purchase registration. User ID = {userId}, Product ID = {parameter.ProductId}.");
             if (!parameter.Validate().IsValid)
             {
                 _logger.Error($"Invalid input data. User ID = {userId}.");
