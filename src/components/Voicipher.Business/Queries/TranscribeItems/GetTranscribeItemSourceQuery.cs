@@ -1,0 +1,39 @@
+﻿using System;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
+using Serilog;
+using Voicipher.Business.Infrastructure;
+using Voicipher.Domain.Infrastructure;
+using Voicipher.Domain.Interfaces.Queries.TranscribeItems;
+using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Models;
+using Voicipher.Domain.Validation;
+
+namespace Voicipher.Business.Queries.TranscribeItems
+{
+    public class GetTranscribeItemSourceQuery : Query<Guid, QueryResult<byte[]>>, IGetTranscribeItemSourceQuery
+    {
+        private readonly ITranscribeItemRepository _transcribeItemRepository;
+        private readonly ILogger _logger;
+
+        public GetTranscribeItemSourceQuery(
+            ITranscribeItemRepository transcribeItemRepository,
+            ILogger logger)
+        {
+            _transcribeItemRepository = transcribeItemRepository;
+            _logger = logger.ForContext<GetTranscribeItemSourceQuery>();
+        }
+
+        protected override async Task<QueryResult<byte[]>> Execute(Guid parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        {
+            var transcribeItem = await _transcribeItemRepository.GetAsync(parameter, cancellationToken);
+            if (transcribeItem == null)
+            {
+                _logger.Error($"Transcribe item '{parameter}' was not found.");
+
+                return new QueryResult<byte[]>(new OperationError(ValidationErrorCodes.NotFound));
+            }
+        }
+    }
+}

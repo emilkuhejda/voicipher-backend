@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
+using Voicipher.Domain.Interfaces.Queries.TranscribeItems;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
@@ -22,13 +23,16 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class TranscribeItemsController : ControllerBase
     {
+        private readonly Lazy<IGetTranscribeItemSourceQuery> _getTranscribeItemSourceQuery;
         private readonly Lazy<ITranscribeItemRepository> _transcribeItemRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public TranscribeItemsController(
+            Lazy<IGetTranscribeItemSourceQuery> getTranscribeItemSourceQuery,
             Lazy<ITranscribeItemRepository> transcribeItemRepository,
             Lazy<IMapper> mapper)
         {
+            _getTranscribeItemSourceQuery = getTranscribeItemSourceQuery;
             _transcribeItemRepository = transcribeItemRepository;
             _mapper = mapper;
         }
@@ -69,20 +73,29 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSource")]
-        public ActionResult GetAudioSource(Guid transcribeItemId)
+        public async Task<ActionResult> GetAudioSource(Guid transcribeItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return NotFound(queryResult.Error.ErrorCode);
+
+            return Ok(queryResult.Value);
         }
 
         [HttpGet("audio-stream/{transcribeItemId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSourceStream")]
-        public ActionResult GetAudioSourceStream(Guid transcribeItemId)
+        public async Task<ActionResult> GetAudioSourceStream(Guid transcribeItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return NotFound(queryResult.Error.ErrorCode);
+
+            return new FileContentResult(queryResult.Value, "audio/wav");
         }
 
         [HttpPut("update-transcript")]
