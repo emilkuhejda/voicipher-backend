@@ -5,6 +5,8 @@ namespace Voicipher.Domain.Payloads
 {
     public record ModifySubscriptionTimePayload
     {
+        public Guid UserId { get; init; }
+
         public Guid ApplicationId { get; init; }
 
         public TimeSpan Time { get; init; }

@@ -65,14 +65,15 @@ namespace Voicipher.Business.Commands
                     await _unitOfWork.SaveAsync(cancellationToken);
 
                     var totalTime = TimeSpan.FromTicks(parameter.Sum(x => x.Ticks));
-                    var payload = new ModifySubscriptionTimePayload
+                    var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                     {
+                        UserId = userId,
                         ApplicationId = _appSettings.ApplicationId,
                         Time = totalTime,
                         Operation = SubscriptionOperation.Remove
                     };
 
-                    var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(payload, principal, cancellationToken);
+                    var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, principal, cancellationToken);
                     if (!commandResult.IsSuccess)
                     {
                         if (commandResult.Error.ErrorCode == ValidationErrorCodes.NotEnoughSubscriptionTime)

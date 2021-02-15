@@ -51,7 +51,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItemsAll")]
-        public async Task<ActionResult> GetAll(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAll(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
             var userId = HttpContext.User.GetNameIdentifier();
             var transcribeItems = await _transcribeItemRepository.Value.GetAllAfterDateAsync(userId, updatedAfter, applicationId, cancellationToken);
@@ -66,7 +66,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItems")]
-        public async Task<ActionResult> GetAllByAudioFileId(Guid fileItemId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllByAudioFileId(Guid fileItemId, CancellationToken cancellationToken)
         {
             var transcribeItems = await _transcribeItemRepository.Value.GetAllByAudioFileIdAsync(fileItemId, cancellationToken);
             var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
@@ -81,7 +81,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSource")]
-        public async Task<ActionResult> GetAudioSource(Guid transcribeItemId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAudioSource(Guid transcribeItemId, CancellationToken cancellationToken)
         {
             var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
             if (!queryResult.IsSuccess)
@@ -97,7 +97,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSourceStream")]
-        public async Task<ActionResult> GetAudioSourceStream(Guid transcribeItemId, CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAudioSourceStream(Guid transcribeItemId, CancellationToken cancellationToken)
         {
             var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
             if (!queryResult.IsSuccess)
@@ -113,7 +113,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateUserTranscript")]
-        public async Task<ActionResult> UpdateUserTranscript(UpdateUserTranscriptInputModel updateUserTranscriptInputModel, CancellationToken cancellationToken)
+        public async Task<IActionResult> UpdateUserTranscript(UpdateUserTranscriptInputModel updateUserTranscriptInputModel, CancellationToken cancellationToken)
         {
             var commandResult = await _updateUserTranscriptCommand.Value.ExecuteAsync(updateUserTranscriptInputModel, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
