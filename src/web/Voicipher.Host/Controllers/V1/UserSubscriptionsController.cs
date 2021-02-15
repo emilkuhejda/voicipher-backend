@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Host.Utils;
@@ -20,10 +22,14 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class UserSubscriptionsController : ControllerBase
     {
+        private readonly Lazy<ICreateSpeechConfigurationCommand> _createSpeechConfigurationCommand;
         private readonly Lazy<ICurrentUserSubscriptionRepository> _currentUserSubscriptionRepository;
 
-        public UserSubscriptionsController(Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository)
+        public UserSubscriptionsController(
+            Lazy<ICreateSpeechConfigurationCommand> createSpeechConfigurationCommand,
+            Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository)
         {
+            _createSpeechConfigurationCommand = createSpeechConfigurationCommand;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
         }
 
@@ -40,14 +46,19 @@ namespace Voicipher.Host.Controllers.V1
         }
 
         [HttpGet("speech-configuration")]
-        // [ProducesResponseType(typeof(SpeechConfigurationDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(SpeechConfigurationOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetSpeechConfiguration")]
-        public IActionResult GetSpeechConfiguration()
+        public async Task<IActionResult> GetSpeechConfiguration(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _createSpeechConfigurationCommand.Value.ExecuteAsync(Guid.NewGuid(), HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpGet("remaining-time")]
