@@ -45,6 +45,7 @@ namespace Voicipher.Business.Commands
             };
 
             await _recognizedAudioSampleRepository.AddAsync(recognizedAudioSample);
+            await _currentUserSubscriptionRepository.SaveAsync(cancellationToken);
 
             var remainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(userId, cancellationToken);
             var outputModel = new SpeechConfigurationOutputModel
