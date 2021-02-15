@@ -50,7 +50,8 @@ namespace Voicipher.Business.Commands
         protected override async Task<CommandResult<TimeSpanWrapperOutputModel>> Execute(SpeechResultInputModel[] parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var speechResults = parameter.Select(_mapper.Map<SpeechResult>).ToArray();
-            //_speechResultRepository.UpdateAll(speechResults);
+            _speechResultRepository.UpdateAll(speechResults);
+            await _speechResultRepository.SaveAsync(cancellationToken);
 
             var totalTime = TimeSpan.FromTicks(parameter.Sum(x => x.Ticks));
             var payload = new ModifySubscriptionTimePayload
