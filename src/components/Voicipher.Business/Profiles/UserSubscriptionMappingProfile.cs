@@ -15,7 +15,7 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(m => Guid.NewGuid()))
                 .ForMember(
                     u => u.UserId,
-                    opt => opt.Ignore())
+                    opt => opt.MapFrom(m => m.UserId))
                 .ForMember(
                     u => u.ApplicationId,
                     opt => opt.MapFrom(m => m.ApplicationId))
