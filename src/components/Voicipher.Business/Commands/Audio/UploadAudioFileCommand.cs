@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Azure;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -93,8 +94,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var uploadBlobSettings = new UploadBlobSettings(userId, audioFileId, tempFilePath);
-                var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings);
+                var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
+                var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
                 _logger.Information($"Audio file '{sourceName}' was uploaded to blob storage. Audio file ID = {audioFileId}. [{userId}]");
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -121,6 +122,12 @@ namespace Voicipher.Business.Commands.Audio
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);
+            }
+            catch (RequestFailedException ex)
+            {
+                _logger.Error(ex, "Blob storage is unavailable.");
+
+                throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (DbUpdateException ex)
             {

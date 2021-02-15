@@ -1,16 +1,19 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Voicipher.Domain.Models;
 
 namespace Voicipher.Domain.Interfaces.Services
 {
     public interface IBlobStorage
     {
-        Task<string> UploadAsync(UploadBlobSettings uploadBlobSettings);
+        Task<byte[]> GetAsync(GetBlobSettings blobSettings, CancellationToken cancellationToken);
 
-        Task DeleteContainer(BlobSettings blobSettings);
+        Task<string> UploadAsync(UploadBlobSettings blobSettings, CancellationToken cancellationToken);
 
-        Task DeleteAudioFileAsync(BlobSettings blobSettings);
+        Task DeleteContainer(BlobSettings blobSettings, CancellationToken cancellationToken);
 
-        Task DeleteFileBlobAsync(DeleteBlobSettings deleteBlobSettings);
+        Task DeleteAudioFileAsync(BlobSettings blobSettings, CancellationToken cancellationToken);
+
+        Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings, CancellationToken cancellationToken);
     }
 }

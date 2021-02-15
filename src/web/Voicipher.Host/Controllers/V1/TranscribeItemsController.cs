@@ -9,7 +9,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
+using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.InputModels;
+using Voicipher.Domain.Interfaces.Commands;
+using Voicipher.Domain.Interfaces.Queries.TranscribeItems;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Host.Utils;
 
@@ -22,13 +28,19 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class TranscribeItemsController : ControllerBase
     {
+        private readonly Lazy<IGetTranscribeItemSourceQuery> _getTranscribeItemSourceQuery;
+        private readonly Lazy<IUpdateUserTranscriptCommand> _updateUserTranscriptCommand;
         private readonly Lazy<ITranscribeItemRepository> _transcribeItemRepository;
         private readonly Lazy<IMapper> _mapper;
 
         public TranscribeItemsController(
+            Lazy<IGetTranscribeItemSourceQuery> getTranscribeItemSourceQuery,
+            Lazy<IUpdateUserTranscriptCommand> updateUserTranscriptCommand,
             Lazy<ITranscribeItemRepository> transcribeItemRepository,
             Lazy<IMapper> mapper)
         {
+            _getTranscribeItemSourceQuery = getTranscribeItemSourceQuery;
+            _updateUserTranscriptCommand = updateUserTranscriptCommand;
             _transcribeItemRepository = transcribeItemRepository;
             _mapper = mapper;
         }
@@ -43,20 +55,23 @@ namespace Voicipher.Host.Controllers.V1
         {
             var userId = HttpContext.User.GetNameIdentifier();
             var transcribeItems = await _transcribeItemRepository.Value.GetAllAfterDateAsync(userId, updatedAfter, applicationId, cancellationToken);
-            var outputModel = transcribeItems.Select(x => _mapper.Value.Map<TranscribeItemOutputModel>(x));
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
 
-            return Ok(outputModel);
+            return Ok(outputModels);
         }
 
         [HttpGet("{fileItemId}")]
-        // [ProducesResponseType(typeof(IEnumerable<TranscribeItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<TranscribeItemOutputModel>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeItems")]
-        public ActionResult GetAllByFileItemId(Guid fileItemId)
+        public async Task<ActionResult> GetAllByAudioFileId(Guid fileItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var transcribeItems = await _transcribeItemRepository.Value.GetAllByAudioFileIdAsync(fileItemId, cancellationToken);
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
+
+            return Ok(outputModels);
         }
 
         [HttpGet("audio/{transcribeItemId}")]
@@ -66,31 +81,45 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSource")]
-        public ActionResult GetAudioSource(Guid transcribeItemId)
+        public async Task<ActionResult> GetAudioSource(Guid transcribeItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return NotFound(queryResult.Error.ErrorCode);
+
+            return Ok(queryResult.Value);
         }
 
         [HttpGet("audio-stream/{transcribeItemId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetTranscribeAudioSourceStream")]
-        public ActionResult GetAudioSourceStream(Guid transcribeItemId)
+        public async Task<ActionResult> GetAudioSourceStream(Guid transcribeItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var queryResult = await _getTranscribeItemSourceQuery.Value.ExecuteAsync(transcribeItemId, HttpContext.User, cancellationToken);
+            if (!queryResult.IsSuccess)
+                return NotFound(queryResult.Error.ErrorCode);
+
+            return new FileContentResult(queryResult.Value, "audio/wav");
         }
 
         [HttpPut("update-transcript")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateUserTranscript")]
-        public ActionResult UpdateUserTranscript(object updateTranscribeItemModel)
+        public async Task<ActionResult> UpdateUserTranscript(UpdateUserTranscriptInputModel updateUserTranscriptInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _updateUserTranscriptCommand.Value.ExecuteAsync(updateUserTranscriptInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
     }
 }
