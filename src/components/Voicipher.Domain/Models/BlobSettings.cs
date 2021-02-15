@@ -5,7 +5,7 @@ namespace Voicipher.Domain.Models
     public record GetBlobSettings : BlobSettings
     {
         public GetBlobSettings(string fileName, Guid userId, Guid audioFileId)
-            : base(userId, audioFileId)
+            : base(audioFileId, userId)
         {
             FileName = fileName;
         }
@@ -16,7 +16,7 @@ namespace Voicipher.Domain.Models
     public record UploadBlobSettings : BlobSettings
     {
         public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId)
-            : base(userId, audioFileId)
+            : base(audioFileId, userId)
         {
             FilePath = filePath;
         }
@@ -27,7 +27,7 @@ namespace Voicipher.Domain.Models
     public record DeleteBlobSettings : BlobSettings
     {
         public DeleteBlobSettings(string fileName, Guid userId, Guid audioFileId)
-            : base(userId, audioFileId)
+            : base(audioFileId, userId)
         {
             FileName = fileName;
         }
@@ -35,15 +35,23 @@ namespace Voicipher.Domain.Models
         public string FileName { get; }
     }
 
-    public record BlobSettings
+    public record BlobSettings : BlobContainerSettings
     {
-        public BlobSettings(Guid userId, Guid audioFileId)
+        public BlobSettings(Guid audioFileId, Guid userId)
+            : base(userId)
         {
-            ContainerName = userId.ToString();
             AudioFileId = audioFileId.ToString();
         }
 
         public string AudioFileId { get; }
+    }
+
+    public record BlobContainerSettings
+    {
+        public BlobContainerSettings(Guid userId)
+        {
+            ContainerName = userId.ToString();
+        }
 
         public string ContainerName { get; }
     }
