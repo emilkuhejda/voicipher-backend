@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using Voicipher.Domain.Interfaces.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Voicipher.DataAccess
 {
@@ -17,6 +19,11 @@ namespace Voicipher.DataAccess
         public Task SaveAsync(CancellationToken cancellationToken = default)
         {
             return _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
         }
 
         public void Dispose()

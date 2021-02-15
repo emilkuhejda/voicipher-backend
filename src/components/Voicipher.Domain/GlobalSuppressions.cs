@@ -14,3 +14,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.OutputModels.Audio.RecognitionAlternativeOutputModel.Words")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Models.InformationMessage.LanguageVersions")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.OutputModels.InformationMessageOutputModel.LanguageVersions")]
+[assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Models.RecognizedAudioSample.SpeechResults")]
