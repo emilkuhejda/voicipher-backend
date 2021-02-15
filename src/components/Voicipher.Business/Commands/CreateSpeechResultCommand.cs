@@ -18,15 +18,18 @@ namespace Voicipher.Business.Commands
 {
     public class CreateSpeechResultCommand : Command<CreateSpeechResultInputModel, CommandResult<OkOutputModel>>, ICreateSpeechResultCommand
     {
+        private readonly IRecognizedAudioSampleRepository _recognizedAudioSampleRepository;
         private readonly ISpeechResultRepository _speechResultRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public CreateSpeechResultCommand(
+            IRecognizedAudioSampleRepository recognizedAudioSampleRepository,
             ISpeechResultRepository speechResultRepository,
             IMapper mapper,
             ILogger logger)
         {
+            _recognizedAudioSampleRepository = recognizedAudioSampleRepository;
             _speechResultRepository = speechResultRepository;
             _mapper = mapper;
             _logger = logger.ForContext<CreateSpeechResultCommand>();
@@ -42,6 +45,14 @@ namespace Voicipher.Business.Commands
             }
 
             var userId = principal.GetNameIdentifier();
+            var audioSample = await _recognizedAudioSampleRepository.GetAsync(parameter.RecognizedAudioSampleId, cancellationToken);
+            if (audioSample == null)
+            {
+                _logger.Error($"Recognized audio sample '{parameter.RecognizedAudioSampleId}' not found. [{userId}]");
+
+                throw new OperationErrorException(ErrorCode.EC105);
+            }
+
             var speechResult = _mapper.Map<SpeechResult>(parameter);
 
             await _speechResultRepository.AddAsync(speechResult);
