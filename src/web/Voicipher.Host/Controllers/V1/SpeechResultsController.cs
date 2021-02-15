@@ -23,22 +23,31 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class SpeechResultsController : ControllerBase
     {
+        private readonly Lazy<ICreateSpeechResultCommand> _createSpeechResultCommand;
         private readonly Lazy<IUpdateSpeechResultsCommand> _updateSpeechResultsCommand;
 
-        public SpeechResultsController(Lazy<IUpdateSpeechResultsCommand> updateSpeechResultsCommand)
+        public SpeechResultsController(
+            Lazy<ICreateSpeechResultCommand> createSpeechResultCommand,
+            Lazy<IUpdateSpeechResultsCommand> updateSpeechResultsCommand)
         {
+            _createSpeechResultCommand = createSpeechResultCommand;
             _updateSpeechResultsCommand = updateSpeechResultsCommand;
         }
 
         [HttpPost("create")]
-        // [ProducesResponseType(typeof(OkDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(OkOutputModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateSpeechResult")]
-        public IActionResult Create(object createSpeechResultModel)
+        public async Task<IActionResult> Create(CreateSpeechResultInputModel createSpeechResultInputModel, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var commandResult = await _createSpeechResultCommand.Value.ExecuteAsync(createSpeechResultInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpPut("update")]
