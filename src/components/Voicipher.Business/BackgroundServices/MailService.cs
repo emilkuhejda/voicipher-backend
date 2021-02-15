@@ -1,28 +1,44 @@
 ﻿using System;
 using System.Net;
 using System.Net.Mail;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Interfaces.Channels;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
 
-namespace Voicipher.Business.Services
+namespace Voicipher.Business.BackgroundServices
 {
-    public class MailService : IMailService
+    public class MailService : BackgroundService
     {
+        private readonly IMailProcessingChannel _mailProcessingChannel;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         public MailService(
+            IMailProcessingChannel mailProcessingChannel,
             IOptions<AppSettings> options,
             ILogger logger)
         {
+            _mailProcessingChannel = mailProcessingChannel;
             _appSettings = options.Value;
             _logger = logger.ForContext<MailService>();
         }
 
-        public async Task SendAsync(string recipient, string subject, string body)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await foreach (var mailData in _mailProcessingChannel.ReadAllAsync(stoppingToken))
+            {
+                await SendAsync(mailData, stoppingToken);
+
+                _logger.Information("Email was successfully sent.");
+            }
+        }
+
+        private Task SendAsync(MailData mailData, CancellationToken cancellationToken)
         {
             try
             {
@@ -35,12 +51,10 @@ namespace Voicipher.Business.Services
                     using (MailMessage mailMessage = new MailMessage())
                     {
                         mailMessage.From = new MailAddress(mailConfiguration.From, mailConfiguration.DisplayName);
-                        mailMessage.To.Add(recipient);
-                        mailMessage.Body = body;
-                        mailMessage.Subject = subject;
-                        await client.SendMailAsync(mailMessage);
-
-                        _logger.Information($"Email was successfully sent to recipient: '{recipient}'.");
+                        mailMessage.To.Add(mailData.Recipient);
+                        mailMessage.Body = mailData.Body;
+                        mailMessage.Subject = mailData.Subject;
+                        return client.SendMailAsync(mailMessage, cancellationToken);
                     }
                 }
             }
@@ -48,6 +62,8 @@ namespace Voicipher.Business.Services
             {
                 _logger.Error(ex, "Exception occurred during sending email.");
             }
+
+            return Task.CompletedTask;
         }
     }
 }

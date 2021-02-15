@@ -10,9 +10,10 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels;
+using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
-using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Validation;
 
@@ -22,16 +23,16 @@ namespace Voicipher.Business.Commands
     {
         private const string Transcription = "Transcription";
 
-        private readonly IMailService _mailService;
+        private readonly IMailProcessingChannel _mailProcessingChannel;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ILogger _logger;
 
         public SendMailCommand(
-            IMailService mailService,
+            IMailProcessingChannel mailProcessingChannel,
             IAudioFileRepository audioFileRepository,
             ILogger logger)
         {
-            _mailService = mailService;
+            _mailProcessingChannel = mailProcessingChannel;
             _audioFileRepository = audioFileRepository;
             _logger = logger.ForContext<SendMailCommand>();
         }
@@ -75,9 +76,9 @@ namespace Voicipher.Business.Commands
 
             var subject = $"{Transcription}: {audioFile.Name}";
 
-            await _mailService.SendAsync(parameter.Recipient, subject, body.ToString());
+            await _mailProcessingChannel.AddFileAsync(new MailData(parameter.Recipient, subject, body.ToString()), cancellationToken);
 
-            _logger.Information($"Email for user '{parameter.Recipient}' was sent.");
+            _logger.Information("Email was sent to queue.");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

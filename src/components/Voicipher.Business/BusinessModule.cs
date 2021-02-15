@@ -1,7 +1,9 @@
 ﻿using System.Reflection;
 using Autofac;
 using AutoMapper;
+using Voicipher.Business.Channels;
 using Voicipher.Business.Services;
+using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Infrastructure;
 using Voicipher.Domain.Interfaces.Services;
 using Module = Autofac.Module;
@@ -35,7 +37,8 @@ namespace Voicipher.Business
             builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
             builder.RegisterType<AudioService>().As<IAudioService>();
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
-            builder.RegisterType<MailService>().As<IMailService>();
+
+            builder.RegisterType<MailProcessingChannel>().As<IMailProcessingChannel>().SingleInstance();
         }
     }
 }

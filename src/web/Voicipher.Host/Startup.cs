@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Voicipher.Business.BackgroundServices;
 using Voicipher.Business.Polling;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Settings;
@@ -107,6 +108,9 @@ namespace Voicipher.Host
             {
                 options.Filters.AddService<ApiExceptionFilter>();
             });
+
+            // Hosted services
+            services.AddHostedService<MailService>();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
