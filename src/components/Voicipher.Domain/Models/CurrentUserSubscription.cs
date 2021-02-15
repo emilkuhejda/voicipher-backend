@@ -8,6 +8,17 @@ namespace Voicipher.Domain.Models
 {
     public class CurrentUserSubscription : EntityBase, IValidatable
     {
+        public CurrentUserSubscription()
+        {
+        }
+
+        public CurrentUserSubscription(Guid userId, long ticks)
+        {
+            UserId = userId;
+            Ticks = ticks;
+            DateUpdatedUtc = DateTime.UtcNow;
+        }
+
         public Guid UserId { get; set; }
 
         public long Ticks { get; set; }

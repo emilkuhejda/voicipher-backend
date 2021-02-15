@@ -6,20 +6,24 @@
 
         public static string TextTooLong => nameof(TextTooLong);
 
+        public static string AdministratorNotFound => nameof(AdministratorNotFound);
+
+        public static string ParameterIsNull => nameof(ParameterIsNull);
+
+        public static string NotSupportedLanguage => nameof(NotSupportedLanguage);
+
+        public static string NotEnoughSubscriptionTime => nameof(NotEnoughSubscriptionTime);
+
         public static string InvalidId => nameof(InvalidId);
 
         public static string InvalidDateTime => nameof(InvalidDateTime);
 
-        public static string AdministratorNotFound => nameof(AdministratorNotFound);
+        public static string InvalidInputData => nameof(InvalidInputData);
 
         public static string InvalidStoredValues => nameof(InvalidStoredValues);
 
         public static string InvalidPassword => nameof(InvalidPassword);
 
         public static string InvalidEmail => nameof(InvalidEmail);
-
-        public static string ParameterIsNull => nameof(ParameterIsNull);
-
-        public static string NotSupportedLanguage => nameof(NotSupportedLanguage);
     }
 }

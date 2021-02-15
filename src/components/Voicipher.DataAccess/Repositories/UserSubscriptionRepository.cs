@@ -15,22 +15,12 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken)
+        public Task<UserSubscription[]> GetAllAsync(Guid userId, CancellationToken cancellationToken)
         {
-            return Context.CurrentUserSubscriptions
+            return Context.UserSubscriptions
+                .AsNoTracking()
                 .Where(x => x.UserId == userId)
-                .OrderByDescending(x => x.DateUpdatedUtc)
-                .Select(x => x.DateUpdatedUtc)
-                .FirstOrDefaultAsync(cancellationToken);
-        }
-
-        public async Task<TimeSpan> GetRemainingTimeAsync(Guid userId, CancellationToken cancellationToken)
-        {
-            var entity = await Context.CurrentUserSubscriptions.SingleOrDefaultAsync(x => x.UserId == userId, cancellationToken);
-            if (entity == null)
-                return TimeSpan.Zero;
-
-            return entity.Time;
+                .ToArrayAsync(cancellationToken);
         }
     }
 }

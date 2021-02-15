@@ -12,16 +12,16 @@ namespace Voicipher.Domain.InputModels.Audio
     {
         [Required]
         [BindProperty(Name = "FileItemId")]
-        public Guid AudioFileId { get; set; }
+        public Guid AudioFileId { get; init; }
 
         [Required]
-        public string Name { get; set; }
+        public string Name { get; init; }
 
         [Required]
-        public string Language { get; set; }
+        public string Language { get; init; }
 
         [Required]
-        public Guid ApplicationId { get; set; }
+        public Guid ApplicationId { get; init; }
 
         public ValidationResult Validate()
         {
