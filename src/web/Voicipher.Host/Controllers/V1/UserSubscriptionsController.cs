@@ -8,6 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.InputModels;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.OutputModels;
@@ -22,27 +23,36 @@ namespace Voicipher.Host.Controllers.V1
     [ApiController]
     public class UserSubscriptionsController : ControllerBase
     {
+        private readonly Lazy<ICreateUserSubscriptionCommand> _createUserSubscriptionCommand;
         private readonly Lazy<ICreateSpeechConfigurationCommand> _createSpeechConfigurationCommand;
         private readonly Lazy<ICurrentUserSubscriptionRepository> _currentUserSubscriptionRepository;
 
         public UserSubscriptionsController(
+            Lazy<ICreateUserSubscriptionCommand> createUserSubscriptionCommand,
             Lazy<ICreateSpeechConfigurationCommand> createSpeechConfigurationCommand,
             Lazy<ICurrentUserSubscriptionRepository> currentUserSubscriptionRepository)
         {
+            _createUserSubscriptionCommand = createUserSubscriptionCommand;
             _createSpeechConfigurationCommand = createSpeechConfigurationCommand;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
         }
 
         [HttpPost("create")]
-        // [ProducesResponseType(typeof(TimeSpanWrapperDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TimeSpanWrapperOutputModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorCode), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateUserSubscription")]
-        public IActionResult Create([FromBody] object billingPurchase, Guid applicationId)
+        public async Task<IActionResult> Create([FromBody] CreateUserSubscriptionInputModel createUserSubscriptionInputModel, Guid applicationId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var appId = applicationId;
+            var commandResult = await _createUserSubscriptionCommand.Value.ExecuteAsync(createUserSubscriptionInputModel, HttpContext.User, cancellationToken);
+            if (!commandResult.IsSuccess)
+                throw new OperationErrorException(ErrorCode.EC601);
+
+            return Ok(commandResult.Value);
         }
 
         [HttpGet("speech-configuration")]

@@ -70,7 +70,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "GetFileItems")]
-        public async Task<ActionResult> Get(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Get(DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken)
         {
             var userId = HttpContext.User.GetNameIdentifier();
             var audioFiles = await _audioFileRepository.Value.GetAllAsync(userId, updatedAfter, applicationId, cancellationToken);
