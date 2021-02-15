@@ -3,31 +3,27 @@ using System.Collections.Generic;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 
-namespace Voicipher.Domain.Payloads
+namespace Voicipher.Domain.Models
 {
-    public record CreateUserSubscriptionPayload : IValidatable
+    public class BillingPurchase : EntityBase, IValidatable
     {
-        public Guid Id { get; init; }
+        public Guid UserId { get; set; }
 
-        public Guid UserId { get; init; }
+        public string PurchaseId { get; set; }
 
-        public Guid ApplicationId { get; init; }
+        public string ProductId { get; set; }
 
-        public string PurchaseId { get; init; }
+        public bool AutoRenewing { get; set; }
 
-        public string ProductId { get; init; }
+        public string PurchaseToken { get; set; }
 
-        public bool AutoRenewing { get; init; }
+        public string PurchaseState { get; set; }
 
-        public string PurchaseToken { get; init; }
+        public string ConsumptionState { get; set; }
 
-        public string PurchaseState { get; init; }
+        public string Platform { get; set; }
 
-        public string ConsumptionState { get; init; }
-
-        public string Platform { get; init; }
-
-        public DateTime TransactionDateUtc { get; init; }
+        public DateTime TransactionDateUtc { get; set; }
 
         public ValidationResult Validate()
         {
