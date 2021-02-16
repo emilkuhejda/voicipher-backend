@@ -57,6 +57,13 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
+            if (_audioFileProcessingChannel.IsProcessingForUser(userId))
+            {
+                _logger.Error($"User {userId} try to run more then one file recognition.");
+
+                throw new OperationErrorException(ErrorCode.EC303);
+            }
+
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {

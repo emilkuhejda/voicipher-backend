@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -48,6 +49,14 @@ namespace Voicipher.Business.Channels
             }
 
             return false;
+        }
+
+        public bool IsProcessingForUser(Guid userId)
+        {
+            lock (_logger)
+            {
+                return _cache.ContainsKey(userId) && _cache[userId].Any();
+            }
         }
 
         public void FinishProcessing(RecognitionFile recognitionFile)
