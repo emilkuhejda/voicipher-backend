@@ -22,6 +22,7 @@ namespace Voicipher.Business.StateMachine
         private readonly IUnitOfWork _unitOfWork;
 
         private BackgroundJob _backgroundJob;
+        private AudioFile _audioFile;
 
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
@@ -49,8 +50,8 @@ namespace Voicipher.Business.StateMachine
         {
             TryChangeState(JobState.Validating);
 
-            var audioFile = await _audioFileRepository.GetAsync(_backgroundJob.UserId, _backgroundJob.AudioFileId, cancellationToken);
-            if (audioFile == null)
+            _audioFile = await _audioFileRepository.GetAsync(_backgroundJob.UserId, _backgroundJob.AudioFileId, cancellationToken);
+            if (_audioFile == null)
                 throw new FileNotFoundException($"Audio file {_backgroundJob.AudioFileId} not found");
 
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(_backgroundJob.UserId), null, cancellationToken);
@@ -63,7 +64,7 @@ namespace Voicipher.Business.StateMachine
         public async Task DoConvertingAsync(CancellationToken cancellationToken)
         {
             TryChangeState(JobState.Converting);
-            await _wavFileService.RunConversionToWavAsync();
+            await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
             TryChangeState(JobState.Converted);
         }
 

@@ -26,8 +26,10 @@ namespace Voicipher.Domain.Models
 
         public RecognitionState RecognitionState { get; set; }
 
+        // File name in the Azure blob storage
         public string OriginalSourceFileName { get; set; }
 
+        // Converted wav file name
         public string SourceFileName { get; set; }
 
         public StorageSetting Storage { get; set; }
