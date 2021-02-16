@@ -23,11 +23,20 @@ namespace Voicipher.Business.Profiles
                     j => j.AudioFileId,
                     opt => opt.MapFrom(c => c.AudioFileId))
                 .ForMember(
+                    j => j.JobState,
+                    opt => opt.MapFrom(c => JobState.Idle))
+                .ForMember(
+                    j => j.Attempt,
+                    opt => opt.MapFrom(c => 0))
+                .ForMember(
                     j => j.Parameters,
                     opt => opt.MapFrom(c => JsonConvert.SerializeObject(c.Parameters)))
                 .ForMember(
                     j => j.DateCreatedUtc,
-                    opt => opt.MapFrom(c => DateTime.UtcNow));
+                    opt => opt.MapFrom(c => DateTime.UtcNow))
+                .ForMember(
+                    j => j.DateCompletedUtc,
+                    opt => opt.MapFrom(c => DateTime.MinValue));
 
             CreateMap<BackgroundJob, BackgroundJobPayload>()
                 .ForMember(
@@ -39,6 +48,12 @@ namespace Voicipher.Business.Profiles
                 .ForMember(
                     p => p.AudioFileId,
                     opt => opt.MapFrom(j => j.AudioFileId))
+                .ForMember(
+                    p => p.JobState,
+                    opt => opt.MapFrom(j => j.JobState))
+                .ForMember(
+                    p => p.Attempt,
+                    opt => opt.MapFrom(j => j.Attempt))
                 .ForMember(
                     p => p.Parameters,
                     opt => opt.Ignore())

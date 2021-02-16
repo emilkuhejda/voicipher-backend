@@ -3,9 +3,11 @@ using Autofac;
 using AutoMapper;
 using Voicipher.Business.Channels;
 using Voicipher.Business.Services;
+using Voicipher.Business.StateMachine;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Infrastructure;
 using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Interfaces.StateMachine;
 using Module = Autofac.Module;
 
 namespace Voicipher.Business
@@ -37,6 +39,7 @@ namespace Voicipher.Business
             builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
             builder.RegisterType<AudioService>().As<IAudioService>();
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
+            builder.RegisterType<JobStateMachine>().As<IJobStateMachine>();
 
             builder.RegisterType<MailProcessingChannel>().As<IMailProcessingChannel>().SingleInstance();
             builder.RegisterType<AudioFileProcessingChannel>().As<IAudioFileProcessingChannel>().SingleInstance();
