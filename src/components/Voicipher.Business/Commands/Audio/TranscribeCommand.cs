@@ -75,7 +75,7 @@ namespace Voicipher.Business.Commands.Audio
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(canRunRecognitionPayload, principal, cancellationToken);
             if (!canRunRecognitionResult.IsSuccess)
             {
-                _logger.Error($"User '{userId}' has no enough left minutes in subscription");
+                _logger.Error($"User '{userId}' has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 
