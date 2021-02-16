@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Business.Infrastructure;
@@ -22,7 +23,7 @@ namespace Voicipher.Business.Commands.Transcription
         protected override async Task<CommandResult> Execute(CanRunRecognitionPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var subscriptionRemainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(parameter.UserId, cancellationToken);
-            if (subscriptionRemainingTime.TotalSeconds < 1)
+            if (subscriptionRemainingTime < TimeSpan.FromSeconds(1))
                 return new CommandResult(new OperationError(ValidationErrorCodes.NotEnoughSubscriptionTime));
 
             return new CommandResult();
