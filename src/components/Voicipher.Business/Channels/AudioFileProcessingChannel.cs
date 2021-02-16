@@ -7,25 +7,25 @@ using Voicipher.Domain.Models;
 
 namespace Voicipher.Business.Channels
 {
-    public class MailProcessingChannel : IMailProcessingChannel
+    public class AudioFileProcessingChannel : IAudioFileProcessingChannel
     {
-        private readonly Channel<MailData> _channel;
+        private readonly Channel<RecognitionFile> _channel;
 
-        public MailProcessingChannel()
+        public AudioFileProcessingChannel()
         {
-            _channel = Channel.CreateUnbounded<MailData>();
+            _channel = Channel.CreateUnbounded<RecognitionFile>();
         }
 
-        public IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<RecognitionFile> ReadAllAsync(CancellationToken cancellationToken = default)
         {
             return _channel.Reader.ReadAllAsync(cancellationToken);
         }
 
-        public async Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken = default)
+        public async Task<bool> AddFileAsync(RecognitionFile recognitionFile, CancellationToken cancellationToken = default)
         {
             while (await _channel.Writer.WaitToWriteAsync(cancellationToken) && !cancellationToken.IsCancellationRequested)
             {
-                if (_channel.Writer.TryWrite(mailData))
+                if (_channel.Writer.TryWrite(recognitionFile))
                 {
                     return true;
                 }
