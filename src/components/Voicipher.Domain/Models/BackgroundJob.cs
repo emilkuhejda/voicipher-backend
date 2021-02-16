@@ -1,4 +1,5 @@
 ﻿using System;
+using Voicipher.Domain.Enums;
 
 namespace Voicipher.Domain.Models
 {
@@ -7,6 +8,10 @@ namespace Voicipher.Domain.Models
         public Guid UserId { get; set; }
 
         public Guid AudioFileId { get; set; }
+
+        public JobState JobState { get; set; }
+
+        public int Attempt { get; set; }
 
         public string Parameters { get; set; }
 
