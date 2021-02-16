@@ -50,7 +50,7 @@ namespace Voicipher.Business.Commands
 
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Transcribe item '{parameter.TranscribeItemId}' was updated.");
+            _logger.Information($"Transcribe item '{parameter.TranscribeItemId}' was updated");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

@@ -41,7 +41,7 @@ namespace Voicipher.Business.Commands.Authentication
 
         protected override async Task<CommandResult<AdministratorOutputModel>> Execute(AuthenticateUserInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            _logger.Information($"Administrator authentication with user name '{parameter.Username}'.");
+            _logger.Information($"Administrator authentication with user name '{parameter.Username}'");
 
             if (!parameter.Validate().IsValid)
             {
@@ -73,7 +73,7 @@ namespace Voicipher.Business.Commands.Authentication
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(7));
 
-            _logger.Information($"User authentication for '{parameter.Username}' was successful.");
+            _logger.Information($"User authentication for {parameter.Username} was successful");
 
             var outputModel = _mapper.Map<AdministratorOutputModel>(
                 administrator,

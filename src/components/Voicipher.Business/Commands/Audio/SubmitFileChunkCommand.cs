@@ -59,7 +59,7 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            _logger.Information("Start submitting audio file to blob storage.");
+            _logger.Information("Start submitting audio file to blob storage");
 
             var userId = principal.GetNameIdentifier();
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
@@ -87,7 +87,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileBytes = await _chunkStorage.ReadAllBytesAsync(fileChunks, cancellationToken);
                 tempFilePath = await _chunkStorage.UploadAsync(audioFileBytes, cancellationToken);
 
-                _logger.Information($"Audio file was created on destination: '{tempFilePath}'.");
+                _logger.Information($"Audio file was created on destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
@@ -119,7 +119,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio file ID = {parameter.AudioFileId}.");
+                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio file ID = {parameter.AudioFileId}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
@@ -132,7 +132,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (OperationCanceledException)
             {
-                _logger.Information("Operation was cancelled.");
+                _logger.Information("Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -142,14 +142,14 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(tempFilePath);
 
-                    _logger.Information($"Audio file was removed on destination: '{tempFilePath}'.");
+                    _logger.Information($"Audio file was removed on destination: {tempFilePath}");
                 }
 
                 _chunkStorage.RemoveRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file '{parameter.AudioFileId}'.");
+                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
             }
         }
     }

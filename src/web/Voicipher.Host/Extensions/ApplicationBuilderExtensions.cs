@@ -25,17 +25,17 @@ namespace Voicipher.Host.Extensions
 
                 try
                 {
-                    logger.Information("Start cleaning temporary data.");
+                    logger.Information("Start cleaning temporary data");
 
                     context.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(FileChunk)}]");
 
                     chunkStorage.RemoveTemporaryFolder();
 
-                    logger.Information("Finish of the cleaning temporary data.");
+                    logger.Information("Finish of the cleaning temporary data");
                 }
                 catch (Exception ex)
                 {
-                    logger.Error(ex, "Cleaning temporary data failed.");
+                    logger.Error(ex, "Cleaning temporary data failed");
                 }
             }
         }

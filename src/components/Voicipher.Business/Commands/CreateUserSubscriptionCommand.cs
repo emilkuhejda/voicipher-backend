@@ -85,7 +85,7 @@ namespace Voicipher.Business.Commands
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error(ex, "An error occurred while updating the entries.");
+                _logger.Error(ex, "An error occurred while updating the entries");
 
                 throw new OperationErrorException(ErrorCode.EC400);
             }
@@ -119,7 +119,7 @@ namespace Voicipher.Business.Commands
                 return false;
             }
 
-            _logger.Information($"Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}.");
+            _logger.Information($"Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}");
 
             return true;
         }
