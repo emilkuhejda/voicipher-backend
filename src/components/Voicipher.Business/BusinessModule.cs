@@ -36,9 +36,12 @@ namespace Voicipher.Business
             builder.RegisterAssemblyTypes(assembly).Where(t => t.IsAssignableTo<Profile>()).As<Profile>().AsSelf();
 
             builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
-            builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
             builder.RegisterType<AudioService>().As<IAudioService>();
+            builder.RegisterType<WavFileService>().As<IWavFileService>();
+
+            builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
+
             builder.RegisterType<JobStateMachine>().As<IJobStateMachine>();
 
             builder.RegisterType<MailProcessingChannel>().As<IMailProcessingChannel>().SingleInstance();

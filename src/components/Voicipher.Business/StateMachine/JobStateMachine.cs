@@ -7,6 +7,7 @@ using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
@@ -15,19 +16,22 @@ namespace Voicipher.Business.StateMachine
 {
     public class JobStateMachine : IJobStateMachine
     {
-        private readonly IAudioFileRepository _audioFileRepository;
         private readonly ICanRunRecognitionCommand _canRunRecognitionCommand;
+        private readonly IWavFileService _wavFileService;
+        private readonly IAudioFileRepository _audioFileRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         private BackgroundJob _backgroundJob;
 
         public JobStateMachine(
-            IAudioFileRepository audioFileRepository,
             ICanRunRecognitionCommand canRunRecognitionCommand,
+            IWavFileService wavFileService,
+            IAudioFileRepository audioFileRepository,
             IUnitOfWork unitOfWork)
         {
-            _audioFileRepository = audioFileRepository;
             _canRunRecognitionCommand = canRunRecognitionCommand;
+            _wavFileService = wavFileService;
+            _audioFileRepository = audioFileRepository;
             _unitOfWork = unitOfWork;
         }
 
@@ -59,7 +63,7 @@ namespace Voicipher.Business.StateMachine
         public async Task DoConvertingAsync(CancellationToken cancellationToken)
         {
             TryChangeState(JobState.Converting);
-            await Task.CompletedTask;
+            await _wavFileService.RunConversionToWavAsync();
             TryChangeState(JobState.Converted);
         }
 
