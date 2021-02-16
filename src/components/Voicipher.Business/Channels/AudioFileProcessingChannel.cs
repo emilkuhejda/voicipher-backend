@@ -65,7 +65,9 @@ namespace Voicipher.Business.Channels
             {
                 if (_cache.ContainsKey(recognitionFile.UserId))
                 {
+                    _logger.Debug($"{_cache[recognitionFile.UserId].Count} items in the cache");
                     _cache[recognitionFile.UserId].Remove(recognitionFile);
+                    _logger.Debug($"{_cache[recognitionFile.UserId].Count} items in the cache");
 
                     _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was removed from cache");
                 }

@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
+using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads.Job;
@@ -18,7 +20,7 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(j => j.AudioFileId))
                 .ForMember(
                     r => r.DateProcessedUtc,
-                    opt => opt.MapFrom(j => j.Parameters[BackgroundJobParameter.DateUtc]));
+                    opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.DateUtc, DateTime.MinValue)));
         }
     }
 }
