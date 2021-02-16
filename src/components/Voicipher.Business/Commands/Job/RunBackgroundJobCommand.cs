@@ -38,7 +38,7 @@ namespace Voicipher.Business.Commands.Job
 
         protected override async Task<CommandResult> Execute(BackgroundJobPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            _logger.Information($"Background job ID {parameter.Id} has started");
+            _logger.Information($"Background job {parameter.Id} has started");
 
             var recognitionFile = _mapper.Map<RecognitionFile>(parameter);
 
@@ -53,6 +53,8 @@ namespace Voicipher.Business.Commands.Job
                 await _jobStateMachine.DoConvertingAsync(cancellationToken);
                 await _jobStateMachine.DoProcessingAsync(cancellationToken);
                 await _jobStateMachine.DoCompleteAsync(cancellationToken);
+
+                _logger.Information($"Background job {parameter.Id} is completed");
 
                 return new CommandResult();
             }
