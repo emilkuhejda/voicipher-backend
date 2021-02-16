@@ -82,7 +82,7 @@ namespace Voicipher.Business.Commands.Audio
                 cancellationToken.ThrowIfCancellationRequested();
 
                 tempFilePath = await _chunkStorage.UploadAsync(uploadedFileSource, cancellationToken);
-                _logger.Information($"Audio file was uploaded on temporary destination: '{tempFilePath}'.");
+                _logger.Information($"Audio file was uploaded on temporary destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
@@ -125,7 +125,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, "Blob storage is unavailable.");
+                _logger.Error(ex, "Blob storage is unavailable");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
@@ -138,7 +138,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (OperationCanceledException)
             {
-                _logger.Information("Operation was cancelled.");
+                _logger.Information("Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -148,7 +148,7 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(tempFilePath);
 
-                    _logger.Information($"Audio file was removed on destination: '{tempFilePath}'.");
+                    _logger.Information($"Audio file was removed on destination: {tempFilePath}");
                 }
             }
         }

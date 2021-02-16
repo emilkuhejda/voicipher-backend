@@ -57,7 +57,7 @@ namespace Voicipher.Business.Commands.Audio
             await _audioFileRepository.SaveAsync(cancellationToken);
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-            _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were restored.");
+            _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were restored");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

@@ -68,7 +68,7 @@ namespace Voicipher.Business.Commands.ControlPanel
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(180));
 
-            _logger.Information($"Token was created for user ID = '{parameter.UserId}'.");
+            _logger.Information($"Token was created for user ID = {parameter.UserId}");
 
             return new CommandResult<AdministratorTokenOutputModel>(new AdministratorTokenOutputModel(token));
         }
