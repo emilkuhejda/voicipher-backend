@@ -1,16 +1,35 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Microsoft.Extensions.Options;
 using Serilog;
+using Voicipher.Domain.Enums;
+using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
+using Voicipher.Domain.Payloads.Transcription;
+using Voicipher.Domain.Settings;
 
 namespace Voicipher.Business.Services
 {
     public class WavFileService : IWavFileService
     {
+        private readonly IUpdateRecognitionStateCommand _updateRecognitionStateCommand;
         private readonly IBlobStorage _blobStorage;
+        private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
+
+        public WavFileService(
+            IUpdateRecognitionStateCommand updateRecognitionStateCommand,
+            IBlobStorage blobStorage,
+            IOptions<AppSettings> options,
+            ILogger logger)
+        {
+            _updateRecognitionStateCommand = updateRecognitionStateCommand;
+            _blobStorage = blobStorage;
+            _appSettings = options.Value;
+            _logger = logger.ForContext<WavFileService>();
+        }
 
         public async Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
@@ -20,6 +39,9 @@ namespace Voicipher.Business.Services
             {
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
+
+                var payload = new UpdateRecognitionStatePayload(audioFile.Id, audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Converting);
+                await _updateRecognitionStateCommand.ExecuteAsync(payload, null, cancellationToken);
             }
             catch (RequestFailedException ex)
             {

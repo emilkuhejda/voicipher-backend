@@ -108,7 +108,7 @@ namespace Voicipher.Business.Commands.Audio
                     Name = parameter.Name,
                     FileName = parameter.FileName,
                     Language = parameter.Language,
-                    OriginalSourceFileName = parameter.FileName,
+                    OriginalSourceFileName = sourceName,
                     Storage = StorageSetting.Azure,
                     UploadStatus = UploadStatus.Completed,
                     TotalTime = audioFileTime.Value,

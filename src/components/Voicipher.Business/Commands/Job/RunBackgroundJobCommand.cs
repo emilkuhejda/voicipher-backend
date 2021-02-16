@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Serilog;
 using Voicipher.Business.Infrastructure;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -19,6 +20,7 @@ namespace Voicipher.Business.Commands.Job
         private readonly IJobStateMachine _jobStateMachine;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IBackgroundJobRepository _backgroundJobRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
@@ -26,12 +28,14 @@ namespace Voicipher.Business.Commands.Job
             IJobStateMachine jobStateMachine,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IBackgroundJobRepository backgroundJobRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
             _jobStateMachine = jobStateMachine;
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _backgroundJobRepository = backgroundJobRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger.ForContext<RunBackgroundJobCommand>();
         }
@@ -42,27 +46,31 @@ namespace Voicipher.Business.Commands.Job
 
             var recognitionFile = _mapper.Map<RecognitionFile>(parameter);
 
-            try
+            using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
             {
-                var backgroundJob = await _backgroundJobRepository.GetAsync(parameter.Id, cancellationToken);
-                if (backgroundJob == null)
-                    throw new InvalidOperationException($"Background job {parameter.Id} not found");
+                try
+                {
+                    var backgroundJob = await _backgroundJobRepository.GetAsync(parameter.Id, cancellationToken);
+                    if (backgroundJob == null)
+                        throw new InvalidOperationException($"Background job {parameter.Id} not found");
 
-                _jobStateMachine.DoInit(backgroundJob);
-                await _jobStateMachine.DoValidationAsync(cancellationToken);
-                await _jobStateMachine.DoConvertingAsync(cancellationToken);
-                await _jobStateMachine.DoProcessingAsync(cancellationToken);
-                await _jobStateMachine.DoCompleteAsync(cancellationToken);
+                    _jobStateMachine.DoInit(backgroundJob);
+                    await _jobStateMachine.DoValidationAsync(cancellationToken);
+                    await _jobStateMachine.DoConvertingAsync(cancellationToken);
+                    await _jobStateMachine.DoProcessingAsync(cancellationToken);
+                    await _jobStateMachine.DoCompleteAsync(cancellationToken);
 
-                _logger.Information($"Background job {parameter.Id} is completed");
+                    _logger.Information($"Background job {parameter.Id} is completed");
 
-                return new CommandResult();
-            }
-            finally
-            {
-                await _jobStateMachine.SaveAsync(cancellationToken);
+                    return new CommandResult();
+                }
+                finally
+                {
+                    await _jobStateMachine.SaveAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
 
-                _audioFileProcessingChannel.FinishProcessing(recognitionFile);
+                    _audioFileProcessingChannel.FinishProcessing(recognitionFile);
+                }
             }
         }
     }
