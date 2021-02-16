@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Serilog;
 using Voicipher.Business.Infrastructure;
-using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Repositories;
