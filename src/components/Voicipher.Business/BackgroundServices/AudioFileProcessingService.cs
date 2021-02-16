@@ -33,7 +33,7 @@ namespace Voicipher.Business.BackgroundServices
         {
             await foreach (var recognitionFile in _audioFileProcessingChannel.ReadAllAsync(stoppingToken))
             {
-                _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started to process");
+                _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started processing");
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
