@@ -65,11 +65,11 @@ namespace Voicipher.Business.Channels
             {
                 if (_cache.ContainsKey(recognitionFile.UserId))
                 {
-                    _logger.Debug($"{_cache[recognitionFile.UserId].Count} items in the cache");
+                    var countBefore = _cache[recognitionFile.UserId].Count;
                     _cache[recognitionFile.UserId].Remove(recognitionFile);
-                    _logger.Debug($"{_cache[recognitionFile.UserId].Count} items in the cache");
+                    var countAfter = _cache[recognitionFile.UserId].Count;
 
-                    _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was removed from cache");
+                    _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was removed from cache. Cache ({countBefore}) -> ({countAfter})");
                 }
             }
         }

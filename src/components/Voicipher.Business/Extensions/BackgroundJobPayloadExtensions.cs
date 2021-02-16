@@ -6,7 +6,7 @@ namespace Voicipher.Business.Extensions
 {
     public static class BackgroundJobPayloadExtensions
     {
-        public static object GetParameter<T>(this BackgroundJobPayload payload, BackgroundJobParameter parameter, T defaultValue = default)
+        public static T GetParameter<T>(this BackgroundJobPayload payload, BackgroundJobParameter parameter, T defaultValue = default)
         {
             if (payload.Parameters.ContainsKey(parameter))
             {
