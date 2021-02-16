@@ -17,6 +17,10 @@ namespace Voicipher.Domain.Payloads.Job
 
         public Guid AudioFileId { get; init; }
 
+        public JobState JobState { get; init; }
+
+        public int Attempt { get; init; }
+
         public Dictionary<BackgroundJobParameter, object> Parameters { get; }
 
         public DateTime DateCreatedUtc { get; init; }
