@@ -67,7 +67,7 @@ namespace Voicipher.Business.Channels
                 {
                     _cache[recognitionFile.UserId].Remove(recognitionFile);
 
-                    _logger.Information("Recognition file {JsonConvert.SerializeObject(recognitionFile)} was removed from cache");
+                    _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was removed from cache");
                 }
             }
         }

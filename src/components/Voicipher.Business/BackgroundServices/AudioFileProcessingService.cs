@@ -37,13 +37,28 @@ namespace Voicipher.Business.BackgroundServices
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
+                    var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
+                    var runBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<IRunBackgroundJobCommand>();
+
                     var parameters = new Dictionary<BackgroundJobParameter, object> { { BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc } };
                     var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
-                    var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
                     var commandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
-                }
 
-                _audioFileProcessingChannel.FinishProcessing(recognitionFile);
+                    if (commandResult.IsSuccess)
+                    {
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await runBackgroundJobCommand.ExecuteAsync(commandResult.Value, null, stoppingToken);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.Fatal(ex, "Background job failed");
+                            }
+                        });
+                    }
+                }
             }
         }
     }
