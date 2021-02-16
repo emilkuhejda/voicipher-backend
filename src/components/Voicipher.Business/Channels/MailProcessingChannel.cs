@@ -16,7 +16,10 @@ namespace Voicipher.Business.Channels
             _channel = Channel.CreateUnbounded<MailData>();
         }
 
-        public IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken = default) => _channel.Reader.ReadAllAsync(cancellationToken);
+        public IAsyncEnumerable<MailData> ReadAllAsync(CancellationToken cancellationToken = default)
+        {
+            return _channel.Reader.ReadAllAsync(cancellationToken);
+        }
 
         public async Task<bool> AddFileAsync(MailData mailData, CancellationToken cancellationToken = default)
         {

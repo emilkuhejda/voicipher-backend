@@ -39,6 +39,7 @@ namespace Voicipher.Business
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
 
             builder.RegisterType<MailProcessingChannel>().As<IMailProcessingChannel>().SingleInstance();
+            builder.RegisterType<AudioFileProcessingChannel>().As<IAudioFileProcessingChannel>().SingleInstance();
         }
     }
 }
