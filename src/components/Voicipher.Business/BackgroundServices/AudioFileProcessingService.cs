@@ -1,22 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Serilog;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
+using Voicipher.Domain.Interfaces.Commands.Job;
+using Voicipher.Domain.Payloads.Job;
 
 namespace Voicipher.Business.BackgroundServices
 {
     public class AudioFileProcessingService : BackgroundService
     {
+        private readonly IServiceProvider _serviceProvider;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly ILogger _logger;
 
         public AudioFileProcessingService(
+            IServiceProvider serviceProvider,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             ILogger logger)
         {
+            _serviceProvider = serviceProvider;
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _logger = logger.ForContext<AudioFileProcessingService>();
         }
@@ -27,7 +35,13 @@ namespace Voicipher.Business.BackgroundServices
             {
                 _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started to process");
 
-                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var parameters = new Dictionary<BackgroundJobParameter, object> { { BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc } };
+                    var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
+                    var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
+                    var commandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
+                }
 
                 _audioFileProcessingChannel.FinishProcessing(recognitionFile);
             }
