@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
@@ -54,9 +53,10 @@ namespace Voicipher.Business.Tests.StateMachine
             await jobStateMachine.DoCompleteAsync(default);
             await jobStateMachine.SaveAsync(default);
 
-            // Arrange
+            // Assert
             unitOfWorkMock.Verify(x => x.SaveAsync(default), Times.Once);
             Assert.Equal(JobState.Completed, backgroundJob.JobState);
+            Assert.Equal(1, backgroundJob.Attempt);
         }
     }
 }

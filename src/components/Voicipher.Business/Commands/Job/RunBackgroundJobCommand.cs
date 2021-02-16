@@ -1,39 +1,41 @@
 ﻿using System;
-using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Serilog;
 using Voicipher.Business.Infrastructure;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Channels;
-using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
-using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Payloads.Job;
 
 namespace Voicipher.Business.Commands.Job
 {
     public class RunBackgroundJobCommand : Command<BackgroundJobPayload, CommandResult>, IRunBackgroundJobCommand
     {
-        private readonly ICanRunRecognitionCommand _canRunRecognitionCommand;
+        private readonly IJobStateMachine _jobStateMachine;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
-        private readonly IAudioFileRepository _audioFileRepository;
+        private readonly IBackgroundJobRepository _backgroundJobRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public RunBackgroundJobCommand(
-            ICanRunRecognitionCommand canRunRecognitionCommand,
+            IJobStateMachine jobStateMachine,
             IAudioFileProcessingChannel audioFileProcessingChannel,
-            IAudioFileRepository audioFileRepository,
+            IBackgroundJobRepository backgroundJobRepository,
+            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
-            _canRunRecognitionCommand = canRunRecognitionCommand;
+            _jobStateMachine = jobStateMachine;
             _audioFileProcessingChannel = audioFileProcessingChannel;
-            _audioFileRepository = audioFileRepository;
+            _backgroundJobRepository = backgroundJobRepository;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger.ForContext<RunBackgroundJobCommand>();
         }
@@ -46,18 +48,22 @@ namespace Voicipher.Business.Commands.Job
 
             try
             {
-                var audioFile = await _audioFileRepository.GetAsync(parameter.UserId, parameter.AudioFileId, cancellationToken);
-                if (audioFile == null)
-                    throw new FileNotFoundException($"Audio file {parameter.AudioFileId} not found");
+                var backgroundJob = await _backgroundJobRepository.GetAsync(parameter.Id, cancellationToken);
+                if (backgroundJob == null)
+                    throw new InvalidOperationException($"Background job {parameter.Id} not found");
 
-                var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(parameter.UserId), principal, cancellationToken);
-                if (!canRunRecognitionResult.IsSuccess)
-                    throw new InvalidOperationException($"User ID '{parameter.UserId}' does not have enough free minutes in the subscription");
+                _jobStateMachine.DoInit(backgroundJob);
+                await _jobStateMachine.DoValidationAsync(cancellationToken);
+                await _jobStateMachine.DoConvertingAsync(cancellationToken);
+                await _jobStateMachine.DoProcessingAsync(cancellationToken);
+                await _jobStateMachine.DoCompleteAsync(cancellationToken);
 
                 return new CommandResult();
             }
             finally
             {
+                await _jobStateMachine.SaveAsync(cancellationToken);
+
                 _audioFileProcessingChannel.FinishProcessing(recognitionFile);
             }
         }

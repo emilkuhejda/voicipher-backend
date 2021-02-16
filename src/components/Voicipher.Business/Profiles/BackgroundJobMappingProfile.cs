@@ -27,7 +27,7 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(c => JobState.Idle))
                 .ForMember(
                     j => j.Attempt,
-                    opt => opt.MapFrom(c => 1))
+                    opt => opt.MapFrom(c => 0))
                 .ForMember(
                     j => j.Parameters,
                     opt => opt.MapFrom(c => JsonConvert.SerializeObject(c.Parameters)))
