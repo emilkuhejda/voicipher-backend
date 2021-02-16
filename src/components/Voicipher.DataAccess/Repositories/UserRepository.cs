@@ -18,5 +18,10 @@ namespace Voicipher.DataAccess.Repositories
         {
             return Context.Users.SingleOrDefaultAsync(x => x.Id == userId && x.Email == email, cancellationToken);
         }
+
+        public Task<bool> ExistsAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            return Context.Users.AnyAsync(x => x.Id == userId, cancellationToken);
+        }
     }
 }

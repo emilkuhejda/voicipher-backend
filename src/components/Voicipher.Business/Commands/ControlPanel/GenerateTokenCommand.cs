@@ -8,7 +8,6 @@ using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
 using Voicipher.Common.Helpers;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.MetaData;
 using Voicipher.Domain.Interfaces.Commands.ControlPanel;
@@ -62,8 +61,8 @@ namespace Voicipher.Business.Commands.ControlPanel
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, Role.User.ToString())
+                new Claim(ClaimTypes.NameIdentifier, parameter.UserId.ToString()),
+                new Claim(ClaimTypes.Role, parameter.Role.ToString())
             };
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, TimeSpan.FromDays(180));
