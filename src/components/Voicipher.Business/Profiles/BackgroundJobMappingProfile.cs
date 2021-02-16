@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using AutoMapper;
 using Newtonsoft.Json;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads.Job;
 
@@ -26,6 +28,31 @@ namespace Voicipher.Business.Profiles
                 .ForMember(
                     j => j.DateCreatedUtc,
                     opt => opt.MapFrom(c => DateTime.UtcNow));
+
+            CreateMap<BackgroundJob, BackgroundJobPayload>()
+                .ForMember(
+                    p => p.Id,
+                    opt => opt.MapFrom(j => j.Id))
+                .ForMember(
+                    p => p.UserId,
+                    opt => opt.MapFrom(j => j.UserId))
+                .ForMember(
+                    p => p.AudioFileId,
+                    opt => opt.MapFrom(j => j.AudioFileId))
+                .ForMember(
+                    p => p.Parameters,
+                    opt => opt.Ignore())
+                .ForMember(
+                    p => p.DateCreatedUtc,
+                    opt => opt.MapFrom(j => j.DateCreatedUtc))
+                .AfterMap((j, p) =>
+                {
+                    var dictionary = JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, object>>(j.Parameters);
+                    foreach (var (key, value) in dictionary)
+                    {
+                        p.Parameters.Add(key, value);
+                    }
+                });
         }
     }
 }

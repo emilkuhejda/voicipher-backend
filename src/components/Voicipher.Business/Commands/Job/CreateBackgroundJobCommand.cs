@@ -12,7 +12,7 @@ using Voicipher.Domain.Payloads.Job;
 
 namespace Voicipher.Business.Commands.Job
 {
-    public class CreateBackgroundJobCommand : Command<CreateBackgroundJobPayload, CommandResult<BackgroundJob>>, ICreateBackgroundJobCommand
+    public class CreateBackgroundJobCommand : Command<CreateBackgroundJobPayload, CommandResult<BackgroundJobPayload>>, ICreateBackgroundJobCommand
     {
         private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly IMapper _mapper;
@@ -28,7 +28,7 @@ namespace Voicipher.Business.Commands.Job
             _logger = logger.ForContext<CreateBackgroundJobCommand>();
         }
 
-        protected override async Task<CommandResult<BackgroundJob>> Execute(CreateBackgroundJobPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<CommandResult<BackgroundJobPayload>> Execute(CreateBackgroundJobPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var backgroundJob = _mapper.Map<BackgroundJob>(parameter);
             await _backgroundJobRepository.AddAsync(backgroundJob);
@@ -36,7 +36,8 @@ namespace Voicipher.Business.Commands.Job
 
             _logger.Information($"Background job {backgroundJob.Id} was created");
 
-            return new CommandResult<BackgroundJob>(backgroundJob);
+            var backgroundJobPayload = _mapper.Map<BackgroundJobPayload>(backgroundJob);
+            return new CommandResult<BackgroundJobPayload>(backgroundJobPayload);
         }
     }
 }
