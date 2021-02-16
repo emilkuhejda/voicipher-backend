@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands.Authentication
                 return new CommandResult<UserRegistrationOutputModel>(inputValidationResult.Errors);
             }
 
-            _logger.Information($"Start user authentication. User email: '{parameter.Email}'.");
+            _logger.Information($"Start user authentication. User email: {parameter.Email}");
 
             var userQueryResult = await _getUserQuery.ExecuteAsync(parameter.Id, principal, cancellationToken);
             if (!userQueryResult.IsSuccess)
@@ -65,7 +65,7 @@ namespace Voicipher.Business.Commands.Authentication
             var user = userQueryResult.Value;
             if (user == null)
             {
-                _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' not exists. Start user registration process.");
+                _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' not exists. Start user registration process");
 
                 user = _mapper.Map<User>(parameter);
 
@@ -79,7 +79,7 @@ namespace Voicipher.Business.Commands.Authentication
             {
                 if (parameter.Device != null)
                 {
-                    _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' already exists. Update device information.");
+                    _logger.Information($"User with ID '{parameter.Id}' and email '{parameter.Email}' already exists. Update device information");
 
                     var userDevice = _mapper.Map<UserDevice>(parameter);
                     await _userDeviceRepository.AddOrUpdateAsync(userDevice, cancellationToken);
@@ -105,7 +105,7 @@ namespace Voicipher.Business.Commands.Authentication
 
             await _userRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"User '{parameter.Email}' was successfully registered and token was created.");
+            _logger.Information($"User '{parameter.Email}' was successfully registered and token was created");
 
             return new CommandResult<UserRegistrationOutputModel>(outputModel);
         }

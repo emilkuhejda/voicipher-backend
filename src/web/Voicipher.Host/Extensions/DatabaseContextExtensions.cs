@@ -28,7 +28,7 @@ namespace Voicipher.Host.Extensions
                 }
                 catch (Exception ex)
                 {
-                    logger.Fatal(ex, "Initializing of the database failed.");
+                    logger.Fatal(ex, "Initializing of the database failed");
                 }
             }
         }

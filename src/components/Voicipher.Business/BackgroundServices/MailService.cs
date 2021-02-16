@@ -40,7 +40,7 @@ namespace Voicipher.Business.BackgroundServices
         {
             try
             {
-                _logger.Information("Start sending email.");
+                _logger.Information("Start sending email");
 
                 var mailConfiguration = _appSettings.MailConfiguration;
                 using (var client = new SmtpClient(mailConfiguration.SmtpServer, mailConfiguration.Port))
@@ -56,13 +56,13 @@ namespace Voicipher.Business.BackgroundServices
                         mailMessage.Subject = mailData.Subject;
                         await client.SendMailAsync(mailMessage, cancellationToken);
 
-                        _logger.Information("Email was successfully sent.");
+                        _logger.Information("Email was successfully sent");
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Exception occurred during sending email.");
+                _logger.Error(ex, "Exception occurred during sending email");
             }
         }
     }

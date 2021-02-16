@@ -49,7 +49,7 @@ namespace Voicipher.Business.Commands.Audio
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file '{parameter.AudioFileId}'.");
+                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }

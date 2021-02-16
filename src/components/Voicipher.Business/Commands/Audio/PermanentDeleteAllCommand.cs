@@ -61,26 +61,26 @@ namespace Voicipher.Business.Commands.Audio
                     _audioFileRepository.Remove(audioFile);
                     await _audioFileRepository.AddAsync(deletedEntity);
 
-                    _logger.Information($"Delete audio file source from blob storage. Audio file ID = '{audioFile.Id}', User ID = '{userId}'.");
+                    _logger.Information($"Delete audio file source from blob storage. Audio file ID = {audioFile.Id}, User ID = {userId}");
                 }
 
                 await _audioFileRepository.SaveAsync(cancellationToken);
 
                 await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId)).ConfigureAwait(false);
 
-                _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted.");
+                _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}.");
+                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "Permanent audio files deletion failed.");
+                _logger.Fatal(ex, "Permanent audio files deletion failed");
 
                 throw new OperationErrorException(ErrorCode.EC603);
             }

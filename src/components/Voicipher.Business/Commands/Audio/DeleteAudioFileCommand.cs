@@ -65,7 +65,7 @@ namespace Voicipher.Business.Commands.Audio
 
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-            _logger.Information($"Audio file '{parameter.AudioFileId}' was deleted.");
+            _logger.Information($"Audio file '{parameter.AudioFileId}' was deleted");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

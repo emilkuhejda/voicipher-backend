@@ -89,7 +89,7 @@ namespace Voicipher.Business.Commands
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error(ex, "An error occurred while updating the entries.");
+                _logger.Error(ex, "An error occurred while updating the entries");
 
                 throw new OperationErrorException(ErrorCode.EC400);
             }
