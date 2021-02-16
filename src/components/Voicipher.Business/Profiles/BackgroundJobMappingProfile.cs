@@ -35,7 +35,7 @@ namespace Voicipher.Business.Profiles
                     j => j.DateCreatedUtc,
                     opt => opt.MapFrom(c => DateTime.UtcNow))
                 .ForMember(
-                    j => j.DateCreatedUtc,
+                    j => j.DateCompletedUtc,
                     opt => opt.MapFrom(c => DateTime.MinValue));
 
             CreateMap<BackgroundJob, BackgroundJobPayload>()

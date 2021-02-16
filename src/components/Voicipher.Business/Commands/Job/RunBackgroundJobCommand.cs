@@ -20,7 +20,6 @@ namespace Voicipher.Business.Commands.Job
         private readonly IJobStateMachine _jobStateMachine;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IBackgroundJobRepository _backgroundJobRepository;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
@@ -28,14 +27,12 @@ namespace Voicipher.Business.Commands.Job
             IJobStateMachine jobStateMachine,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IBackgroundJobRepository backgroundJobRepository,
-            IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
             _jobStateMachine = jobStateMachine;
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _backgroundJobRepository = backgroundJobRepository;
-            _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger.ForContext<RunBackgroundJobCommand>();
         }
