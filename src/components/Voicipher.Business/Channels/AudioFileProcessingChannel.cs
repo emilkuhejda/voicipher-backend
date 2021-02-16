@@ -2,6 +2,8 @@
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Serilog;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Models;
 
@@ -10,10 +12,12 @@ namespace Voicipher.Business.Channels
     public class AudioFileProcessingChannel : IAudioFileProcessingChannel
     {
         private readonly Channel<RecognitionFile> _channel;
+        private readonly ILogger _logger;
 
-        public AudioFileProcessingChannel()
+        public AudioFileProcessingChannel(ILogger logger)
         {
             _channel = Channel.CreateUnbounded<RecognitionFile>();
+            _logger = logger.ForContext<AudioFileProcessingChannel>();
         }
 
         public IAsyncEnumerable<RecognitionFile> ReadAllAsync(CancellationToken cancellationToken = default)
@@ -27,6 +31,8 @@ namespace Voicipher.Business.Channels
             {
                 if (_channel.Writer.TryWrite(recognitionFile))
                 {
+                    _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
+
                     return true;
                 }
             }
