@@ -40,7 +40,8 @@ namespace Voicipher.Business.Tests.StateMachine
                 JobState = JobState.Idle,
                 Attempt = 1,
                 Parameters = JsonConvert.SerializeObject(new Dictionary<BackgroundJobParameter, object>()),
-                DateCreatedUtc = DateTime.UtcNow
+                DateCreatedUtc = DateTime.UtcNow,
+                DateCompletedUtc = DateTime.MinValue
             };
 
             var jobStateMachine = new JobStateMachine(audioFileRepositoryMock.Object, canRunRecognitionCommandMock.Object, unitOfWorkMock.Object);
@@ -57,6 +58,7 @@ namespace Voicipher.Business.Tests.StateMachine
             unitOfWorkMock.Verify(x => x.SaveAsync(default), Times.Once);
             Assert.Equal(JobState.Completed, backgroundJob.JobState);
             Assert.Equal(1, backgroundJob.Attempt);
+            Assert.NotEqual(DateTime.MinValue, backgroundJob.DateCompletedUtc);
         }
     }
 }

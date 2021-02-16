@@ -16,5 +16,7 @@ namespace Voicipher.Domain.Models
         public string Parameters { get; set; }
 
         public DateTime DateCreatedUtc { get; set; }
+
+        public DateTime DateCompletedUtc { get; set; }
     }
 }

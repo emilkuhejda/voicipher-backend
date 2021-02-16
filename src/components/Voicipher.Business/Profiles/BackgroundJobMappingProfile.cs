@@ -33,7 +33,10 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(c => JsonConvert.SerializeObject(c.Parameters)))
                 .ForMember(
                     j => j.DateCreatedUtc,
-                    opt => opt.MapFrom(c => DateTime.UtcNow));
+                    opt => opt.MapFrom(c => DateTime.UtcNow))
+                .ForMember(
+                    j => j.DateCreatedUtc,
+                    opt => opt.MapFrom(c => DateTime.MinValue));
 
             CreateMap<BackgroundJob, BackgroundJobPayload>()
                 .ForMember(

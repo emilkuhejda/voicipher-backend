@@ -72,6 +72,8 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoCompleteAsync(CancellationToken cancellationToken)
         {
+            _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
+
             TryChangeState(JobState.Completed);
 
             await _unitOfWork.SaveAsync(cancellationToken);
