@@ -16,7 +16,7 @@ using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.V1
 {
-    [ApiVersion("1.0")]
+    [ApiVersion("1")]
     [Produces("application/json")]
     [Route("api/v{version:apiVersion}/utils")]
     [ApiController]
