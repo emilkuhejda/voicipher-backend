@@ -8,10 +8,13 @@ namespace Voicipher.Domain.Models
         {
             UserId = userId;
             AudioFileId = audioFileId;
+            DateProcessedUtc = DateTime.UtcNow;
         }
 
         public Guid UserId { get; }
 
         public Guid AudioFileId { get; }
+
+        public DateTime DateProcessedUtc { get; }
     }
 }

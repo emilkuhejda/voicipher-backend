@@ -5,7 +5,6 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Domain.Interfaces.Channels;
-using Voicipher.Domain.Models;
 
 namespace Voicipher.Business.BackgroundServices
 {
@@ -28,7 +27,9 @@ namespace Voicipher.Business.BackgroundServices
             {
                 _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started to process");
 
-                await Task.Delay(TimeSpan.FromSeconds(20));
+                await Task.Delay(TimeSpan.FromSeconds(20), stoppingToken);
+
+                _audioFileProcessingChannel.FinishProcessing(recognitionFile);
             }
         }
     }

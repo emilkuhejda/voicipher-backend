@@ -10,5 +10,7 @@ namespace Voicipher.Domain.Interfaces.Channels
         IAsyncEnumerable<RecognitionFile> ReadAllAsync(CancellationToken cancellationToken = default);
 
         Task<bool> AddFileAsync(RecognitionFile recognitionFile, CancellationToken cancellationToken = default);
+
+        void FinishProcessing(RecognitionFile recognitionFile);
     }
 }
