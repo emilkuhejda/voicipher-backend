@@ -49,6 +49,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<ContactForm> ContactForms { get; set; }
 
+        public DbSet<BackgroundJob> BackgroundJobs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -74,6 +76,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new InformationMessageConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
             modelBuilder.ApplyConfiguration(new ContactFormConfiguration());
+            modelBuilder.ApplyConfiguration(new BackgroundJobConfiguration());
         }
     }
 }

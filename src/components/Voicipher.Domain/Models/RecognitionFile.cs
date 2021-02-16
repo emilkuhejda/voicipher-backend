@@ -11,10 +11,10 @@ namespace Voicipher.Domain.Models
             DateProcessedUtc = DateTime.UtcNow;
         }
 
-        public Guid UserId { get; }
+        public Guid UserId { get; init; }
 
-        public Guid AudioFileId { get; }
+        public Guid AudioFileId { get; init; }
 
-        public DateTime DateProcessedUtc { get; }
+        public DateTime DateProcessedUtc { get; init; }
     }
 }
