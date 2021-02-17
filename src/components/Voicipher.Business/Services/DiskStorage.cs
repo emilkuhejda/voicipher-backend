@@ -26,7 +26,7 @@ namespace Voicipher.Business.Services
         public async Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
         {
             var fileName = $"{Guid.NewGuid()}.tmp";
-            var rootPath = GetRootPath();
+            var rootPath = GetDirectoryPath();
             var filePath = Path.Combine(rootPath, fileName);
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
@@ -58,14 +58,14 @@ namespace Voicipher.Business.Services
 
         public void RemoveTemporaryFolder()
         {
-            var rootPath = GetRootPath();
+            var rootPath = GetDirectoryPath();
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, true);
             }
         }
 
-        private string GetRootPath()
+        public string GetDirectoryPath()
         {
             var rootDirectoryPath = Path.Combine(_webHostEnvironment.WebRootPath, UploadedFilesDirectory, _filesDirectory);
             if (!Directory.Exists(rootDirectoryPath))

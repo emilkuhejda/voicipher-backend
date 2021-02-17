@@ -13,5 +13,7 @@ namespace Voicipher.Domain.Interfaces.Services
         Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken);
 
         void RemoveTemporaryFolder();
+
+        string GetDirectoryPath();
     }
 }
