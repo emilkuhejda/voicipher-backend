@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -119,17 +120,25 @@ namespace Voicipher.Business.StateMachine
             var transcribeAudioFiles = _backgroundJobParameter.GetValue<TranscribeAudioFile[]>(BackgroundJobParameter.AudioFiles);
             if (transcribeAudioFiles != null && transcribeAudioFiles.Any())
             {
-                foreach (var transcribeAudioFile in transcribeAudioFiles)
+                try
                 {
-                    if (File.Exists(transcribeAudioFile.Path))
+                    foreach (var transcribeAudioFile in transcribeAudioFiles)
                     {
-                        var uploadBlobSettings = new UploadBlobSettings(transcribeAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribeAudioFile.SourceFileName);
-                        await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
-                        File.Delete(transcribeAudioFile.SourceFileName);
+                        if (File.Exists(transcribeAudioFile.Path))
+                        {
+                            var uploadBlobSettings = new UploadBlobSettings(transcribeAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribeAudioFile.SourceFileName);
+                            await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+                            File.Delete(transcribeAudioFile.Path);
+                        }
                     }
-                }
 
-                _logger.Information($"Audio fIle ({transcribeAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+                    _logger.Information($"Audio fIle ({transcribeAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+                }
+                catch (RequestFailedException ex)
+                {
+                    _logger.Error(ex, "Blob storage is unavailable");
+                    throw;
+                }
             }
 
             _backgroundJob.DateCompletedUtc = DateTime.UtcNow;

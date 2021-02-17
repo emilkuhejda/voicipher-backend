@@ -89,7 +89,11 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            return SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+            var transcribeAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+
+            File.Delete(wavFilePath);
+
+            return transcribeAudioFiles;
         }
 
         private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath)
