@@ -8,27 +8,23 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
-using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
 
 namespace Voicipher.Business.Services
 {
     public class WavFileService : IWavFileService
     {
-        private readonly IUpdateRecognitionStateCommand _updateRecognitionStateCommand;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         public WavFileService(
-            IUpdateRecognitionStateCommand updateRecognitionStateCommand,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
         {
-            _updateRecognitionStateCommand = updateRecognitionStateCommand;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Chunk];
             _appSettings = options.Value;
@@ -43,9 +39,6 @@ namespace Voicipher.Business.Services
             {
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
-
-                var payload = new UpdateRecognitionStatePayload(audioFile.Id, audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Converting);
-                await _updateRecognitionStateCommand.ExecuteAsync(payload, null, cancellationToken);
             }
             catch (RequestFailedException ex)
             {

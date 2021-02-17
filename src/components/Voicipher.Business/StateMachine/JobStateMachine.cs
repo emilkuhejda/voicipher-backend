@@ -41,6 +41,7 @@ namespace Voicipher.Business.StateMachine
         public void DoInit(BackgroundJob backgroundJob)
         {
             _backgroundJob = backgroundJob;
+            _backgroundJob.Attempt += 1;
             _backgroundJob.JobState = JobState.Idle;
 
             TryChangeState(JobState.Initialized);

@@ -40,7 +40,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 UserId = Guid.NewGuid(),
                 AudioFileId = Guid.NewGuid(),
                 JobState = JobState.Idle,
-                Attempt = 1,
+                Attempt = 0,
                 Parameters = JsonConvert.SerializeObject(new Dictionary<BackgroundJobParameter, object>()),
                 DateCreatedUtc = DateTime.UtcNow,
                 DateCompletedUtc = DateTime.MinValue
