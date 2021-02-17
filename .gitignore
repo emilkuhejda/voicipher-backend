@@ -219,3 +219,6 @@ _Pvt_Extensions
 scripts/performance/__pycache__/
 
 src/web/Voicipher.Host/Logs/
+
+src/web/Voicipher.Host/wwwroot/uploaded/chunks/
+src/web/Voicipher.Host/wwwroot/uploaded/audio/

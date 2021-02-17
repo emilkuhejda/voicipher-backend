@@ -4,13 +4,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Commands.Job;
+using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Payloads.Job;
+using Voicipher.Domain.Payloads.Transcription;
+using Voicipher.Domain.Settings;
+using Voicipher.Domain.Validation;
 
 namespace Voicipher.Business.BackgroundServices
 {
@@ -36,17 +41,37 @@ namespace Voicipher.Business.BackgroundServices
             {
                 _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started processing");
 
-                CommandResult<BackgroundJobPayload> commandResult;
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
+                CommandResult<BackgroundJobPayload> createJobCommandResult;
+                var isSuccess = true;
 
-                    var parameters = new Dictionary<BackgroundJobParameter, object> { { BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc } };
-                    var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
-                    commandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
+                try
+                {
+                    using (var scope = _serviceProvider.CreateScope())
+                    {
+                        var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
+                        var updateRecognitionStateCommand = scope.ServiceProvider.GetRequiredService<IUpdateRecognitionStateCommand>();
+                        var appSettings = scope.ServiceProvider.GetRequiredService<IOptions<AppSettings>>().Value;
+
+                        var parameters = new Dictionary<BackgroundJobParameter, object> { { BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc } };
+                        var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
+                        createJobCommandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
+                        isSuccess &= createJobCommandResult.IsSuccess;
+
+                        var payload = new UpdateRecognitionStatePayload(recognitionFile.AudioFileId, recognitionFile.UserId, appSettings.ApplicationId, RecognitionState.InProgress);
+                        var updateStateCommandResult = await updateRecognitionStateCommand.ExecuteAsync(payload, null, stoppingToken);
+                        isSuccess &= updateStateCommandResult.IsSuccess;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Fatal(ex, "Background job initialization failed");
+
+                    createJobCommandResult = new CommandResult<BackgroundJobPayload>(new OperationError(ValidationErrorCodes.OperationFailed));
+                    isSuccess = false;
                 }
 
-                if (commandResult != null && commandResult.IsSuccess)
+
+                if (isSuccess)
                 {
                     Task.Run(async () =>
                     {
@@ -55,7 +80,7 @@ namespace Voicipher.Business.BackgroundServices
                             using (var scope = _serviceProvider.CreateScope())
                             {
                                 var runBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<IRunBackgroundJobCommand>();
-                                await runBackgroundJobCommand.ExecuteAsync(commandResult.Value, null, stoppingToken);
+                                await runBackgroundJobCommand.ExecuteAsync(createJobCommandResult.Value, null, stoppingToken);
                             }
                         }
                         catch (Exception ex)

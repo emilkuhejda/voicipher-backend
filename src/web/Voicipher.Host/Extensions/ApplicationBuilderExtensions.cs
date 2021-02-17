@@ -1,9 +1,11 @@
 ﻿using System;
+using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Voicipher.DataAccess;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 
@@ -20,7 +22,7 @@ namespace Voicipher.Host.Extensions
             using (var serviceScope = serviceScopeFactory.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                var chunkStorage = serviceScope.ServiceProvider.GetRequiredService<IChunkStorage>();
+                var diskStorage = serviceScope.ServiceProvider.GetRequiredService<IIndex<StorageLocation, IDiskStorage>>()[StorageLocation.Chunk];
                 var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>().ForContext<Startup>();
 
                 try
@@ -29,7 +31,7 @@ namespace Voicipher.Host.Extensions
 
                     context.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(FileChunk)}]");
 
-                    chunkStorage.RemoveTemporaryFolder();
+                    diskStorage.RemoveTemporaryFolder();
 
                     logger.Information("Finish of the cleaning temporary data");
                 }

@@ -2,14 +2,14 @@
 {
     public enum JobState
     {
-        Idle,
-        Initialized,
-        Validating,
-        Validated,
-        Converting,
-        Converted,
-        Processing,
-        Processed,
-        Completed
+        Idle = 0,
+        Initialized = 1,
+        Validating = 2,
+        Validated = 3,
+        Converting = 4,
+        Converted = 5,
+        Processing = 6,
+        Processed = 7,
+        Completed = 8
     }
 }
