@@ -122,7 +122,7 @@ namespace Voicipher.Business.StateMachine
             await _unitOfWork.SaveAsync(cancellationToken);
             _logger.Information($"Transcribed time audio file '{_audioFile.Id}' was updated to {transcribedTime}");
 
-            var transcribeItems = await _speechRecognitionService.RecognizeAsync(transcribeAudioFiles, _audioFile.Language, cancellationToken);
+            var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribeAudioFiles, cancellationToken);
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
@@ -152,8 +152,8 @@ namespace Voicipher.Business.StateMachine
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
                 _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
 
-                //var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
-                //await _blobStorage.DeleteFileBlobAsync(blobSettings, cancellationToken);
+                var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
+                await _blobStorage.DeleteFileBlobAsync(blobSettings, cancellationToken);
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {

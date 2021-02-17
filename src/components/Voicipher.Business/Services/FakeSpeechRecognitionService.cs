@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Voicipher.Domain.Interfaces.Channels;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
 
@@ -10,14 +12,18 @@ namespace Voicipher.Business.Services
 {
     public class FakeSpeechRecognitionService : SpeechRecognitionServiceBase
     {
-        public FakeSpeechRecognitionService(IOptions<AppSettings> options, ILogger logger)
-            : base(options, logger)
+        public FakeSpeechRecognitionService(
+            IAudioFileProcessingChannel audioFileProcessingChannel,
+            IMessageCenterService messageCenterService,
+            IOptions<AppSettings> options,
+            ILogger logger)
+            : base(audioFileProcessingChannel, messageCenterService, options, logger)
         {
         }
 
         protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
         {
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(1));
 
             var response = new LongRunningRecognizeResponse
             {

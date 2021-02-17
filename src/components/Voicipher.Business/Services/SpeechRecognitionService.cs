@@ -2,6 +2,8 @@
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Voicipher.Domain.Interfaces.Channels;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
 
@@ -9,8 +11,12 @@ namespace Voicipher.Business.Services
 {
     public class SpeechRecognitionService : SpeechRecognitionServiceBase
     {
-        public SpeechRecognitionService(IOptions<AppSettings> options, ILogger logger)
-            : base(options, logger)
+        public SpeechRecognitionService(
+            IAudioFileProcessingChannel audioFileProcessingChannel,
+            IMessageCenterService messageCenterService,
+            IOptions<AppSettings> options,
+            ILogger logger)
+            : base(audioFileProcessingChannel, messageCenterService, options, logger)
         {
         }
 
