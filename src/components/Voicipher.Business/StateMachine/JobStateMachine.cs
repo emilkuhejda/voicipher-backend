@@ -152,8 +152,8 @@ namespace Voicipher.Business.StateMachine
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
                 _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
 
-                var blobSettings = new BlobSettings(_audioFile.Id, _audioFile.UserId);
-                await _blobStorage.DeleteAudioFileAsync(blobSettings, cancellationToken);
+                var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
+                await _blobStorage.DeleteFileBlobAsync(blobSettings, cancellationToken);
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {
