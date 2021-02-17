@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using AutoMapper;
 using Azure;
 using Microsoft.EntityFrameworkCore;
@@ -26,7 +27,7 @@ namespace Voicipher.Business.Commands.Audio
     {
         private readonly IAudioService _audioService;
         private readonly IBlobStorage _blobStorage;
-        private readonly IChunkStorage _chunkStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IFileChunkRepository _fileChunkRepository;
         private readonly IMapper _mapper;
@@ -35,7 +36,7 @@ namespace Voicipher.Business.Commands.Audio
         public SubmitFileChunkCommand(
             IAudioService audioService,
             IBlobStorage blobStorage,
-            IChunkStorage chunkStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IAudioFileRepository audioFileRepository,
             IFileChunkRepository fileChunkRepository,
             IMapper mapper,
@@ -43,7 +44,7 @@ namespace Voicipher.Business.Commands.Audio
         {
             _audioService = audioService;
             _blobStorage = blobStorage;
-            _chunkStorage = chunkStorage;
+            _diskStorage = index[StorageLocation.Chunk];
             _audioFileRepository = audioFileRepository;
             _fileChunkRepository = fileChunkRepository;
             _mapper = mapper;
@@ -84,8 +85,8 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC102);
                 }
 
-                var audioFileBytes = await _chunkStorage.ReadAllBytesAsync(fileChunks, cancellationToken);
-                tempFilePath = await _chunkStorage.UploadAsync(audioFileBytes, cancellationToken);
+                var audioFileBytes = await _diskStorage.ReadAllBytesAsync(fileChunks, cancellationToken);
+                tempFilePath = await _diskStorage.UploadAsync(audioFileBytes, cancellationToken);
 
                 _logger.Information($"Audio file was created on destination: {tempFilePath}");
 
@@ -145,7 +146,7 @@ namespace Voicipher.Business.Commands.Audio
                     _logger.Information($"Audio file was removed on destination: {tempFilePath}");
                 }
 
-                _chunkStorage.RemoveRange(fileChunks);
+                _diskStorage.RemoveRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 

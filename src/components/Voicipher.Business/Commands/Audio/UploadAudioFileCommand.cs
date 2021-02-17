@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using AutoMapper;
 using Azure;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,7 @@ namespace Voicipher.Business.Commands.Audio
     {
         private readonly IAudioService _audioService;
         private readonly IBlobStorage _blobStorage;
-        private readonly IChunkStorage _chunkStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
@@ -35,14 +36,14 @@ namespace Voicipher.Business.Commands.Audio
         public UploadAudioFileCommand(
             IAudioService audioService,
             IBlobStorage blobStorage,
-            IChunkStorage chunkStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IAudioFileRepository audioFileRepository,
             IMapper mapper,
             ILogger logger)
         {
             _audioService = audioService;
             _blobStorage = blobStorage;
-            _chunkStorage = chunkStorage;
+            _diskStorage = index[StorageLocation.Chunk];
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
             _logger = logger.ForContext<UploadAudioFileCommand>();
@@ -81,7 +82,7 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadedFileSource = await parameter.File.GetBytesAsync(cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                tempFilePath = await _chunkStorage.UploadAsync(uploadedFileSource, cancellationToken);
+                tempFilePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);
                 _logger.Information($"Audio file was uploaded on temporary destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);

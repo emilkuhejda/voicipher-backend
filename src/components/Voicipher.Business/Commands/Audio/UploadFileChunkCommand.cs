@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using AutoMapper;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -23,18 +24,18 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class UploadFileChunkCommand : Command<UploadFileChunkPayload, CommandResult<OkOutputModel>>, IUploadFileChunkCommand
     {
-        private readonly IChunkStorage _chunkStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly IFileChunkRepository _fileChunkRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public UploadFileChunkCommand(
-            IChunkStorage chunkStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IFileChunkRepository fileChunkRepository,
             IMapper mapper,
             ILogger logger)
         {
-            _chunkStorage = chunkStorage;
+            _diskStorage = index[StorageLocation.Chunk];
             _fileChunkRepository = fileChunkRepository;
             _mapper = mapper;
             _logger = logger.ForContext<UploadFileChunkCommand>();
@@ -63,7 +64,7 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadedFileSource = await parameter.File.GetBytesAsync(cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                filePath = await _chunkStorage.UploadAsync(uploadedFileSource, cancellationToken);
+                filePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);
                 _logger.Information($"File chunk was created on destination: {filePath}");
 
                 var fileChunk = _mapper.Map<FileChunk>(

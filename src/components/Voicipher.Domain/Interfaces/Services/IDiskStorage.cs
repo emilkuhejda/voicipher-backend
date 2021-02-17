@@ -4,7 +4,7 @@ using Voicipher.Domain.Models;
 
 namespace Voicipher.Domain.Interfaces.Services
 {
-    public interface IChunkStorage
+    public interface IDiskStorage
     {
         Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken);
 

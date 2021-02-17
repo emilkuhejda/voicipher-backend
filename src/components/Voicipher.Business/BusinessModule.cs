@@ -4,6 +4,7 @@ using AutoMapper;
 using Voicipher.Business.Channels;
 using Voicipher.Business.Services;
 using Voicipher.Business.StateMachine;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Infrastructure;
 using Voicipher.Domain.Interfaces.Services;
@@ -39,7 +40,8 @@ namespace Voicipher.Business
             builder.RegisterType<AudioService>().As<IAudioService>();
             builder.RegisterType<WavFileService>().As<IWavFileService>();
 
-            builder.RegisterType<ChunkStorage>().As<IChunkStorage>();
+            builder.RegisterType<ChunkStorage>().Keyed<IDiskStorage>(StorageLocation.Chunk);
+            builder.RegisterType<AudioStorage>().Keyed<IDiskStorage>(StorageLocation.Audio);
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
 
             builder.RegisterType<JobStateMachine>().As<IJobStateMachine>();
