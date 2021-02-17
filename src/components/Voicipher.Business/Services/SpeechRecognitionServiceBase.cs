@@ -42,11 +42,11 @@ namespace Voicipher.Business.Services
             _logger = logger.ForContext<SpeechRecognitionService>();
         }
 
-        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribeAudioFile[] transcribeAudioFiles, CancellationToken cancellationToken)
+        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken)
         {
             var speechClient = CreateSpeechClient();
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
-            foreach (var transcribeAudioFile in transcribeAudioFiles)
+            foreach (var transcribeAudioFile in transcribedAudioFiles)
             {
                 updateMethods.Add(() => RecognizeSpeech(speechClient, transcribeAudioFile, audioFile.Language));
             }
@@ -75,11 +75,11 @@ namespace Voicipher.Business.Services
             await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionProgressChangedMethod(userId), outputModel).ConfigureAwait(false);
         }
 
-        private async Task<TranscribeItem> RecognizeSpeech(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
+        private async Task<TranscribeItem> RecognizeSpeech(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language)
         {
-            _logger.Information($"Start speech recognition for file {transcribeAudioFile.Path}");
+            _logger.Information($"Start speech recognition for file {transcribedAudioFile.Path}");
 
-            var response = await GetRecognizedResponseAsync(speech, transcribeAudioFile, language);
+            var response = await GetRecognizedResponseAsync(speech, transcribedAudioFile, language);
             var alternatives = response.Results
                 .SelectMany(x => x.Alternatives)
                 .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
@@ -87,25 +87,25 @@ namespace Voicipher.Business.Services
             var dateCreated = DateTime.UtcNow;
             var transcribeItem = new TranscribeItem
             {
-                Id = transcribeAudioFile.Id,
-                AudioFileId = transcribeAudioFile.AudioFileId,
+                Id = transcribedAudioFile.Id,
+                AudioFileId = transcribedAudioFile.AudioFileId,
                 ApplicationId = _appSettings.ApplicationId,
                 Alternatives = JsonConvert.SerializeObject(alternatives),
-                SourceFileName = transcribeAudioFile.SourceFileName,
+                SourceFileName = transcribedAudioFile.SourceFileName,
                 Storage = StorageSetting.Azure,
-                StartTime = transcribeAudioFile.StartTime,
-                EndTime = transcribeAudioFile.EndTime,
-                TotalTime = transcribeAudioFile.TotalTime,
+                StartTime = transcribedAudioFile.StartTime,
+                EndTime = transcribedAudioFile.EndTime,
+                TotalTime = transcribedAudioFile.TotalTime,
                 DateCreatedUtc = dateCreated,
                 DateUpdatedUtc = dateCreated
             };
 
-            _logger.Information($"Audio file '{transcribeAudioFile.Path}' was recognized");
+            _logger.Information($"Audio file '{transcribedAudioFile.Path}' was recognized");
 
             return transcribeItem;
         }
 
-        protected abstract Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language);
+        protected abstract Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language);
 
         private SpeechClient CreateSpeechClient()
         {

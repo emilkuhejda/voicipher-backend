@@ -78,7 +78,7 @@ namespace Voicipher.Business.Services
             }
         }
 
-        public async Task<TranscribeAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken)
+        public async Task<TranscribedAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
             var wavFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
             if (!File.Exists(wavFilePath))
@@ -89,11 +89,11 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            var transcribeAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
 
             File.Delete(wavFilePath);
 
-            return transcribeAudioFiles;
+            return transcribedAudioFiles;
         }
 
         private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath)
@@ -113,9 +113,9 @@ namespace Voicipher.Business.Services
             return (filePath, fileName);
         }
 
-        private IList<TranscribeAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId)
+        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId)
         {
-            var transcribeAudioFiles = new List<TranscribeAudioFile>();
+            var transcribedAudioFiles = new List<TranscribedAudioFile>();
             var processedTime = TimeSpan.Zero;
 
             try
@@ -129,22 +129,22 @@ namespace Voicipher.Business.Services
                     {
                         var processedSample = ProcessAudioSample(reader, remainingTime, processedTime, audioFileId);
                         if (processedSample.sampleDuration.Ticks <= 0)
-                            return transcribeAudioFiles;
+                            return transcribedAudioFiles;
 
                         processedTime = processedTime.Add(processedSample.sampleDuration);
-                        transcribeAudioFiles.Add(processedSample.transcribeAudioFile);
+                        transcribedAudioFiles.Add(processedSample.transcribedAudioFile);
                     }
 
-                    return transcribeAudioFiles;
+                    return transcribedAudioFiles;
                 }
             }
             catch (Exception)
             {
-                _logger.Error($"Remove wav audio files ({transcribeAudioFiles.Count}) from disk storage");
+                _logger.Error($"Remove wav audio files ({transcribedAudioFiles.Count}) from disk storage");
 
-                if (transcribeAudioFiles.Any())
+                if (transcribedAudioFiles.Any())
                 {
-                    foreach (var audioFile in transcribeAudioFiles)
+                    foreach (var audioFile in transcribedAudioFiles)
                     {
                         if (File.Exists(audioFile.Path))
                             File.Delete(audioFile.Path);
@@ -155,7 +155,7 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private (TimeSpan sampleDuration, TranscribeAudioFile transcribeAudioFile) ProcessAudioSample(WaveFileReader reader, TimeSpan remainingTime, TimeSpan processedTime, Guid audioFileId)
+        private (TimeSpan sampleDuration, TranscribedAudioFile transcribedAudioFile) ProcessAudioSample(WaveFileReader reader, TimeSpan remainingTime, TimeSpan processedTime, Guid audioFileId)
         {
             var remainingTimeSpan = remainingTime.Subtract(processedTime);
             if (remainingTimeSpan.Ticks <= 0)
@@ -169,12 +169,12 @@ namespace Voicipher.Business.Services
             var end = processedTime.Add(sampleDuration);
             var endTime = end > audioTotalTime ? audioTotalTime : end;
 
-            var transcribeAudioFile = CreateTranscribeAudioFile(reader, processedTime, endTime, audioFileId);
+            var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
 
-            return (sampleDuration, transcribeAudioFile);
+            return (sampleDuration, transcribedAudioFile);
         }
 
-        private TranscribeAudioFile CreateTranscribeAudioFile(WaveFileReader reader, TimeSpan start, TimeSpan end, Guid audioFileId)
+        private TranscribedAudioFile CreateTranscribedAudioFile(WaveFileReader reader, TimeSpan start, TimeSpan end, Guid audioFileId)
         {
             var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
             using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
@@ -204,7 +204,7 @@ namespace Voicipher.Business.Services
                     }
                 }
 
-                var wavPartialFile = new TranscribeAudioFile
+                var wavPartialFile = new TranscribedAudioFile
                 {
                     Id = Guid.NewGuid(),
                     AudioFileId = audioFileId,

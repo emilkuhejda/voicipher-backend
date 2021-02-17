@@ -20,7 +20,7 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
+        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language)
         {
             var recognitionConfig = new RecognitionConfig
             {
@@ -29,10 +29,10 @@ namespace Voicipher.Business.Services
                 EnableAutomaticPunctuation = true,
                 UseEnhanced = true,
                 EnableWordTimeOffsets = true,
-                AudioChannelCount = transcribeAudioFile.AudioChannels,
+                AudioChannelCount = transcribedAudioFile.AudioChannels,
                 EnableSeparateRecognitionPerChannel = true
             };
-            var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribeAudioFile.Path);
+            var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
 
             var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
             longOperation = await longOperation.PollUntilCompletedAsync().ConfigureAwait(false);
