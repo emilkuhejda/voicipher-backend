@@ -7,6 +7,7 @@ namespace Voicipher.Business.Utils
         private const string RecognitionProgressChangedMethod = "recognition-progress";
         private const string FilesListChangedMethod = "file-list";
         private const string RecognitionStateChangedMethod = "recognition-state";
+        private const string RecognitionErrorMethod = "recognition-error";
 
         public static string GetRecognitionProgressChangedMethod(Guid userId)
         {
@@ -21,6 +22,11 @@ namespace Voicipher.Business.Utils
         public static string GetRecognitionStateChangedMethod(Guid userId)
         {
             return $"{RecognitionStateChangedMethod}-{userId}";
+        }
+
+        public static string GetRecognitionErrorMethod(Guid userId)
+        {
+            return $"{RecognitionErrorMethod}-{userId}";
         }
     }
 }
