@@ -2,6 +2,7 @@
 {
     public enum BackgroundJobParameter
     {
-        DateUtc = 0
+        DateUtc = 0,
+        AudioFiles = 1
     }
 }

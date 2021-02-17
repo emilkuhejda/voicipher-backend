@@ -8,6 +8,6 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken);
 
-        Task SplitAudioFile(AudioFile audioFile, BackgroundJob backgroundJob, CancellationToken cancellationToken);
+        Task<TranscribeAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken);
     }
 }

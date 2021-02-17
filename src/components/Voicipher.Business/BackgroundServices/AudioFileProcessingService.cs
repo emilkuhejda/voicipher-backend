@@ -85,6 +85,7 @@ namespace Voicipher.Business.BackgroundServices
                         }
                         catch (Exception ex)
                         {
+                            _audioFileProcessingChannel.FinishProcessing(recognitionFile);
                             _logger.Fatal(ex, "Background job failed");
                         }
                     });

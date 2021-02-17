@@ -14,7 +14,7 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 
         Task DoProcessingAsync(CancellationToken cancellationToken);
 
-        Task DoCompleteAsync(CancellationToken cancellationToken);
+        void DoCompleteAsync(CancellationToken cancellationToken);
 
         Task SaveAsync(CancellationToken cancellationToken);
     }
