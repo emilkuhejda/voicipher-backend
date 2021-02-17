@@ -114,6 +114,7 @@ namespace Voicipher.Host
             // Hosted services
             services.AddHostedService<MailService>();
             services.AddHostedService<AudioFileProcessingService>();
+            services.AddHostedService<BackgroundJobStarterService>();
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
