@@ -11,7 +11,9 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Voicipher.Business.BackgroundServices;
 using Voicipher.Business.Polling;
+using Voicipher.Business.Services;
 using Voicipher.DataAccess;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Settings;
 using Voicipher.Host.Configuration;
 using Voicipher.Host.Extensions;
@@ -117,6 +119,17 @@ namespace Voicipher.Host
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new ApplicationModule());
+        }
+
+        public void ConfigureProductionContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new ApplicationModule());
+        }
+
+        public void ConfigureDevelopmentContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new ApplicationModule());
+            builder.RegisterType<FakeSpeechRecognitionService>().As<ISpeechRecognitionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,0 +1,36 @@
+﻿using System.Threading.Tasks;
+using Google.Cloud.Speech.V1;
+using Microsoft.Extensions.Options;
+using Serilog;
+using Voicipher.Domain.Models;
+using Voicipher.Domain.Settings;
+
+namespace Voicipher.Business.Services
+{
+    public class SpeechRecognitionService : SpeechRecognitionServiceBase
+    {
+        public SpeechRecognitionService(IOptions<AppSettings> options, ILogger logger)
+            : base(options, logger)
+        {
+        }
+
+        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
+        {
+            var recognitionConfig = new RecognitionConfig
+            {
+                Encoding = RecognitionConfig.Types.AudioEncoding.Linear16,
+                LanguageCode = language,
+                EnableAutomaticPunctuation = true,
+                UseEnhanced = true,
+                EnableWordTimeOffsets = true,
+                AudioChannelCount = transcribeAudioFile.AudioChannels,
+                EnableSeparateRecognitionPerChannel = true
+            };
+            var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribeAudioFile.Path);
+
+            var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
+            longOperation = await longOperation.PollUntilCompletedAsync().ConfigureAwait(false);
+            return longOperation.Result;
+        }
+    }
+}

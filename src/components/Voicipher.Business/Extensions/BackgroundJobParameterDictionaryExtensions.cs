@@ -27,10 +27,18 @@ namespace Voicipher.Business.Extensions
                 if (value.GetType() == typeof(T))
                     return (T)Convert.ChangeType(dictionary[parameter], typeof(T));
 
-                return JsonConvert.DeserializeObject<T>(value.ToString());
+                return JsonConvert.DeserializeObject<T>(value.ToString() ?? string.Empty);
             }
 
             return defaultValue;
+        }
+
+        public static void Remove(this Dictionary<BackgroundJobParameter, object> dictionary, BackgroundJobParameter parameter)
+        {
+            if (dictionary.ContainsKey(parameter))
+            {
+                dictionary.Remove(parameter);
+            }
         }
     }
 }
