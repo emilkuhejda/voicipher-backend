@@ -1,4 +1,6 @@
-﻿using Voicipher.Domain.Interfaces.Repositories;
+﻿using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
 namespace Voicipher.DataAccess.Repositories
@@ -8,6 +10,11 @@ namespace Voicipher.DataAccess.Repositories
         public InternalValueRepository(DatabaseContext context)
             : base(context)
         {
+        }
+
+        public Task<InternalValue> GetValueAsync(string key)
+        {
+            return Context.InternalValues.FirstOrDefaultAsync(x => x.Key == key);
         }
     }
 }
