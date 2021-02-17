@@ -36,7 +36,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
-                .ReturnsAsync(new[] { new TranscribeAudioFile() });
+                .ReturnsAsync(new[] { new TranscribedAudioFile() });
             audioFileRepositoryMock
                 .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
                 .ReturnsAsync(new AudioFile());
@@ -45,7 +45,7 @@ namespace Voicipher.Business.Tests.StateMachine
             {
                 {
                     BackgroundJobParameter.AudioFiles,
-                    new TranscribeAudioFile[]{new() {Id = Guid.NewGuid()}, new() {Id = Guid.NewGuid()}, new() {Id = Guid.NewGuid()}}
+                    new TranscribedAudioFile[]{new() {Id = Guid.NewGuid()}, new() {Id = Guid.NewGuid()}, new() {Id = Guid.NewGuid()}}
                 }
             };
 
@@ -87,7 +87,7 @@ namespace Voicipher.Business.Tests.StateMachine
             Assert.Equal(JobState.Completed, backgroundJob.JobState);
             Assert.Equal(1, backgroundJob.Attempt);
             Assert.NotEqual(DateTime.MinValue, backgroundJob.DateCompletedUtc);
-            Assert.Single(JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, TranscribeAudioFile[]>>(backgroundJob.Parameters));
+            Assert.Single(JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, TranscribedAudioFile[]>>(backgroundJob.Parameters));
         }
     }
 }

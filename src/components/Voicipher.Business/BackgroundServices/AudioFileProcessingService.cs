@@ -52,7 +52,12 @@ namespace Voicipher.Business.BackgroundServices
                         var updateRecognitionStateCommand = scope.ServiceProvider.GetRequiredService<IUpdateRecognitionStateCommand>();
                         var appSettings = scope.ServiceProvider.GetRequiredService<IOptions<AppSettings>>().Value;
 
-                        var parameters = new Dictionary<BackgroundJobParameter, object> { { BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc } };
+                        var parameters = new Dictionary<BackgroundJobParameter, object>
+                        {
+                            {BackgroundJobParameter.FileName, recognitionFile.FileName},
+                            {BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc},
+                        };
+
                         var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
                         createJobCommandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
                         isSuccess &= createJobCommandResult.IsSuccess;

@@ -14,7 +14,8 @@ namespace Voicipher.Business.Channels
 {
     public class AudioFileProcessingChannel : IAudioFileProcessingChannel
     {
-        private readonly ConcurrentDictionary<Guid, IList<RecognitionFile>> _cache = new ConcurrentDictionary<Guid, IList<RecognitionFile>>();
+        private readonly Dictionary<Guid, IList<RecognitionFile>> _cache = new();
+        private readonly ConcurrentDictionary<Guid, int> _progressCache = new();
         private readonly Channel<RecognitionFile> _channel;
         private readonly ILogger _logger;
 
@@ -40,6 +41,8 @@ namespace Voicipher.Business.Channels
                     _logger.Warning("Recognition file {JsonConvert.SerializeObject(recognitionFile)} was not added to cache");
                 }
 
+                _progressCache.TryAdd(recognitionFile.AudioFileId, 0);
+
                 if (_channel.Writer.TryWrite(recognitionFile))
                 {
                     _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
@@ -61,6 +64,8 @@ namespace Voicipher.Business.Channels
 
         public void FinishProcessing(RecognitionFile recognitionFile)
         {
+            _progressCache.TryRemove(recognitionFile.AudioFileId, out _);
+
             lock (_lockObject)
             {
                 if (_cache.ContainsKey(recognitionFile.UserId))
@@ -82,6 +87,22 @@ namespace Voicipher.Business.Channels
                     }
                 }
             }
+        }
+
+        public void UpdateProgress(Guid audioFileId, int progress)
+        {
+            _progressCache.TryGetValue(audioFileId, out var oldValue);
+            _progressCache.TryUpdate(audioFileId, progress, oldValue);
+        }
+
+        public int? GetProgress(Guid audioFile)
+        {
+            if (_progressCache.TryGetValue(audioFile, out int progress))
+            {
+                return progress;
+            }
+
+            return null;
         }
 
         private bool TryAddToCache(RecognitionFile recognitionFile)

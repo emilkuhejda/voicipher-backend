@@ -3,7 +3,7 @@ using SystemPath = System.IO.Path;
 
 namespace Voicipher.Domain.Models
 {
-    public record TranscribeAudioFile
+    public record TranscribedAudioFile
     {
         public Guid Id { get; set; }
 

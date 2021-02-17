@@ -15,5 +15,9 @@ namespace Voicipher.Domain.Interfaces.Channels
         bool IsProcessingForUser(Guid userId);
 
         void FinishProcessing(RecognitionFile recognitionFile);
+
+        void UpdateProgress(Guid audioFileId, int progress);
+
+        int? GetProgress(Guid audioFile);
     }
 }
