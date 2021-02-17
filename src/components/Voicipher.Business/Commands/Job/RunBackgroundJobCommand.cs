@@ -7,7 +7,6 @@ using Serilog;
 using Voicipher.Business.Infrastructure;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
-using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
@@ -18,7 +17,6 @@ namespace Voicipher.Business.Commands.Job
     public class RunBackgroundJobCommand : Command<BackgroundJobPayload, CommandResult>, IRunBackgroundJobCommand
     {
         private readonly IJobStateMachine _jobStateMachine;
-        private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -26,14 +24,12 @@ namespace Voicipher.Business.Commands.Job
 
         public RunBackgroundJobCommand(
             IJobStateMachine jobStateMachine,
-            IAudioFileProcessingChannel audioFileProcessingChannel,
             IBackgroundJobRepository backgroundJobRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             ILogger logger)
         {
             _jobStateMachine = jobStateMachine;
-            _audioFileProcessingChannel = audioFileProcessingChannel;
             _backgroundJobRepository = backgroundJobRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -58,7 +54,7 @@ namespace Voicipher.Business.Commands.Job
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
-                    await _jobStateMachine.DoCompleteAsync(cancellationToken);
+                    _jobStateMachine.DoCompleteAsync(cancellationToken);
 
                     _logger.Information($"Background job {parameter.Id} is completed");
 
@@ -68,8 +64,6 @@ namespace Voicipher.Business.Commands.Job
                 {
                     await _jobStateMachine.SaveAsync(cancellationToken);
                     await transaction.CommitAsync(cancellationToken);
-
-                    _audioFileProcessingChannel.FinishProcessing(recognitionFile);
                 }
             }
         }
