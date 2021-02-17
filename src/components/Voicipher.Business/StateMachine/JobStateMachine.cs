@@ -186,6 +186,7 @@ namespace Voicipher.Business.StateMachine
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
             _backgroundJob.Parameters = JsonConvert.SerializeObject(_backgroundJobParameter);
+
             await _unitOfWork.SaveAsync(cancellationToken);
         }
 
