@@ -117,10 +117,10 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoCompleteAsync(CancellationToken cancellationToken)
         {
-            var transcribeAudioFiles = _backgroundJobParameter.GetValue<TranscribeAudioFile[]>(BackgroundJobParameter.AudioFiles);
-            if (transcribeAudioFiles != null && transcribeAudioFiles.Any())
+            try
             {
-                try
+                var transcribeAudioFiles = _backgroundJobParameter.GetValue<TranscribeAudioFile[]>(BackgroundJobParameter.AudioFiles);
+                if (transcribeAudioFiles != null && transcribeAudioFiles.Any())
                 {
                     foreach (var transcribeAudioFile in transcribeAudioFiles)
                     {
@@ -134,17 +134,20 @@ namespace Voicipher.Business.StateMachine
 
                     _logger.Information($"Audio fIle ({transcribeAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
                 }
-                catch (RequestFailedException ex)
-                {
-                    _logger.Error(ex, "Blob storage is unavailable");
-                    throw;
-                }
+
+                _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
+                _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
+
+                //var blobSettings = new BlobSettings(_audioFile.Id, _audioFile.UserId);
+                //await _blobStorage.DeleteAudioFileAsync(blobSettings, cancellationToken);
+
+                TryChangeState(JobState.Completed);
             }
-
-            _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
-            _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
-
-            TryChangeState(JobState.Completed);
+            catch (RequestFailedException ex)
+            {
+                _logger.Error(ex, "Blob storage is unavailable");
+                throw;
+            }
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)
