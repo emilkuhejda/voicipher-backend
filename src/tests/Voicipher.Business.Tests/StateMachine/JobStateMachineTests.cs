@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Autofac.Features.Indexed;
-using AutoMapper;
 using Moq;
 using Newtonsoft.Json;
 using Serilog;
@@ -65,11 +63,9 @@ namespace Voicipher.Business.Tests.StateMachine
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
                 Mock.Of<IBlobStorage>(),
-                Mock.Of<IIndex<StorageLocation, IDiskStorage>>(),
                 Mock.Of<IAudioFileRepository>(),
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
-                Mock.Of<IMapper>(),
                 Mock.Of<ILogger>());
 
             // Act
@@ -77,7 +73,7 @@ namespace Voicipher.Business.Tests.StateMachine
             await jobStateMachine.DoValidationAsync(default);
             await jobStateMachine.DoConvertingAsync(default);
             await jobStateMachine.DoProcessingAsync(default);
-            jobStateMachine.DoCompleteAsync(default);
+            await jobStateMachine.DoCompleteAsync(default);
             await jobStateMachine.SaveAsync(default);
 
             // Assert

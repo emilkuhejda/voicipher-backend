@@ -58,7 +58,7 @@ namespace Voicipher.Business.Commands.Job
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
-                    _jobStateMachine.DoCompleteAsync(cancellationToken);
+                    await _jobStateMachine.DoCompleteAsync(cancellationToken);
 
                     _logger.Information($"Background job {parameter.Id} is completed");
 

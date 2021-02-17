@@ -3,7 +3,6 @@
     public enum BackgroundJobParameter
     {
         DateUtc = 0,
-        AudioFiles = 1,
-        TranscribeItems = 2
+        AudioFiles = 1
     }
 }

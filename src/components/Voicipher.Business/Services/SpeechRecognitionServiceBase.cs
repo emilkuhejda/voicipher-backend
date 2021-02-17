@@ -60,7 +60,6 @@ namespace Voicipher.Business.Services
                 .SelectMany(x => x.Alternatives)
                 .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
 
-            var sourceFileName = Path.GetFileName(transcribeAudioFile.Path);
             var dateCreated = DateTime.UtcNow;
             var transcribeItem = new TranscribeItem
             {
@@ -68,7 +67,7 @@ namespace Voicipher.Business.Services
                 AudioFileId = transcribeAudioFile.AudioFileId,
                 ApplicationId = _appSettings.ApplicationId,
                 Alternatives = JsonConvert.SerializeObject(alternatives),
-                SourceFileName = sourceFileName,
+                SourceFileName = transcribeAudioFile.SourceFileName,
                 Storage = StorageSetting.Azure,
                 StartTime = transcribeAudioFile.StartTime,
                 EndTime = transcribeAudioFile.EndTime,
