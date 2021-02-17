@@ -3,39 +3,54 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
+using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
+using Voicipher.Domain.Payloads.Job;
 
 namespace Voicipher.Business.BackgroundServices
 {
     public class BackgroundJobStarterService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IBackgroundJobRepository _backgroundJobRepository;
-        private readonly ILogger _logger;
 
-        public BackgroundJobStarterService(
-            IServiceProvider serviceProvider,
-            IBackgroundJobRepository backgroundJobRepository,
-            ILogger logger)
+        public BackgroundJobStarterService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _backgroundJobRepository = backgroundJobRepository;
-            _logger = logger.ForContext<BackgroundJobStarterService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield();
 
-            var jobs = await _backgroundJobRepository.GetJobsForRestartAsync(stoppingToken);
-            if (jobs.Any())
+            using (var scope = _serviceProvider.CreateScope())
             {
-                _logger.Information($"{jobs.Length} background jobs for restart");
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger>().ForContext<BackgroundJobStarterService>();
+                var backgroundJobRepository = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
+                var backgroundJobs = await backgroundJobRepository.GetJobsForRestartAsync(stoppingToken);
+                if (backgroundJobs.Any())
+                {
+                    logger.Information($"{backgroundJobs.Length} background jobs for restart");
+
+                    foreach (var backgroundJob in backgroundJobs)
+                    {
+                        try
+                        {
+                            var runBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<IRunBackgroundJobCommand>();
+                            var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                            var backgroundJobPayload = mapper.Map<BackgroundJobPayload>(backgroundJob);
+                            await runBackgroundJobCommand.ExecuteAsync(backgroundJobPayload, null, stoppingToken);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Fatal(ex, "Background job failed");
+                        }
+                    }
+                }
             }
 
             using (var scope = _serviceProvider.CreateScope())
