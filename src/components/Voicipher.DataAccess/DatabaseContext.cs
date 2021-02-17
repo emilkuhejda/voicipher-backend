@@ -51,6 +51,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<BackgroundJob> BackgroundJobs { get; set; }
 
+        public DbSet<InternalValue> InternalValues { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
@@ -77,6 +79,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
             modelBuilder.ApplyConfiguration(new ContactFormConfiguration());
             modelBuilder.ApplyConfiguration(new BackgroundJobConfiguration());
+            modelBuilder.ApplyConfiguration(new InternalValueConfiguration());
         }
     }
 }

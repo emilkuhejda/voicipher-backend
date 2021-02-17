@@ -40,6 +40,9 @@ namespace Voicipher.Business.Profiles
                     u => u.AudioFiles,
                     opt => opt.Ignore())
                 .ForMember(
+                    u => u.BillingPurchases,
+                    opt => opt.Ignore())
+                .ForMember(
                     u => u.UserDevices,
                     opt => opt.Ignore())
                 .AfterMap((m, u) =>
