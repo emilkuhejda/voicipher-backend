@@ -169,6 +169,9 @@ namespace Voicipher.Business.StateMachine
                 var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
                 await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
+                _audioFile.OriginalSourceFileName = string.Empty;
+                _audioFile.SourceFileName = string.Empty;
+
                 TryChangeState(JobState.Completed);
             }
             catch (RequestFailedException ex)
