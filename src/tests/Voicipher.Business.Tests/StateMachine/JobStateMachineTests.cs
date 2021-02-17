@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using AutoMapper;
 using Moq;
 using Newtonsoft.Json;
@@ -63,7 +64,9 @@ namespace Voicipher.Business.Tests.StateMachine
                 canRunRecognitionCommandMock.Object,
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
-                audioFileRepositoryMock.Object,
+                Mock.Of<IBlobStorage>(),
+                Mock.Of<IIndex<StorageLocation, IDiskStorage>>(),
+                Mock.Of<IAudioFileRepository>(),
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
                 Mock.Of<IMapper>(),
