@@ -17,5 +17,9 @@ namespace Voicipher.Domain.Settings
         public MailConfiguration MailConfiguration { get; set; }
 
         public AzureRecognitionSpeechConfiguration AzureSpeechConfiguration { get; set; }
+
+        public string GoogleApiAuthUri { get; set; }
+
+        public SpeechCredentials SpeechCredentials { get; set; }
     }
 }

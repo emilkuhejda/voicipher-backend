@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Newtonsoft.Json;
+using Serilog;
 using Voicipher.Business.StateMachine;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
@@ -60,8 +61,11 @@ namespace Voicipher.Business.Tests.StateMachine
             var jobStateMachine = new JobStateMachine(
                 canRunRecognitionCommandMock.Object,
                 wavFileServiceMock.Object,
+                Mock.Of<ISpeechRecognitionService>(),
                 audioFileRepositoryMock.Object,
-                unitOfWorkMock.Object);
+                Mock.Of<ITranscribeItemRepository>(),
+                unitOfWorkMock.Object,
+                Mock.Of<ILogger>());
 
             // Act
             jobStateMachine.DoInit(backgroundJob);

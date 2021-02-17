@@ -23,7 +23,9 @@ namespace Voicipher.Business.StateMachine
     {
         private readonly ICanRunRecognitionCommand _canRunRecognitionCommand;
         private readonly IWavFileService _wavFileService;
+        private readonly ISpeechRecognitionService _speechRecognitionService;
         private readonly IAudioFileRepository _audioFileRepository;
+        private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
@@ -34,13 +36,17 @@ namespace Voicipher.Business.StateMachine
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
             IWavFileService wavFileService,
+            ISpeechRecognitionService speechRecognitionService,
             IAudioFileRepository audioFileRepository,
+            ITranscribeItemRepository transcribeItemRepository,
             IUnitOfWork unitOfWork,
             ILogger logger)
         {
             _canRunRecognitionCommand = canRunRecognitionCommand;
             _wavFileService = wavFileService;
+            _speechRecognitionService = speechRecognitionService;
             _audioFileRepository = audioFileRepository;
+            _transcribeItemRepository = transcribeItemRepository;
             _unitOfWork = unitOfWork;
             _logger = logger.ForContext<JobStateMachine>();
         }
@@ -95,6 +101,9 @@ namespace Voicipher.Business.StateMachine
             _audioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
             _logger.Information($"Transcribed time audio file '{_audioFile.Id}' was updated to {transcribedTime}");
+
+            var transcribeItems = await _speechRecognitionService.RecognizeAsync(transcribeAudioFiles, _audioFile.Language, cancellationToken);
+            await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
 
             TryChangeState(JobState.Processed);
         }
