@@ -31,5 +31,9 @@
     <ProjectReference Include="..\..\components\Voicipher.Domain\Voicipher.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Logs\" />
+  </ItemGroup>
+
 
 </Project>

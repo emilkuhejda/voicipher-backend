@@ -98,7 +98,7 @@ namespace Voicipher.Business.Commands.Audio
 
             _logger.Information($"Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
 
-            await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(userId, audioFile.Id));
+            await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(userId, audioFile.Id, audioFile.FileName));
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
