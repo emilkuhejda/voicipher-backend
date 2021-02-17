@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
 using Serilog;
@@ -8,11 +9,13 @@ using Voicipher.Business.StateMachine;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
+using Voicipher.Domain.Settings;
 using Xunit;
 
 namespace Voicipher.Business.Tests.StateMachine
@@ -60,12 +63,15 @@ namespace Voicipher.Business.Tests.StateMachine
 
             var jobStateMachine = new JobStateMachine(
                 canRunRecognitionCommandMock.Object,
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
                 Mock.Of<IBlobStorage>(),
                 Mock.Of<IAudioFileRepository>(),
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
+                Mock.Of<IOptions<AppSettings>>(),
                 Mock.Of<ILogger>());
 
             // Act

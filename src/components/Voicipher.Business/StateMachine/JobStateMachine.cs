@@ -6,29 +6,37 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
+using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
+using Voicipher.Domain.Payloads.Transcription;
+using Voicipher.Domain.Settings;
 
 namespace Voicipher.Business.StateMachine
 {
     public class JobStateMachine : IJobStateMachine
     {
         private readonly ICanRunRecognitionCommand _canRunRecognitionCommand;
+        private readonly IModifySubscriptionTimeCommand _modifySubscriptionTimeCommand;
+        private readonly IUpdateRecognitionStateCommand _updateRecognitionStateCommand;
         private readonly IWavFileService _wavFileService;
         private readonly ISpeechRecognitionService _speechRecognitionService;
         private readonly IBlobStorage _blobStorage;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         private BackgroundJob _backgroundJob;
@@ -37,21 +45,27 @@ namespace Voicipher.Business.StateMachine
 
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
+            IModifySubscriptionTimeCommand modifySubscriptionTimeCommand,
+            IUpdateRecognitionStateCommand updateRecognitionStateCommand,
             IWavFileService wavFileService,
             ISpeechRecognitionService speechRecognitionService,
             IBlobStorage blobStorage,
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
             IUnitOfWork unitOfWork,
+            IOptions<AppSettings> options,
             ILogger logger)
         {
             _canRunRecognitionCommand = canRunRecognitionCommand;
+            _modifySubscriptionTimeCommand = modifySubscriptionTimeCommand;
+            _updateRecognitionStateCommand = updateRecognitionStateCommand;
             _wavFileService = wavFileService;
             _speechRecognitionService = speechRecognitionService;
             _blobStorage = blobStorage;
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
             _unitOfWork = unitOfWork;
+            _appSettings = options.Value;
             _logger = logger.ForContext<JobStateMachine>();
         }
 
@@ -138,8 +152,22 @@ namespace Voicipher.Business.StateMachine
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
                 _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
 
-                //var blobSettings = new BlobSettings(_audioFile.Id, _audioFile.UserId);
-                //await _blobStorage.DeleteAudioFileAsync(blobSettings, cancellationToken);
+                var blobSettings = new BlobSettings(_audioFile.Id, _audioFile.UserId);
+                await _blobStorage.DeleteAudioFileAsync(blobSettings, cancellationToken);
+
+                var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
+                {
+                    UserId = _audioFile.UserId,
+                    ApplicationId = _appSettings.ApplicationId,
+                    Time = _audioFile.TranscribedTime,
+                    Operation = SubscriptionOperation.Remove
+                };
+                var modifySubscriptionCommandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, null, cancellationToken);
+                if (!modifySubscriptionCommandResult.IsSuccess)
+                    throw new OperationErrorException(modifySubscriptionCommandResult.Error.ErrorCode);
+
+                var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
+                await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
                 TryChangeState(JobState.Completed);
             }
