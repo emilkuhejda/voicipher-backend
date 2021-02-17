@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Serilog;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Common.Utils;
@@ -18,16 +19,16 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class DeleteFileChunkCommand : Command<DeleteFileChunkPayload, CommandResult<OkOutputModel>>, IDeleteFileChunkCommand
     {
-        private readonly IChunkStorage _chunkStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly IFileChunkRepository _fileChunkRepository;
         private readonly ILogger _logger;
 
         public DeleteFileChunkCommand(
-            IChunkStorage chunkStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IFileChunkRepository fileChunkRepository,
             ILogger logger)
         {
-            _chunkStorage = chunkStorage;
+            _diskStorage = index[StorageLocation.Chunk];
             _fileChunkRepository = fileChunkRepository;
             _logger = logger.ForContext<DeleteFileChunkCommand>();
         }
@@ -45,7 +46,7 @@ namespace Voicipher.Business.Commands.Audio
             {
                 var fileChunks = await _fileChunkRepository.GetByAudioFileIdAsync(parameter.AudioFileId);
 
-                _chunkStorage.RemoveRange(fileChunks);
+                _diskStorage.RemoveRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 

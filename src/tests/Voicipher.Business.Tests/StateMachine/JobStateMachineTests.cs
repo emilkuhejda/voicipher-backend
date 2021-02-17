@@ -9,6 +9,7 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 using Xunit;
@@ -21,16 +22,17 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task TestStateMachine()
         {
             // Arrange
-            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var wavFileServiceMock = new Mock<IWavFileService>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
 
-            audioFileRepositoryMock
-                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
-                .Returns(Task.FromResult(new AudioFile()));
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
                 .Returns(Task.FromResult(new CommandResult()));
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .Returns(Task.FromResult(new AudioFile()));
 
             var backgroundJob = new BackgroundJob
             {
@@ -38,13 +40,17 @@ namespace Voicipher.Business.Tests.StateMachine
                 UserId = Guid.NewGuid(),
                 AudioFileId = Guid.NewGuid(),
                 JobState = JobState.Idle,
-                Attempt = 1,
+                Attempt = 0,
                 Parameters = JsonConvert.SerializeObject(new Dictionary<BackgroundJobParameter, object>()),
                 DateCreatedUtc = DateTime.UtcNow,
                 DateCompletedUtc = DateTime.MinValue
             };
 
-            var jobStateMachine = new JobStateMachine(audioFileRepositoryMock.Object, canRunRecognitionCommandMock.Object, unitOfWorkMock.Object);
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                wavFileServiceMock.Object,
+                audioFileRepositoryMock.Object,
+                unitOfWorkMock.Object);
 
             // Act
             jobStateMachine.DoInit(backgroundJob);
