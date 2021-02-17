@@ -40,7 +40,7 @@ namespace Voicipher.Business.Services
 
         public async Task<string> UploadAsync(UploadBlobSettings blobSettings, CancellationToken cancellationToken)
         {
-            var fileName = $"{Guid.NewGuid()}.voc";
+            var fileName = string.IsNullOrWhiteSpace(blobSettings.FileName) ? $"{Guid.NewGuid()}.voc" : blobSettings.FileName;
             var filePath = Path.Combine(blobSettings.AudioFileId, fileName);
             var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);

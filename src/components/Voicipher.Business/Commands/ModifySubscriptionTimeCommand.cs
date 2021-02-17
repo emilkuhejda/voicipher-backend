@@ -42,7 +42,7 @@ namespace Voicipher.Business.Commands
 
         protected override async Task<CommandResult> Execute(ModifySubscriptionTimePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var userId = principal.GetNameIdentifier();
+            var userId = parameter.UserId;
             var userSubscription = _mapper.Map<UserSubscription>(parameter);
 
             if (!userSubscription.Validate().IsValid)

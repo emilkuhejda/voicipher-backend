@@ -15,6 +15,11 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
+        public Task AddRangeAsync(TranscribeItem[] transcribeItems, CancellationToken cancellationToken)
+        {
+            return Context.TranscribeItems.AddRangeAsync(transcribeItems, cancellationToken);
+        }
+
         public Task<TranscribeItem[]> GetAllByAudioFileIdAsync(Guid audioFileId, CancellationToken cancellationToken)
         {
             return Context.TranscribeItems

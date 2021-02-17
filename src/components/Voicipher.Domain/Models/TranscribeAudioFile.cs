@@ -1,4 +1,5 @@
 ﻿using System;
+using SystemPath = System.IO.Path;
 
 namespace Voicipher.Domain.Models
 {
@@ -9,6 +10,8 @@ namespace Voicipher.Domain.Models
         public Guid AudioFileId { get; set; }
 
         public string Path { get; set; }
+
+        public string SourceFileName => string.IsNullOrWhiteSpace(Path) ? string.Empty : SystemPath.GetFileName(Path);
 
         public int AudioChannels { get; set; }
 

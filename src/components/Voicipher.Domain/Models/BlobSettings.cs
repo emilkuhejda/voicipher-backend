@@ -16,12 +16,20 @@ namespace Voicipher.Domain.Models
     public record UploadBlobSettings : BlobSettings
     {
         public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId)
+            : this(filePath, userId, audioFileId, string.Empty)
+        {
+        }
+
+        public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId, string fileName)
             : base(audioFileId, userId)
         {
             FilePath = filePath;
+            FileName = fileName;
         }
 
         public string FilePath { get; }
+
+        public string FileName { get; }
     }
 
     public record DeleteBlobSettings : BlobSettings

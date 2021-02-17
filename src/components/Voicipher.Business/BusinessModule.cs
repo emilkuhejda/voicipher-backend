@@ -39,6 +39,7 @@ namespace Voicipher.Business
             builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
             builder.RegisterType<AudioService>().As<IAudioService>();
             builder.RegisterType<WavFileService>().As<IWavFileService>();
+            builder.RegisterType<SpeechRecognitionService>().As<ISpeechRecognitionService>();
 
             builder.RegisterType<ChunkStorage>().Keyed<IDiskStorage>(StorageLocation.Chunk);
             builder.RegisterType<AudioStorage>().Keyed<IDiskStorage>(StorageLocation.Audio);

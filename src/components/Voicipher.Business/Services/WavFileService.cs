@@ -89,7 +89,11 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            return SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+            var transcribeAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+
+            File.Delete(wavFilePath);
+
+            return transcribeAudioFiles;
         }
 
         private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath)
@@ -114,22 +118,40 @@ namespace Voicipher.Business.Services
             var transcribeAudioFiles = new List<TranscribeAudioFile>();
             var processedTime = TimeSpan.Zero;
 
-            using (var stream = new MemoryStream(inputFile))
-            using (var reader = new WaveFileReader(stream))
+            try
             {
-                var countItems = (int)Math.Floor(reader.TotalTime.TotalSeconds / FileLengthInSeconds);
-
-                for (var i = 0; i <= countItems; i++)
+                using (var stream = new MemoryStream(inputFile))
+                using (var reader = new WaveFileReader(stream))
                 {
-                    var processedSample = ProcessAudioSample(reader, remainingTime, processedTime, audioFileId);
-                    if (processedSample.sampleDuration.Ticks <= 0)
-                        return transcribeAudioFiles;
+                    var countItems = (int)Math.Floor(reader.TotalTime.TotalSeconds / FileLengthInSeconds);
 
-                    processedTime = processedTime.Add(processedSample.sampleDuration);
-                    transcribeAudioFiles.Add(processedSample.transcribeAudioFile);
+                    for (var i = 0; i <= countItems; i++)
+                    {
+                        var processedSample = ProcessAudioSample(reader, remainingTime, processedTime, audioFileId);
+                        if (processedSample.sampleDuration.Ticks <= 0)
+                            return transcribeAudioFiles;
+
+                        processedTime = processedTime.Add(processedSample.sampleDuration);
+                        transcribeAudioFiles.Add(processedSample.transcribeAudioFile);
+                    }
+
+                    return transcribeAudioFiles;
+                }
+            }
+            catch (Exception)
+            {
+                _logger.Error($"Remove wav audio files ({transcribeAudioFiles.Count}) from disk storage");
+
+                if (transcribeAudioFiles.Any())
+                {
+                    foreach (var audioFile in transcribeAudioFiles)
+                    {
+                        if (File.Exists(audioFile.Path))
+                            File.Delete(audioFile.Path);
+                    }
                 }
 
-                return transcribeAudioFiles;
+                throw;
             }
         }
 
