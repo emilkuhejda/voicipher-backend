@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using AutoMapper;
 using Moq;
 using Newtonsoft.Json;
 using Serilog;
@@ -65,6 +66,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
+                Mock.Of<IMapper>(),
                 Mock.Of<ILogger>());
 
             // Act
