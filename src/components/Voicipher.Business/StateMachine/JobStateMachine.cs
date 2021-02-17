@@ -108,8 +108,6 @@ namespace Voicipher.Business.StateMachine
         {
             TryChangeState(JobState.Processing);
 
-            _logger.Information("Start uploading transcribed audio files to blob storage");
-
             var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
             if (transcribedAudioFiles == null || !transcribedAudioFiles.Any() || transcribedAudioFiles.Any(x => !File.Exists(x.Path)))
             {
@@ -135,6 +133,8 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
+                _logger.Information("Start uploading transcribed audio files to blob storage");
+
                 var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
                 if (transcribedAudioFiles != null && transcribedAudioFiles.Any())
                 {
@@ -148,7 +148,7 @@ namespace Voicipher.Business.StateMachine
                         }
                     }
 
-                    _logger.Information($"Audio fIle ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+                    _logger.Information($"Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
                 }
 
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
