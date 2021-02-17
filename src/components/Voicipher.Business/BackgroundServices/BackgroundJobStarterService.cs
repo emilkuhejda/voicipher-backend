@@ -17,10 +17,14 @@ namespace Voicipher.Business.BackgroundServices
     public class BackgroundJobStarterService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger _logger;
 
-        public BackgroundJobStarterService(IServiceProvider serviceProvider)
+        public BackgroundJobStarterService(
+            IServiceProvider serviceProvider,
+            ILogger logger)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger.ForContext<BackgroundJobStarterService>();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,12 +33,11 @@ namespace Voicipher.Business.BackgroundServices
 
             using (var scope = _serviceProvider.CreateScope())
             {
-                var logger = scope.ServiceProvider.GetRequiredService<ILogger>().ForContext<BackgroundJobStarterService>();
                 var backgroundJobRepository = scope.ServiceProvider.GetRequiredService<IBackgroundJobRepository>();
                 var backgroundJobs = await backgroundJobRepository.GetJobsForRestartAsync(stoppingToken);
                 if (backgroundJobs.Any())
                 {
-                    logger.Information($"{backgroundJobs.Length} background jobs for restart");
+                    _logger.Information($"{backgroundJobs.Length} background jobs for restart");
 
                     foreach (var backgroundJob in backgroundJobs)
                     {
@@ -47,7 +50,7 @@ namespace Voicipher.Business.BackgroundServices
                         }
                         catch (Exception ex)
                         {
-                            logger.Fatal(ex, "Background job failed");
+                            _logger.Fatal(ex, "Background job failed");
                         }
                     }
                 }
