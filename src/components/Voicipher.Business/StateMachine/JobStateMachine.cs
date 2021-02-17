@@ -108,6 +108,8 @@ namespace Voicipher.Business.StateMachine
         {
             TryChangeState(JobState.Processing);
 
+            _logger.Information("Start uploading transcribed audio files to blob storage");
+
             var transcribeAudioFiles = _backgroundJobParameter.GetValue<TranscribeAudioFile[]>(BackgroundJobParameter.AudioFiles);
             if (transcribeAudioFiles == null || !transcribeAudioFiles.Any() || transcribeAudioFiles.Any(x => !File.Exists(x.Path)))
             {
