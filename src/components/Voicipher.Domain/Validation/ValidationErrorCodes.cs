@@ -16,6 +16,8 @@
 
         public static string NotEnoughSubscriptionTime => nameof(NotEnoughSubscriptionTime);
 
+        public static string OperationFailed => nameof(OperationFailed);
+
         public static string InvalidId => nameof(InvalidId);
 
         public static string InvalidDateTime => nameof(InvalidDateTime);

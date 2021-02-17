@@ -15,6 +15,7 @@ using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Payloads.Job;
 using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Validation;
 
 namespace Voicipher.Business.BackgroundServices
 {
@@ -40,11 +41,11 @@ namespace Voicipher.Business.BackgroundServices
             {
                 _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was started processing");
 
+                CommandResult<BackgroundJobPayload> createJobCommandResult;
+                var isSuccess = true;
+
                 try
                 {
-                    CommandResult<BackgroundJobPayload> createJobCommandResult;
-                    var isSuccess = true;
-
                     using (var scope = _serviceProvider.CreateScope())
                     {
                         var createBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<ICreateBackgroundJobCommand>();
@@ -60,30 +61,33 @@ namespace Voicipher.Business.BackgroundServices
                         var updateStateCommandResult = await updateRecognitionStateCommand.ExecuteAsync(payload, null, stoppingToken);
                         isSuccess &= updateStateCommandResult.IsSuccess;
                     }
-
-
-                    if (isSuccess)
-                    {
-                        Task.Run(async () =>
-                        {
-                            try
-                            {
-                                using (var scope = _serviceProvider.CreateScope())
-                                {
-                                    var runBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<IRunBackgroundJobCommand>();
-                                    await runBackgroundJobCommand.ExecuteAsync(createJobCommandResult.Value, null, stoppingToken);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.Fatal(ex, "Background job failed");
-                            }
-                        });
-                    }
                 }
                 catch (Exception ex)
                 {
                     _logger.Fatal(ex, "Background job initialization failed");
+
+                    createJobCommandResult = new CommandResult<BackgroundJobPayload>(new OperationError(ValidationErrorCodes.OperationFailed));
+                    isSuccess = false;
+                }
+
+
+                if (isSuccess)
+                {
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            using (var scope = _serviceProvider.CreateScope())
+                            {
+                                var runBackgroundJobCommand = scope.ServiceProvider.GetRequiredService<IRunBackgroundJobCommand>();
+                                await runBackgroundJobCommand.ExecuteAsync(createJobCommandResult.Value, null, stoppingToken);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.Fatal(ex, "Background job failed");
+                        }
+                    });
                 }
             }
         }
