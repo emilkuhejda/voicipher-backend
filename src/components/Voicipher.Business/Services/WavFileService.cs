@@ -36,6 +36,13 @@ namespace Voicipher.Business.Services
         {
             _logger.Information($"Start conversion audio file {audioFile.Id} to wav format");
 
+            var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            if (File.Exists(sourceFileNamePath))
+            {
+                _logger.Information($"Source wav file is already exists in destination in destination {sourceFileNamePath}");
+                return;
+            }
+
             var tempFilePath = string.Empty;
             try
             {
@@ -62,6 +69,13 @@ namespace Voicipher.Business.Services
                     File.Delete(tempFilePath);
                 }
             }
+        }
+
+        public async Task SplitAudioFile(AudioFile audioFile, BackgroundJob backgroundJob, CancellationToken cancellationToken)
+        {
+            var wavFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            if (!File.Exists(wavFilePath))
+                throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
         }
 
         public async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath)
