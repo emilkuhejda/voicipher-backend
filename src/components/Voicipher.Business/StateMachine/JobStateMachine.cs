@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
@@ -24,6 +25,7 @@ namespace Voicipher.Business.StateMachine
         private readonly IWavFileService _wavFileService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger _logger;
 
         private BackgroundJob _backgroundJob;
         private AudioFile _audioFile;
@@ -33,12 +35,14 @@ namespace Voicipher.Business.StateMachine
             ICanRunRecognitionCommand canRunRecognitionCommand,
             IWavFileService wavFileService,
             IAudioFileRepository audioFileRepository,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            ILogger logger)
         {
             _canRunRecognitionCommand = canRunRecognitionCommand;
             _wavFileService = wavFileService;
             _audioFileRepository = audioFileRepository;
             _unitOfWork = unitOfWork;
+            _logger = logger.ForContext<JobStateMachine>();
         }
 
         private JobState CurrentState => _backgroundJob.JobState;
@@ -86,6 +90,11 @@ namespace Voicipher.Business.StateMachine
                 transcribeAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
                 _backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribeAudioFiles);
             }
+
+            var transcribedTime = transcribeAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
+            _audioFile.TranscribedTime = transcribedTime;
+            await _unitOfWork.SaveAsync(cancellationToken);
+            _logger.Information($"Transcribed time audio file '{_audioFile.Id}' was updated to {transcribedTime}");
 
             TryChangeState(JobState.Processed);
         }
