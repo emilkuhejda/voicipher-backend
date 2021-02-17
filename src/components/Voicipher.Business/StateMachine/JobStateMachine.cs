@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Voicipher.Business.Extensions;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
@@ -23,6 +27,7 @@ namespace Voicipher.Business.StateMachine
 
         private BackgroundJob _backgroundJob;
         private AudioFile _audioFile;
+        private Dictionary<BackgroundJobParameter, object> _backgroundJobParameter = new();
 
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
@@ -43,6 +48,8 @@ namespace Voicipher.Business.StateMachine
             _backgroundJob = backgroundJob;
             _backgroundJob.Attempt += 1;
             _backgroundJob.JobState = JobState.Idle;
+
+            _backgroundJobParameter = JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, object>>(backgroundJob.Parameters);
 
             TryChangeState(JobState.Initialized);
         }
@@ -72,24 +79,27 @@ namespace Voicipher.Business.StateMachine
         public async Task DoProcessingAsync(CancellationToken cancellationToken)
         {
             TryChangeState(JobState.Processing);
-            await Task.CompletedTask;
+
+            var transcribeAudioFiles = _backgroundJobParameter.GetValue<TranscribeAudioFile[]>(BackgroundJobParameter.AudioFiles);
+            if (transcribeAudioFiles == null || !transcribeAudioFiles.Any() || transcribeAudioFiles.Any(x => !File.Exists(x.Path)))
+            {
+                transcribeAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
+                _backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribeAudioFiles);
+            }
+
             TryChangeState(JobState.Processed);
         }
 
-        public async Task DoCompleteAsync(CancellationToken cancellationToken)
+        public void DoCompleteAsync(CancellationToken cancellationToken)
         {
             _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
 
             TryChangeState(JobState.Completed);
-
-            await _unitOfWork.SaveAsync(cancellationToken);
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
-            if (CurrentState == JobState.Completed)
-                return;
-
+            _backgroundJob.Parameters = JsonConvert.SerializeObject(_backgroundJobParameter);
             await _unitOfWork.SaveAsync(cancellationToken);
         }
 
