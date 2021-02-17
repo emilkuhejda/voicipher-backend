@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -14,8 +15,10 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
+        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribeAudioFile transcribeAudioFile, string language)
         {
+            await Task.Delay(TimeSpan.FromSeconds(10));
+
             var response = new LongRunningRecognizeResponse
             {
                 Results =
@@ -34,7 +37,7 @@ namespace Voicipher.Business.Services
                 }
             };
 
-            return Task.FromResult(response);
+            return response;
         }
     }
 }
