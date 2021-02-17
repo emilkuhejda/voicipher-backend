@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Azure;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -16,17 +17,20 @@ namespace Voicipher.Business.Services
     {
         private readonly IUpdateRecognitionStateCommand _updateRecognitionStateCommand;
         private readonly IBlobStorage _blobStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         public WavFileService(
             IUpdateRecognitionStateCommand updateRecognitionStateCommand,
             IBlobStorage blobStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _updateRecognitionStateCommand = updateRecognitionStateCommand;
             _blobStorage = blobStorage;
+            _diskStorage = index[StorageLocation.Chunk];
             _appSettings = options.Value;
             _logger = logger.ForContext<WavFileService>();
         }
