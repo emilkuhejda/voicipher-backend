@@ -66,7 +66,7 @@ namespace Voicipher.Business.Commands.Audio
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.AudioFileId}' was not found");
+                _logger.Error($"Audio file {parameter.AudioFileId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
@@ -93,7 +93,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"Audio file '{audioFile.FileName}' is not supported");
+                    _logger.Error($"Audio file {audioFile.FileName} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
@@ -113,7 +113,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"Audio file '{audioFile.Id}' was successfully submitted");
+                _logger.Information($"Audio file {audioFile.Id} was successfully submitted");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);

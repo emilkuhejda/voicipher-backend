@@ -47,14 +47,14 @@ namespace Voicipher.Business.Commands.ControlPanel
             var administrator = await _administratorRepository.GetByNameAsync(parameter.Username, cancellationToken);
             if (administrator == null)
             {
-                _logger.Error($"Administrator '{parameter.Username}' was not found.");
+                _logger.Error($"Administrator {parameter.Username} was not found.");
 
                 return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.AdministratorNotFound));
             }
 
             if (!PasswordHelper.VerifyPasswordHash(parameter.Password, administrator.PasswordHash, administrator.PasswordSalt))
             {
-                _logger.Error($"Password verification failed for administrator '{parameter.Username}'.");
+                _logger.Error($"Password verification failed for administrator {parameter.Username}");
 
                 return new CommandResult<AdministratorTokenOutputModel>(new OperationError(ValidationErrorCodes.InvalidPassword));
             }

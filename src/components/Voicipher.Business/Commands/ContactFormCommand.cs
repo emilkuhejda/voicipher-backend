@@ -51,7 +51,7 @@ namespace Voicipher.Business.Commands
             await _contactFormRepository.AddAsync(contactForm);
             await _contactFormRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Contact '{contactForm.Id}' form was created");
+            _logger.Information($"Contact {contactForm.Id} form was created");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

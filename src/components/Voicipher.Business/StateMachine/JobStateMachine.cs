@@ -97,7 +97,7 @@ namespace Voicipher.Business.StateMachine
 
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(_backgroundJob.UserId), null, cancellationToken);
             if (!canRunRecognitionResult.IsSuccess)
-                throw new InvalidOperationException($"User ID '{_backgroundJob.UserId}' does not have enough free minutes in the subscription");
+                throw new InvalidOperationException($"User ID {_backgroundJob.UserId} does not have enough free minutes in the subscription");
 
             TryChangeState(JobState.Validated);
         }
@@ -121,7 +121,7 @@ namespace Voicipher.Business.StateMachine
             var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             _audioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
-            _logger.Information($"Transcribed time audio file '{_audioFile.Id}' was updated to {transcribedTime}");
+            _logger.Information($"Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
 
             var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribedAudioFiles, cancellationToken);
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);

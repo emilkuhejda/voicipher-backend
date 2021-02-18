@@ -63,7 +63,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language '{parameter.Language}' is not supported.");
+                    _logger.Error($"Language {parameter.Language} is not supported.");
 
                     throw new OperationErrorException(ErrorCode.EC200);
                 }

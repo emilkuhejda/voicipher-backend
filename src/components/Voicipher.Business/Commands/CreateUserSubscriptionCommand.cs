@@ -99,7 +99,7 @@ namespace Voicipher.Business.Commands
             var subscriptionProduct = SubscriptionProducts.All.FirstOrDefault(x => x.Id == billingPurchase.ProductId);
             if (subscriptionProduct == null)
             {
-                _logger.Error($"Product ID '{billingPurchase.ProductId}' not exists.");
+                _logger.Error($"Product ID {billingPurchase.ProductId} not exists.");
                 return false;
             }
 
