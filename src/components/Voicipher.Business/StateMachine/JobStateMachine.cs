@@ -186,14 +186,16 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoErrorAsync(CancellationToken cancellationToken)
         {
+            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_backgroundJob.AudioFileId, _backgroundJob.UserId, _appSettings.ApplicationId, RecognitionState.None);
+            await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
+
+            var fileName = _backgroundJob.GetParameterValue(BackgroundJobParameter.FileName, string.Empty);
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionErrorMethod(_backgroundJob.UserId), fileName);
+
             if (_audioFile == null)
                 return;
 
             _audioFile.RecognitionState = RecognitionState.None;
-
-            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, _audioFile.RecognitionState);
-            await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
-            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionErrorMethod(_audioFile.UserId), _audioFile.FileName);
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)
