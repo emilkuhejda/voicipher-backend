@@ -66,7 +66,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.SaveAsync(cancellationToken);
 
-                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId)).ConfigureAwait(false);
+                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
                 _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were permanently deleted");
 

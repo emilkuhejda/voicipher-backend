@@ -35,7 +35,7 @@ namespace Voicipher.Business.Services
             var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
 
             var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
-            longOperation = await longOperation.PollUntilCompletedAsync().ConfigureAwait(false);
+            longOperation = await longOperation.PollUntilCompletedAsync();
             return longOperation.Result;
         }
     }

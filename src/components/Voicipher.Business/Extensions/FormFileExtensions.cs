@@ -11,7 +11,7 @@ namespace Voicipher.Business.Extensions
         {
             using (var memoryStream = new MemoryStream())
             {
-                await formFile.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
+                await formFile.CopyToAsync(memoryStream, cancellationToken);
 
                 return memoryStream.ToArray();
             }

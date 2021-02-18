@@ -32,7 +32,7 @@ namespace Voicipher.Business.Services
 
             using (var memoryStream = new MemoryStream())
             {
-                await client.DownloadToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
+                await client.DownloadToAsync(memoryStream, cancellationToken);
 
                 return memoryStream.ToArray();
             }
@@ -47,7 +47,7 @@ namespace Voicipher.Business.Services
 
             using (var fileStream = File.OpenRead(blobSettings.FilePath))
             {
-                await client.UploadAsync(fileStream, true, cancellationToken).ConfigureAwait(false);
+                await client.UploadAsync(fileStream, true, cancellationToken);
             }
 
             return fileName;
