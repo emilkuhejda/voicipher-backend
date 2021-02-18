@@ -22,7 +22,7 @@ namespace Voicipher.Domain.Enums
         // File is not completely uploaded
         EC104 = 104,
 
-        // Recognized audio sample
+        // Not found recognized audio sample
         EC105 = 105,
         EC106 = 106,
         EC107 = 107,
@@ -38,6 +38,7 @@ namespace Voicipher.Domain.Enums
 
         // Email address is invalid
         EC202 = 202,
+
         EC203 = 203,
         EC204 = 204,
         EC205 = 205,
@@ -59,7 +60,9 @@ namespace Voicipher.Domain.Enums
         // Only one file recognition at a time
         EC303 = 303,
 
+        // Too many attempts to restart
         EC304 = 304,
+
         EC305 = 305,
         EC306 = 306,
         EC307 = 307,

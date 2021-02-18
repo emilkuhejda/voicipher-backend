@@ -10,5 +10,7 @@ namespace Voicipher.Domain.Interfaces.Repositories
         Task<BackgroundJob> GetJobForRestartAsync(Guid audioFileId, CancellationToken cancellationToken);
 
         Task<BackgroundJob[]> GetJobsForRestartAsync(CancellationToken cancellationToken);
+
+        Task<int> GetAttemptsCountAsync(Guid audioFileId, CancellationToken cancellationToken);
     }
 }

@@ -25,5 +25,13 @@ namespace Voicipher.DataAccess.Repositories
         {
             return Context.BackgroundJobs.Where(x => x.JobState < JobState.Completed).ToArrayAsync(cancellationToken);
         }
+
+        public Task<int> GetAttemptsCountAsync(Guid audioFileId, CancellationToken cancellationToken)
+        {
+            return Context.BackgroundJobs
+                .Where(x => x.AudioFileId == audioFileId)
+                .Select(x => x.Attempt)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }
