@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"Audio file '{parameter.FileName}' is not supported. [{userId}]");
+                    _logger.Error($"Audio file {parameter.FileName} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
@@ -97,7 +97,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
                 var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
-                _logger.Information($"Audio file '{sourceName}' was uploaded to blob storage. Audio file ID = {audioFileId}. [{userId}]");
+                _logger.Information($"Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -119,7 +119,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.AddAsync(audioFile);
                 await _audioFileRepository.SaveAsync(cancellationToken);
-                _logger.Information($"Audio file '{audioFile.Id}' was successfully submitted. [{userId}]");
+                _logger.Information($"Audio file was successfully submitted. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}, user ID = {userId}");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);
@@ -132,7 +132,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}. [{userId}]");
+                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}");
                 _logger.Error(ExceptionFormatter.FormatException(ex));
 
                 throw new OperationErrorException(ErrorCode.EC400);

@@ -40,7 +40,7 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language '{parameter.Language}' is not supported.");
+                    _logger.Error($"Language {parameter.Language} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
@@ -54,7 +54,7 @@ namespace Voicipher.Business.Commands.Audio
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.AudioFileId}' was not found. [{userId}]");
+                _logger.Error($"Audio file {parameter.AudioFileId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }

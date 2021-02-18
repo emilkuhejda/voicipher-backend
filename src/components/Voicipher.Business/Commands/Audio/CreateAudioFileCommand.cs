@@ -74,7 +74,7 @@ namespace Voicipher.Business.Commands.Audio
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
             await _audioFileRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Audio file '{audioFile.Id}' was created");
+            _logger.Information($"Audio file was created. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}, user ID = {userId}");
 
             return new CommandResult<FileItemOutputModel>(_mapper.Map<FileItemOutputModel>(audioFile));
         }

@@ -66,7 +66,7 @@ namespace Voicipher.Business.Commands.Audio
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.AudioFileId}' was not found. [{userId}]");
+                _logger.Error($"Audio file '{parameter.AudioFileId}' was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (fileChunks.Length != parameter.ChunksCount)
                 {
-                    _logger.Error($"Chunks count does not match. [{userId}]");
+                    _logger.Error($"Chunks count does not match for user {userId} request");
 
                     throw new OperationErrorException(ErrorCode.EC102);
                 }
@@ -93,7 +93,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"Audio file '{audioFile.FileName}' is not supported. [{userId}]");
+                    _logger.Error($"Audio file '{audioFile.FileName}' is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
@@ -103,7 +103,7 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, parameter.AudioFileId);
                 var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                _logger.Information($"Audio file '{sourceName}' was uploaded to blob storage. Audio file ID = {audioFile.Id}. [{userId}]");
+                _logger.Information($"Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFile.Id}");
 
                 audioFile.ApplicationId = parameter.ApplicationId;
                 audioFile.OriginalSourceFileName = sourceName;
@@ -113,7 +113,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"Audio file '{audioFile.Id}' was successfully submitted. [{userId}]");
+                _logger.Information($"Audio file '{audioFile.Id}' was successfully submitted");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);
@@ -126,7 +126,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}. [{userId}]");
+                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}");
                 _logger.Error(ExceptionFormatter.FormatException(ex));
 
                 throw new OperationErrorException(ErrorCode.EC400);

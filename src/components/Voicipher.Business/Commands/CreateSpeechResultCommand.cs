@@ -48,7 +48,7 @@ namespace Voicipher.Business.Commands
             var audioSample = await _recognizedAudioSampleRepository.GetAsync(parameter.RecognizedAudioSampleId, cancellationToken);
             if (audioSample == null)
             {
-                _logger.Error($"Recognized audio sample '{parameter.RecognizedAudioSampleId}' not found. [{userId}]");
+                _logger.Error($"Recognized audio sample {parameter.RecognizedAudioSampleId} not found for user {userId}");
 
                 throw new OperationErrorException(ErrorCode.EC105);
             }
