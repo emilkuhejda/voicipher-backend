@@ -9,6 +9,7 @@ using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
 {
@@ -32,7 +33,7 @@ namespace Voicipher.Business.Services
 
             using (var memoryStream = new MemoryStream())
             {
-                await client.DownloadToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
+                await client.DownloadToAsync(memoryStream, cancellationToken);
 
                 return memoryStream.ToArray();
             }
@@ -47,7 +48,10 @@ namespace Voicipher.Business.Services
 
             using (var fileStream = File.OpenRead(blobSettings.FilePath))
             {
-                await client.UploadAsync(fileStream, true, cancellationToken).ConfigureAwait(false);
+                await client.UploadAsync(
+                    fileStream,
+                    metadata: blobSettings.Metadata,
+                    cancellationToken: cancellationToken);
             }
 
             return fileName;
@@ -71,6 +75,27 @@ namespace Voicipher.Business.Services
             {
                 var client = container.GetBlobClient(blobItem.Name);
                 await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+            }
+        }
+
+        public async Task DeleteTranscribedFiles(DeleteBlobSettings blobSettings, CancellationToken cancellationToken)
+        {
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
+            var blobItems = container.GetBlobs()
+                .AsPages()
+                .SelectMany(x => x.Values)
+                .Where(x =>
+                    x.Name.Contains(blobSettings.AudioFileId, StringComparison.InvariantCulture) &&
+                    !x.Name.Contains(blobSettings.FileName, StringComparison.InvariantCulture));
+
+            foreach (var blobItem in blobItems)
+            {
+                var client = container.GetBlobClient(blobItem.Name);
+                var properties = await client.GetPropertiesAsync(cancellationToken: cancellationToken);
+                if (properties.Value.Metadata.ContainsKey(BlobMetadata.TranscribedAudioFile))
+                {
+                    await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+                }
             }
         }
 

@@ -72,7 +72,7 @@ namespace Voicipher.Business.Commands.Audio
 
             await _audioFileRepository.AddAsync(audioFile);
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
-            await _audioFileRepository.SaveAsync(cancellationToken).ConfigureAwait(false);
+            await _audioFileRepository.SaveAsync(cancellationToken);
 
             _logger.Information($"Audio file '{audioFile.Id}' was created");
 

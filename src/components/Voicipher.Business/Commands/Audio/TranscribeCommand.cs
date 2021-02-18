@@ -25,17 +25,20 @@ namespace Voicipher.Business.Commands.Audio
         private readonly ICanRunRecognitionCommand _canRunRecognitionCommand;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IAudioFileRepository _audioFileRepository;
+        private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly ILogger _logger;
 
         public TranscribeCommand(
             ICanRunRecognitionCommand canRunRecognitionCommand,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IAudioFileRepository audioFileRepository,
+            IBackgroundJobRepository backgroundJobRepository,
             ILogger logger)
         {
             _canRunRecognitionCommand = canRunRecognitionCommand;
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _audioFileRepository = audioFileRepository;
+            _backgroundJobRepository = backgroundJobRepository;
             _logger = logger.ForContext<TranscribeCommand>();
         }
 
@@ -60,8 +63,14 @@ namespace Voicipher.Business.Commands.Audio
             if (_audioFileProcessingChannel.IsProcessingForUser(userId))
             {
                 _logger.Error($"User {userId} try to run more then one file recognition.");
-
                 throw new OperationErrorException(ErrorCode.EC303);
+            }
+
+            var restartedAttempts = await _backgroundJobRepository.GetAttemptsCountAsync(parameter.AudioFileId, cancellationToken);
+            if (restartedAttempts > 1)
+            {
+                _logger.Error($"Too many attempts ({restartedAttempts}) to restart has been done for audio file {parameter.AudioFileId}");
+                throw new OperationErrorException(ErrorCode.EC304);
             }
 
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);

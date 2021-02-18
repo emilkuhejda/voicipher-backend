@@ -106,7 +106,7 @@ namespace Voicipher.Business.Services
                 {
                     WaveFileWriter.CreateWaveFile(filePath, reader);
                 }
-            }).ConfigureAwait(false);
+            });
 
             _logger.Information($"File {inputFilePath} was converted and stored in new destination {filePath}");
 

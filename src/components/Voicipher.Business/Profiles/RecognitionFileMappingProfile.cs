@@ -19,6 +19,9 @@ namespace Voicipher.Business.Profiles
                     r => r.AudioFileId,
                     opt => opt.MapFrom(j => j.AudioFileId))
                 .ForMember(
+                    r => r.JobId,
+                    opt => opt.MapFrom(j => j.Id))
+                .ForMember(
                     r => r.FileName,
                     opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.FileName, string.Empty)))
                 .ForMember(

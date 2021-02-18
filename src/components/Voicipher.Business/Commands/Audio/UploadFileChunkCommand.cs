@@ -61,7 +61,7 @@ namespace Voicipher.Business.Commands.Audio
             var filePath = string.Empty;
             try
             {
-                var uploadedFileSource = await parameter.File.GetBytesAsync(cancellationToken).ConfigureAwait(false);
+                var uploadedFileSource = await parameter.File.GetBytesAsync(cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
 
                 filePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);

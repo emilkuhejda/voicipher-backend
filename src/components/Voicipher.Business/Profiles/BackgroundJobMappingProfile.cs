@@ -15,7 +15,7 @@ namespace Voicipher.Business.Profiles
             CreateMap<CreateBackgroundJobPayload, BackgroundJob>()
                 .ForMember(
                     j => j.Id,
-                    opt => opt.MapFrom(c => Guid.NewGuid()))
+                    opt => opt.MapFrom(c => c.JobId))
                 .ForMember(
                     j => j.UserId,
                     opt => opt.MapFrom(c => c.UserId))
