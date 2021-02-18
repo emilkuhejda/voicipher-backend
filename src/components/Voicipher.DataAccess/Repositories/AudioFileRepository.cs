@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
@@ -103,6 +104,14 @@ namespace Voicipher.DataAccess.Repositories
                 .Include(x => x.TranscribeItems)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == audioFileId && x.UserId == userId, cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetInProgressAsync(CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Where(x => !x.IsDeleted)
+                .Where(x => x.RecognitionState == RecognitionState.InProgress)
+                .ToArrayAsync(cancellationToken);
         }
     }
 }

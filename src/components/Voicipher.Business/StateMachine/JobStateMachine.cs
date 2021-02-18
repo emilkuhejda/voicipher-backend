@@ -191,11 +191,6 @@ namespace Voicipher.Business.StateMachine
 
             var fileName = _backgroundJob.GetParameterValue(BackgroundJobParameter.FileName, string.Empty);
             await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionErrorMethod(_backgroundJob.UserId), fileName);
-
-            if (_audioFile == null)
-                return;
-
-            _audioFile.RecognitionState = RecognitionState.None;
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)
