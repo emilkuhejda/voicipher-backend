@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,11 @@ namespace Voicipher.DataAccess.Repositories
         public BackgroundJobRepository(DatabaseContext context)
             : base(context)
         {
+        }
+
+        public Task<BackgroundJob> GetJobForRestartAsync(Guid audioFileId, CancellationToken cancellationToken)
+        {
+            return Context.BackgroundJobs.FirstOrDefaultAsync(x => x.AudioFileId == audioFileId, cancellationToken);
         }
 
         public Task<BackgroundJob[]> GetJobsForRestartAsync(CancellationToken cancellationToken)

@@ -31,7 +31,7 @@ namespace Voicipher.Business.Commands.Job
         protected override async Task<CommandResult<BackgroundJobPayload>> Execute(CreateBackgroundJobPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var backgroundJob = _mapper.Map<BackgroundJob>(parameter);
-            var backgroundJobToRestart = await _backgroundJobRepository.GetAsync(backgroundJob.Id, cancellationToken);
+            var backgroundJobToRestart = await _backgroundJobRepository.GetJobForRestartAsync(backgroundJob.AudioFileId, cancellationToken);
             if (backgroundJobToRestart != null)
             {
                 _logger.Information($"Background job {backgroundJob.Id} was restored from database");
