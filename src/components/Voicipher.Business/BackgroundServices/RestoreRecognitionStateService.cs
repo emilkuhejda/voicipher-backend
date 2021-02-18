@@ -9,6 +9,7 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
 
@@ -41,14 +42,20 @@ namespace Voicipher.Business.BackgroundServices
                     var options = scope.ServiceProvider.GetRequiredService<IOptions<AppSettings>>();
                     var audioFileRepository = scope.ServiceProvider.GetRequiredService<IAudioFileRepository>();
                     var audioFiles = await audioFileRepository.GetInProgressAsync(stoppingToken);
+
+                    _logger.Information($"There were found {audioFiles.Length} audio files in recognition state {RecognitionState.InProgress}");
+
                     foreach (var audioFile in audioFiles)
                     {
                         var updateRecognitionStateCommand = scope.ServiceProvider.GetRequiredService<IUpdateRecognitionStateCommand>();
                         var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(audioFile.Id, audioFile.UserId, options.Value.ApplicationId, RecognitionState.None);
                         await updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, stoppingToken);
-                    }
 
-                    _logger.Information($"There were found {audioFiles.Length} audio files in recognition state {RecognitionState.InProgress} and they were update to {RecognitionState.None}");
+                        _logger.Information($"Try to restart transcription operation for audio file {audioFile.Id}");
+
+                        var recognitionFile = new RecognitionFile(audioFile.UserId, audioFile.Id, audioFile.FileName);
+                        await _audioFileProcessingChannel.AddFileAsync(recognitionFile, stoppingToken);
+                    }
                 }
             }
             catch (Exception ex)

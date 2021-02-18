@@ -34,7 +34,7 @@ namespace Voicipher.Business.Commands.Job
             var backgroundJobToRestart = await _backgroundJobRepository.GetJobForRestartAsync(backgroundJob.AudioFileId, cancellationToken);
             if (backgroundJobToRestart != null)
             {
-                _logger.Information($"Background job {backgroundJob.Id} was restored from database");
+                _logger.Information($"Background job {backgroundJob.Id} was restored from database. Unsuccessful attempts {backgroundJobToRestart.Attempt}");
 
                 var payload = _mapper.Map<BackgroundJobPayload>(backgroundJobToRestart);
                 return new CommandResult<BackgroundJobPayload>(payload);
