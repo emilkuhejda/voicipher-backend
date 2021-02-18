@@ -46,12 +46,12 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (validationResult.Errors.ContainsError(nameof(CreateAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language '{parameter.Language}' is not supported.");
+                    _logger.Error($"Language {parameter.Language} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -74,7 +74,7 @@ namespace Voicipher.Business.Commands.Audio
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
             await _audioFileRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Audio file '{audioFile.Id}' was created");
+            _logger.Information($"Audio file was created. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}, user ID = {userId}");
 
             return new CommandResult<FileItemOutputModel>(_mapper.Map<FileItemOutputModel>(audioFile));
         }

@@ -12,7 +12,7 @@ namespace Voicipher.Common.Helpers
                 throw new ArgumentNullException(nameof(password));
 
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("Value cannot be empty or whitespace only string.", nameof(password));
+                throw new ArgumentException("Value cannot be empty or whitespace only string", nameof(password));
 
             using (var hmac = new HMACSHA512())
             {

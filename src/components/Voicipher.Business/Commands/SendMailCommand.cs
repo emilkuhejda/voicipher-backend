@@ -44,12 +44,12 @@ namespace Voicipher.Business.Commands
             {
                 if (validationResult.Errors.ContainsError(nameof(SendMailInputModel.Recipient), ValidationErrorCodes.InvalidEmail))
                 {
-                    _logger.Error($"Recipient email address format '{parameter.Recipient}' is incorrect.");
+                    _logger.Error($"Recipient email address format {parameter.Recipient} is incorrect");
 
                     throw new OperationErrorException(ErrorCode.EC202);
                 }
 
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -58,7 +58,7 @@ namespace Voicipher.Business.Commands
             var audioFile = await _audioFileRepository.GetWithTranscribeItemsAsync(userId, parameter.FileItemId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.FileItemId}' was not found.");
+                _logger.Error($"Audio file {parameter.FileItemId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }

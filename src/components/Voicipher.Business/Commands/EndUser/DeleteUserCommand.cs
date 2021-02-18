@@ -44,7 +44,7 @@ namespace Voicipher.Business.Commands.EndUser
             var user = await _userRepository.GetByEmailAsync(userId, parameter, cancellationToken);
             if (user == null)
             {
-                _logger.Error($"User with ID '{userId}' and email '{parameter}' not found.");
+                _logger.Error($"User with ID {userId} and email {parameter} not found");
 
                 throw new OperationErrorException(StatusCodes.Status404NotFound);
             }

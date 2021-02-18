@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.Audio
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -57,7 +57,7 @@ namespace Voicipher.Business.Commands.Audio
             await _audioFileRepository.SaveAsync(cancellationToken);
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-            _logger.Information($"Audio files '{JsonConvert.SerializeObject(parameter.AudioFilesIds)}' were restored");
+            _logger.Information($"Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were restored");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

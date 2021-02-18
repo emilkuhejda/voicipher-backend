@@ -100,7 +100,7 @@ namespace Voicipher.Business.Services
                 DateUpdatedUtc = dateCreated
             };
 
-            _logger.Information($"Audio file '{transcribedAudioFile.Path}' was recognized");
+            _logger.Information($"Audio file {transcribedAudioFile.Path} was recognized");
 
             return transcribeItem;
         }

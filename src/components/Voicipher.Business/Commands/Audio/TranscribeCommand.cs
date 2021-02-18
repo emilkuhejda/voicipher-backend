@@ -52,17 +52,17 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language {parameter.Language} is not supported.");
+                    _logger.Error($"Language {parameter.Language} is not supported");
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
             if (_audioFileProcessingChannel.IsProcessingForUser(userId))
             {
-                _logger.Error($"User {userId} try to run more then one file recognition.");
+                _logger.Error($"User {userId} try to run more then one file recognition");
                 throw new OperationErrorException(ErrorCode.EC303);
             }
 
@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.Audio
 
             if (audioFile.RecognitionState != RecognitionState.None)
             {
-                _logger.Error($"Audio file {parameter.AudioFileId} is in the wrong recognition state. Recognition state is {audioFile.RecognitionState}.");
+                _logger.Error($"Audio file {parameter.AudioFileId} is in the wrong recognition state. Recognition state is {audioFile.RecognitionState}");
                 throw new OperationErrorException(ErrorCode.EC103);
             }
 
@@ -96,7 +96,7 @@ namespace Voicipher.Business.Commands.Audio
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(canRunRecognitionPayload, principal, cancellationToken);
             if (!canRunRecognitionResult.IsSuccess)
             {
-                _logger.Error($"User '{userId}' has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
+                _logger.Error($"User {userId} has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 

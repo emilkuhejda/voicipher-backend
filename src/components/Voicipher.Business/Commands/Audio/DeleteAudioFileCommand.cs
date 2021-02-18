@@ -37,7 +37,7 @@ namespace Voicipher.Business.Commands.Audio
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -46,14 +46,14 @@ namespace Voicipher.Business.Commands.Audio
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file '{parameter.AudioFileId}' not found.");
+                _logger.Error($"Audio file {parameter.AudioFileId} not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
 
             if (audioFile.UploadStatus != UploadStatus.Completed)
             {
-                _logger.Error($"Audio file source '{parameter.AudioFileId}' is not uploaded. Uploaded state is '{audioFile.UploadStatus}'.");
+                _logger.Error($"Audio file source {parameter.AudioFileId} is not uploaded. Uploaded state is {audioFile.UploadStatus}");
 
                 throw new OperationErrorException(ErrorCode.EC104);
             }
@@ -65,7 +65,7 @@ namespace Voicipher.Business.Commands.Audio
 
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-            _logger.Information($"Audio file '{parameter.AudioFileId}' was deleted");
+            _logger.Information($"Audio file {parameter.AudioFileId} was deleted");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
