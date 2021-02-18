@@ -27,7 +27,7 @@ namespace Voicipher.Business.Extensions
         {
             return list.Select<Func<Task<T>>, Func<Task<T>>>(x => async () =>
             {
-                var result = await x().ConfigureAwait(false);
+                var result = await x();
                 action();
 
                 return result;

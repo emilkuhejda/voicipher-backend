@@ -67,6 +67,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
                 Mock.Of<IBlobStorage>(),
                 Mock.Of<IAudioFileRepository>(),
                 Mock.Of<ITranscribeItemRepository>(),

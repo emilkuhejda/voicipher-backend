@@ -72,7 +72,7 @@ namespace Voicipher.Business.Services
             _audioFileProcessingChannel.UpdateProgress(audioFileId, percentageDone);
 
             var outputModel = new CacheItemOutputModel(audioFileId, RecognitionState.InProgress, percentageDone);
-            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionProgressChangedMethod(userId), outputModel).ConfigureAwait(false);
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionProgressChangedMethod(userId), outputModel);
         }
 
         private async Task<TranscribeItem> RecognizeSpeech(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language)
