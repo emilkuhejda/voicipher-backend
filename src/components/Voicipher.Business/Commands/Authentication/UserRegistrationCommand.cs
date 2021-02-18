@@ -98,7 +98,7 @@ namespace Voicipher.Business.Commands.Authentication
             var outputValidationResult = outputModel.Validate();
             if (!outputValidationResult.IsValid)
             {
-                _logger.Error("Invalid output model.");
+                _logger.Error("Invalid output model");
 
                 return new CommandResult<UserRegistrationOutputModel>(outputValidationResult.Errors);
             }

@@ -45,7 +45,7 @@ namespace Voicipher.Business.Commands.Authentication
 
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -53,14 +53,14 @@ namespace Voicipher.Business.Commands.Authentication
             var administrator = await _administratorRepository.GetByNameAsync(parameter.Username, cancellationToken);
             if (administrator == null)
             {
-                _logger.Warning($"User {parameter.Username} was not found.");
+                _logger.Warning($"User {parameter.Username} was not found");
 
                 throw new OperationErrorException(StatusCodes.Status404NotFound);
             }
 
             if (!PasswordHelper.VerifyPasswordHash(parameter.Password, administrator.PasswordHash, administrator.PasswordSalt))
             {
-                _logger.Warning($"Password verification failed for user name {parameter.Username}.");
+                _logger.Warning($"Password verification failed for user name {parameter.Username}");
 
                 throw new OperationErrorException(StatusCodes.Status404NotFound);
             }

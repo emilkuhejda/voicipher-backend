@@ -31,7 +31,7 @@ namespace Voicipher.Business.Commands
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands
             var transcribeItem = await _transcribeItemRepository.GetAsync(parameter.TranscribeItemId, cancellationToken);
             if (transcribeItem == null)
             {
-                _logger.Error($"Transcribe item {parameter.TranscribeItemId} not found.");
+                _logger.Error($"Transcribe item {parameter.TranscribeItemId} not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }

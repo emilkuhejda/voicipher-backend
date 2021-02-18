@@ -45,7 +45,7 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }

@@ -50,17 +50,17 @@ namespace Voicipher.Business.Commands
         {
             var userId = principal.GetNameIdentifier();
 
-            _logger.Information($"Start billing purchase registration. User ID = {userId}, Product ID = {parameter.ProductId}.");
+            _logger.Information($"Start billing purchase registration. User ID = {userId}, Product ID = {parameter.ProductId}");
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error($"Invalid input data. User ID = {userId}.");
+                _logger.Error($"Invalid input data. User ID = {userId}");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
             var billingPurchase = _mapper.Map<BillingPurchase>(parameter);
             if (!billingPurchase.Validate().IsValid)
             {
-                _logger.Error($"Invalid billing purchase input data. User ID = {userId}.");
+                _logger.Error($"Invalid billing purchase input data. User ID = {userId}");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
@@ -99,7 +99,7 @@ namespace Voicipher.Business.Commands
             var subscriptionProduct = SubscriptionProducts.All.FirstOrDefault(x => x.Id == billingPurchase.ProductId);
             if (subscriptionProduct == null)
             {
-                _logger.Error($"Product ID {billingPurchase.ProductId} not exists.");
+                _logger.Error($"Product ID {billingPurchase.ProductId} not exists");
                 return false;
             }
 
@@ -114,7 +114,7 @@ namespace Voicipher.Business.Commands
             var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, principal, cancellationToken);
             if (!commandResult.IsSuccess)
             {
-                _logger.Error($"User subscription was not modified. Error code = {commandResult.Error.ErrorCode}.");
+                _logger.Error($"User subscription was not modified. Error code = {commandResult.Error.ErrorCode}");
 
                 return false;
             }

@@ -35,7 +35,7 @@ namespace Voicipher.Business.Commands
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -43,7 +43,7 @@ namespace Voicipher.Business.Commands
             var contactForm = _mapper.Map<ContactForm>(parameter);
             if (!contactForm.Validate().IsValid)
             {
-                _logger.Error("Invalid entity data.");
+                _logger.Error("Invalid entity data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }

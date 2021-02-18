@@ -34,7 +34,7 @@ namespace Voicipher.Domain.Validation
         public static IList<ValidationError> ValidateMaxLength(this IList<ValidationError> errorList, string value, string field, int maxLength, string objectName = null)
         {
             if (maxLength <= 0)
-                throw new ArgumentOutOfRangeException(nameof(maxLength), maxLength, "MaxLength must be positive value.");
+                throw new ArgumentOutOfRangeException(nameof(maxLength), maxLength, "MaxLength must be positive value");
 
             if (value != null && value.Length > maxLength)
                 return errorList.Add(ValidationErrorCodes.TextTooLong, field, objectName);

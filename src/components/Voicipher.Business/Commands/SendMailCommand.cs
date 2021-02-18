@@ -49,7 +49,7 @@ namespace Voicipher.Business.Commands
                     throw new OperationErrorException(ErrorCode.EC202);
                 }
 
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
