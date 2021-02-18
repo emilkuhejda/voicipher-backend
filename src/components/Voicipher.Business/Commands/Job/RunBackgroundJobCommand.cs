@@ -8,6 +8,7 @@ using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
@@ -54,6 +55,7 @@ namespace Voicipher.Business.Commands.Job
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
+                    throw new OperationErrorException();
                     await _jobStateMachine.DoCompleteAsync(cancellationToken);
 
                     _logger.Information($"Background job {parameter.Id} is completed");

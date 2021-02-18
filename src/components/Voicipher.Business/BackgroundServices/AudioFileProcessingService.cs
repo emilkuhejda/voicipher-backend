@@ -58,7 +58,7 @@ namespace Voicipher.Business.BackgroundServices
                             {BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc},
                         };
 
-                        var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, parameters);
+                        var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, recognitionFile.JobId, parameters);
                         createJobCommandResult = await createBackgroundJobCommand.ExecuteAsync(createBackgroundJobPayload, null, stoppingToken);
                         isSuccess &= createJobCommandResult.IsSuccess;
 
