@@ -37,7 +37,7 @@ namespace Voicipher.Business.Commands.Audio
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (Exception ex)
             {
-                _logger.Error("Operation error.");
+                _logger.Error("Operation error");
                 _logger.Error(ExceptionFormatter.FormatException(ex));
 
                 throw new OperationErrorException(ErrorCode.EC603);

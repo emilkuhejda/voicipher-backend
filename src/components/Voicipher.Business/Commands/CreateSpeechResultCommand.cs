@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands
         {
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data.");
+                _logger.Error("Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -48,7 +48,7 @@ namespace Voicipher.Business.Commands
             var audioSample = await _recognizedAudioSampleRepository.GetAsync(parameter.RecognizedAudioSampleId, cancellationToken);
             if (audioSample == null)
             {
-                _logger.Error($"Recognized audio sample '{parameter.RecognizedAudioSampleId}' not found. [{userId}]");
+                _logger.Error($"Recognized audio sample {parameter.RecognizedAudioSampleId} not found for user {userId}");
 
                 throw new OperationErrorException(ErrorCode.EC105);
             }
@@ -58,7 +58,7 @@ namespace Voicipher.Business.Commands
             await _speechResultRepository.AddAsync(speechResult);
             await _speechResultRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"User with ID = '{userId}' inserted speech result");
+            _logger.Information($"User with ID = {userId} inserted speech result");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }
