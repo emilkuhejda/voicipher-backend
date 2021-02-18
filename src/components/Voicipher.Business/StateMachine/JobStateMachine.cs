@@ -23,6 +23,7 @@ using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.StateMachine
 {
@@ -145,7 +146,8 @@ namespace Voicipher.Business.StateMachine
                     {
                         if (File.Exists(transcribedAudioFile.Path))
                         {
-                            var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName);
+                            var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
+                            var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
                             await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
                             File.Delete(transcribedAudioFile.Path);
                         }
@@ -156,8 +158,6 @@ namespace Voicipher.Business.StateMachine
 
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
                 _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
-
-                throw new OperationErrorException();
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {

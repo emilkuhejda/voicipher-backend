@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Voicipher.Domain.Models
 {
@@ -21,15 +22,23 @@ namespace Voicipher.Domain.Models
         }
 
         public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId, string fileName)
+            : this(filePath, userId, audioFileId, fileName, new Dictionary<string, string>())
+        {
+        }
+
+        public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId, string fileName, Dictionary<string, string> metadata)
             : base(audioFileId, userId)
         {
             FilePath = filePath;
             FileName = fileName;
+            Metadata = metadata;
         }
 
         public string FilePath { get; }
 
         public string FileName { get; }
+
+        public Dictionary<string, string> Metadata { get; }
     }
 
     public record DeleteBlobSettings : BlobSettings

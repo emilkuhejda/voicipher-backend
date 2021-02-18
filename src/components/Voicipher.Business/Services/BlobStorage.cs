@@ -9,6 +9,7 @@ using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
 {
@@ -47,7 +48,10 @@ namespace Voicipher.Business.Services
 
             using (var fileStream = File.OpenRead(blobSettings.FilePath))
             {
-                await client.UploadAsync(fileStream, true, cancellationToken);
+                await client.UploadAsync(
+                    fileStream,
+                    metadata: blobSettings.Metadata,
+                    cancellationToken: cancellationToken);
             }
 
             return fileName;
@@ -87,7 +91,11 @@ namespace Voicipher.Business.Services
             foreach (var blobItem in blobItems)
             {
                 var client = container.GetBlobClient(blobItem.Name);
-                await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+                var properties = await client.GetPropertiesAsync(cancellationToken: cancellationToken);
+                if (properties.Value.Metadata.ContainsKey(BlobMetadata.TranscribedAudioFile))
+                {
+                    await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+                }
             }
         }
 
