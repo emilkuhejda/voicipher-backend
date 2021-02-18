@@ -135,6 +135,9 @@ namespace Voicipher.Business.StateMachine
             {
                 _logger.Information("Start uploading transcribed audio files to blob storage");
 
+                var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
+                await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
+
                 var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
                 if (transcribedAudioFiles != null && transcribedAudioFiles.Any())
                 {
@@ -156,9 +159,6 @@ namespace Voicipher.Business.StateMachine
 
                 throw new OperationErrorException();
 
-                //var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
-                //await _blobStorage.DeleteFileBlobAsync(blobSettings, cancellationToken);
-
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {
                     UserId = _audioFile.UserId,
@@ -173,7 +173,6 @@ namespace Voicipher.Business.StateMachine
                 var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
                 await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
-                //_audioFile.OriginalSourceFileName = string.Empty;
                 _audioFile.SourceFileName = string.Empty;
 
                 TryChangeState(JobState.Completed);

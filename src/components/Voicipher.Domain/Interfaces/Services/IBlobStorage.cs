@@ -14,6 +14,8 @@ namespace Voicipher.Domain.Interfaces.Services
 
         Task DeleteAudioFileAsync(BlobSettings blobSettings, CancellationToken cancellationToken);
 
+        Task DeleteTranscribedFiles(DeleteBlobSettings blobSettings, CancellationToken cancellationToken);
+
         Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings, CancellationToken cancellationToken);
     }
 }

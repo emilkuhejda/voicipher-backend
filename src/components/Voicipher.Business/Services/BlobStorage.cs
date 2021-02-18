@@ -74,6 +74,23 @@ namespace Voicipher.Business.Services
             }
         }
 
+        public async Task DeleteTranscribedFiles(DeleteBlobSettings blobSettings, CancellationToken cancellationToken)
+        {
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
+            var blobItems = container.GetBlobs()
+                .AsPages()
+                .SelectMany(x => x.Values)
+                .Where(x =>
+                    x.Name.Contains(blobSettings.AudioFileId, StringComparison.InvariantCulture) &&
+                    !x.Name.Contains(blobSettings.FileName, StringComparison.InvariantCulture));
+
+            foreach (var blobItem in blobItems)
+            {
+                var client = container.GetBlobClient(blobItem.Name);
+                await client.DeleteIfExistsAsync(cancellationToken: cancellationToken);
+            }
+        }
+
         public async Task DeleteFileBlobAsync(DeleteBlobSettings blobSettings, CancellationToken cancellationToken)
         {
             var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
