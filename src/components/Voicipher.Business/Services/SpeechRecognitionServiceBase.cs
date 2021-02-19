@@ -42,9 +42,27 @@ namespace Voicipher.Business.Services
             _logger = logger.ForContext<SpeechRecognitionService>();
         }
 
+        public bool CanCreateSpeechClientAsync()
+        {
+            try
+            {
+                var speechClient = CreateSpeechClient();
+                return speechClient != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.Fatal(ex, $"Unable to create speech recognition client");
+            }
+
+            return false;
+        }
+
         public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken)
         {
-            var speechClient = CreateSpeechClient(audioFile.UserId);
+            var speechClient = CreateSpeechClient();
+
+            _logger.Information($"[{audioFile.UserId}] Speech recognition client was created");
+
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
             foreach (var transcribeAudioFile in transcribedAudioFiles)
             {
@@ -107,10 +125,8 @@ namespace Voicipher.Business.Services
 
         protected abstract Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language);
 
-        private SpeechClient CreateSpeechClient(Guid userId)
+        private SpeechClient CreateSpeechClient()
         {
-            _logger.Information($"[{userId}] Create speech recognition client");
-
             var serializedCredentials = JsonConvert.SerializeObject(_appSettings.SpeechCredentials);
             var credentials = GoogleCredential
                 .FromJson(serializedCredentials)

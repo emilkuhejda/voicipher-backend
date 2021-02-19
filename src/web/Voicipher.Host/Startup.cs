@@ -40,7 +40,7 @@ namespace Voicipher.Host
             {
                 options.AddPolicy(Constants.CorsPolicy,
                     builder => builder
-                        .WithOrigins("http://localhost:4200")
+                        .WithOrigins("http://localhost:4200", "http://localhost:4210")
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());

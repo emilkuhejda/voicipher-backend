@@ -12,6 +12,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
 
         Task<AudioFile[]> GetAllAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
 
+        Task<AudioFile[]> GetAllCreatedAsync(Guid userId, CancellationToken cancellationToken);
+
         Task<DateTime> GetLastUpdateAsync(Guid userId, CancellationToken cancellationToken);
 
         Task<DateTime> GetDeletedLastUpdateAsync(Guid userId, CancellationToken cancellationToken);
