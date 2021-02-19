@@ -62,7 +62,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
                 Time = x.Time,
                 Operation = x.Operation,
                 DateCreatedUtc = x.DateCreatedUtc
-            });
+            }).ToArray();
 
             return Ok(outputModels);
         }

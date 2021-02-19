@@ -29,16 +29,18 @@ namespace Voicipher.Host.Controllers.ControlPanel
         public async Task<IActionResult> GetAll(Guid userId, CancellationToken cancellationToken)
         {
             var audioFiles = await _audioFileRepository.Value.GetAllCreatedAsync(userId, cancellationToken);
+            var outputModels = audioFiles.Select(MapAudioFile).ToArray();
 
-            return Ok(audioFiles.Select(MapAudioFile).ToArray());
+            return Ok(outputModels);
         }
 
         [HttpGet("detail/{fileItemId}")]
         public async Task<IActionResult> Get(Guid fileItemId, CancellationToken cancellationToken)
         {
             var audioFile = await _audioFileRepository.Value.GetAsync(fileItemId, cancellationToken);
+            var outputModel = MapAudioFile(audioFile);
 
-            return Ok(MapAudioFile(audioFile));
+            return Ok(outputModel);
         }
 
         [HttpPut("restore")]

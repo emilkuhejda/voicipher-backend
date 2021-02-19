@@ -35,7 +35,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
                 GivenName = x.GivenName,
                 FamilyName = x.FamilyName,
                 DateRegisteredUtc = x.DateRegisteredUtc
-            });
+            }).ToArray();
 
             return Ok(outputModels);
         }
