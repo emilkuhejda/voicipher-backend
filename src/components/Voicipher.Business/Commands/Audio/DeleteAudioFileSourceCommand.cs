@@ -46,7 +46,6 @@ namespace Voicipher.Business.Commands.Audio
             if (audioFile == null)
             {
                 _logger.Error($"[{parameter.UserId}] Audio file {parameter.AudioFileId} not found");
-
                 return new CommandResult(new OperationError(ValidationErrorCodes.NotFound));
             }
 
@@ -84,8 +83,12 @@ namespace Voicipher.Business.Commands.Audio
             catch (RequestFailedException ex)
             {
                 _logger.Error(ex, $"[{parameter.UserId}] Blob storage is unavailable. Audio file ID = {parameter.AudioFileId}");
-
                 return new CommandResult(new OperationError(ValidationErrorCodes.UnavailableBlobStorage));
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"[{parameter.UserId}] Delete audio file source command failed");
+                return new CommandResult(new OperationError(ValidationErrorCodes.OperationFailed));
             }
         }
     }
