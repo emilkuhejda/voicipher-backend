@@ -42,7 +42,7 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult> Execute(DeleteAudioFileSourcePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, parameter.UserId, cancellationToken);
+            var audioFile = await _audioFileRepository.GetAsync(parameter.UserId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
                 _logger.Error($"[{parameter.UserId}] Audio file {parameter.AudioFileId} not found");
