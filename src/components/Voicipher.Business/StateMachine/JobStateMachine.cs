@@ -179,7 +179,7 @@ namespace Voicipher.Business.StateMachine
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, "Blob storage is unavailable");
+                _logger.Error(ex, $"[{_audioFile.UserId}] Blob storage is unavailable");
                 throw;
             }
         }

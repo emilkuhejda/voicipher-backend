@@ -66,7 +66,7 @@ namespace Voicipher.Business.Services
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {audioFile.Id}, Audio files = {audioFile.Id}, file name = {audioFile.OriginalSourceFileName}");
+                _logger.Error(ex, $"[{audioFile.UserId}] Blob storage is unavailable. Audio file = {audioFile.Id}, file name = {audioFile.OriginalSourceFileName}");
                 throw;
             }
             finally

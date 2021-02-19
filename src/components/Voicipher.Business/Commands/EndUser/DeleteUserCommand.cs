@@ -71,11 +71,11 @@ namespace Voicipher.Business.Commands.EndUser
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable");
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Error occurred during deleting of the user {userId}");
+                _logger.Error(ex, $"[{userId}] Delete user failed");
             }
 
             throw new OperationErrorException(StatusCodes.Status400BadRequest);

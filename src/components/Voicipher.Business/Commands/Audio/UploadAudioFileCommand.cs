@@ -125,7 +125,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, "Blob storage is unavailable");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }

@@ -73,7 +73,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable. Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }

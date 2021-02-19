@@ -119,7 +119,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio file ID = {parameter.AudioFileId}");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable. Audio file ID = {parameter.AudioFileId}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
