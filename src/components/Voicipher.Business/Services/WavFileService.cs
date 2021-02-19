@@ -89,7 +89,7 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId).ToArray();
 
             File.Delete(wavFilePath);
 
@@ -113,7 +113,7 @@ namespace Voicipher.Business.Services
             return (filePath, fileName);
         }
 
-        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId)
+        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId, Guid userId)
         {
             var transcribedAudioFiles = new List<TranscribedAudioFile>();
             var processedTime = TimeSpan.Zero;
@@ -140,7 +140,7 @@ namespace Voicipher.Business.Services
             }
             catch (Exception)
             {
-                _logger.Error($"Remove wav audio files ({transcribedAudioFiles.Count}) from disk storage");
+                _logger.Error($"[{userId}] Remove wav audio files ({transcribedAudioFiles.Count}) from disk storage");
 
                 if (transcribedAudioFiles.Any())
                 {

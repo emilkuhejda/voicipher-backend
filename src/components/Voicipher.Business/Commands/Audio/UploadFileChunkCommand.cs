@@ -43,22 +43,22 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(UploadFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(UploadFileChunkPayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
-                    _logger.Error("Uploaded file source was not found");
+                    _logger.Error($"[{userId}] Uploaded file source was not found");
 
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var filePath = string.Empty;
             try
             {
@@ -74,7 +74,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (!fileChunk.Validate().IsValid)
                 {
-                    _logger.Error("Invalid input data for file chunk entity");
+                    _logger.Error($"[{userId}] Invalid input data for file chunk entity");
 
                     throw new OperationErrorException(ErrorCode.EC600);
                 }
@@ -101,9 +101,7 @@ namespace Voicipher.Business.Commands.Audio
                     _logger.Information($"[{userId}] File chunk was removed on destination: {filePath}");
                 }
 
-                _logger.Error("File chunk was not uploaded correctly");
-                _logger.Error(ExceptionFormatter.FormatException(ex));
-
+                _logger.Error(ex, $"[{userId}] File chunk was not uploaded correctly");
                 throw;
             }
         }

@@ -36,9 +36,10 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(DeleteFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -51,13 +52,13 @@ namespace Voicipher.Business.Commands.Audio
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"[{principal.GetNameIdentifier()}] File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
+                _logger.Information($"[{userId}] File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (Exception ex)
             {
-                _logger.Error("Operation error");
+                _logger.Error($"[{userId}] Operation error");
                 _logger.Error(ExceptionFormatter.FormatException(ex));
 
                 throw new OperationErrorException(ErrorCode.EC603);

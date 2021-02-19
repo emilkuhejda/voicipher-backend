@@ -53,14 +53,14 @@ namespace Voicipher.Business.Commands
             _logger.Information($"[{userId}] Start billing purchase registration. Product ID = {parameter.ProductId}");
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error($"Invalid input data. User ID = {userId}");
+                _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
             var billingPurchase = _mapper.Map<BillingPurchase>(parameter);
             if (!billingPurchase.Validate().IsValid)
             {
-                _logger.Error($"Invalid billing purchase input data. User ID = {userId}");
+                _logger.Error($"[{userId}] Invalid billing purchase input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
@@ -96,10 +96,11 @@ namespace Voicipher.Business.Commands
             await _billingPurchaseRepository.AddAsync(billingPurchase);
             await _unitOfWork.SaveAsync(cancellationToken);
 
+            var userId = principal.GetNameIdentifier();
             var subscriptionProduct = SubscriptionProducts.All.FirstOrDefault(x => x.Id == billingPurchase.ProductId);
             if (subscriptionProduct == null)
             {
-                _logger.Error($"Product ID {billingPurchase.ProductId} not exists");
+                _logger.Error($"[{userId}] Product ID {billingPurchase.ProductId} not exists");
                 return false;
             }
 
@@ -114,12 +115,12 @@ namespace Voicipher.Business.Commands
             var commandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, principal, cancellationToken);
             if (!commandResult.IsSuccess)
             {
-                _logger.Error($"User subscription was not modified. Error code = {commandResult.Error.ErrorCode}");
+                _logger.Error($"[{userId}] User subscription was not modified. Error code = {commandResult.Error.ErrorCode}");
 
                 return false;
             }
 
-            _logger.Information($"[{principal.GetNameIdentifier()}] Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}");
+            _logger.Information($"[{userId}] Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}");
 
             return true;
         }

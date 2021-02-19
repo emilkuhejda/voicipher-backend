@@ -41,14 +41,13 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(PermanentDeleteAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
-
-            var userId = principal.GetNameIdentifier();
 
             try
             {

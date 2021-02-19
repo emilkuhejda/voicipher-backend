@@ -30,9 +30,10 @@ namespace Voicipher.Business.Commands
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(UpdateUserTranscriptInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -40,7 +41,7 @@ namespace Voicipher.Business.Commands
             var transcribeItem = await _transcribeItemRepository.GetAsync(parameter.TranscribeItemId, cancellationToken);
             if (transcribeItem == null)
             {
-                _logger.Error($"Transcribe item {parameter.TranscribeItemId} not found");
+                _logger.Error($"[{userId}] Transcribe item {parameter.TranscribeItemId} not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
@@ -51,7 +52,7 @@ namespace Voicipher.Business.Commands
 
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"[{principal.GetNameIdentifier()}] Transcribe item {parameter.TranscribeItemId} was updated");
+            _logger.Information($"[{userId}] Transcribe item {parameter.TranscribeItemId} was updated");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

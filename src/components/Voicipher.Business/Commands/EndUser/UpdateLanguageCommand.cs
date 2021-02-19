@@ -33,7 +33,7 @@ namespace Voicipher.Business.Commands.EndUser
             var userId = principal.GetNameIdentifier();
             if (!Enum.IsDefined(typeof(Language), parameter.Language))
             {
-                _logger.Error($"Language {parameter.Language} is not supported");
+                _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
 
                 throw new OperationErrorException(ErrorCode.EC200);
             }

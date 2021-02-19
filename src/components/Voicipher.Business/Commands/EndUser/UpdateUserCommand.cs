@@ -37,7 +37,7 @@ namespace Voicipher.Business.Commands.EndUser
             var user = await _userRepository.GetAsync(userId, cancellationToken);
             if (user == null)
             {
-                _logger.Error($"User {userId} was not found");
+                _logger.Error($"[{userId}] User was not found");
 
                 throw new OperationErrorException(StatusCodes.Status401Unauthorized);
             }

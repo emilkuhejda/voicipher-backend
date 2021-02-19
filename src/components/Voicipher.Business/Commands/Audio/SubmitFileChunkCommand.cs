@@ -53,20 +53,20 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<FileItemOutputModel>> Execute(SubmitFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             _logger.Information($"[{userId}] Start submitting audio file to blob storage");
 
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file {parameter.AudioFileId} was not found");
+                _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (fileChunks.Length != parameter.ChunksCount)
                 {
-                    _logger.Error($"Chunks count does not match for user {userId} request");
+                    _logger.Error($"[{userId}] Chunks count does not match for request");
 
                     throw new OperationErrorException(ErrorCode.EC102);
                 }
@@ -93,7 +93,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"Audio file {audioFile.FileName} is not supported");
+                    _logger.Error($"[{userId}] Audio file {audioFile.FileName} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
@@ -126,8 +126,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}");
-                _logger.Error(ExceptionFormatter.FormatException(ex));
+                _logger.Error(ex, $"[{userId}] Exception occurred during submitting file chunks");
 
                 throw new OperationErrorException(ErrorCode.EC400);
             }
