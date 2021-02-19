@@ -36,6 +36,7 @@ namespace Voicipher.DataAccess.Repositories
         public Task<AudioFile[]> GetAllCreatedAsync(Guid userId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
+                .Where(x => !x.IsPermanentlyDeleted)
                 .Where(x => x.UserId == userId)
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
