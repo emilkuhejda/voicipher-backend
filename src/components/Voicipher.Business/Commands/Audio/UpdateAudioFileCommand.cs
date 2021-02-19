@@ -35,26 +35,26 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<FileItemOutputModel>> Execute(UpdateAudioFileInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language {parameter.Language} is not supported");
+                    _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file {parameter.AudioFileId} was not found");
+                _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }

@@ -34,33 +34,33 @@ namespace Voicipher.Business.Queries.TranscribeItems
 
         protected override async Task<QueryResult<byte[]>> Execute(Guid parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var transcribeItem = await _transcribeItemRepository.GetAsync(parameter, cancellationToken);
             if (transcribeItem == null)
             {
-                _logger.Error($"Transcribe item {parameter} was not found");
+                _logger.Error($"[{userId}] Transcribe item {parameter} was not found");
 
                 return new QueryResult<byte[]>(new OperationError(ValidationErrorCodes.NotFound));
             }
 
             try
             {
-                var userId = principal.GetNameIdentifier();
                 var blobSettings = new GetBlobSettings(transcribeItem.SourceFileName, userId, transcribeItem.AudioFileId);
                 var blobItem = await _blobStorage.GetAsync(blobSettings, cancellationToken);
 
-                _logger.Information($"Blob file {transcribeItem.SourceFileName} was downloaded from blob storage. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
+                _logger.Information($"[{userId}] Blob file {transcribeItem.SourceFileName} was downloaded from blob storage. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
 
                 return new QueryResult<byte[]>(blobItem);
             }
             catch (RequestFailedException ex)
             {
-                _logger.Warning(ex, $"Blob storage is unavailable. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}, Transcribe file name = {transcribeItem.SourceFileName}");
+                _logger.Warning(ex, $"[{userId}] Blob storage is unavailable. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}, Transcribe file name = {transcribeItem.SourceFileName}");
 
                 return new QueryResult<byte[]>(new byte[0]);
             }
             catch (BlobNotExistsException)
             {
-                _logger.Warning($"Blob file {transcribeItem.SourceFileName} not found. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
+                _logger.Warning($"[{userId}] Blob file {transcribeItem.SourceFileName} not found. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
 
                 return new QueryResult<byte[]>(new byte[0]);
             }

@@ -116,12 +116,12 @@ namespace Voicipher.Business.StateMachine
             var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
             _backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribedAudioFiles);
 
-            _logger.Information($"Audio file was split to {transcribedAudioFiles.Length} partial audio files");
+            _logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
 
             var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             _audioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
-            _logger.Information($"Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
+            _logger.Information($"[{_audioFile.UserId}] Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
 
             var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribedAudioFiles, cancellationToken);
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
@@ -134,7 +134,7 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
-                _logger.Information("Start uploading transcribed audio files to blob storage");
+                _logger.Information($"[{_audioFile.UserId}] Start uploading transcribed audio files to blob storage");
 
                 var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
                 await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
@@ -153,7 +153,7 @@ namespace Voicipher.Business.StateMachine
                         }
                     }
 
-                    _logger.Information($"Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+                    _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
                 }
 
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
@@ -179,7 +179,7 @@ namespace Voicipher.Business.StateMachine
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, "Blob storage is unavailable");
+                _logger.Error(ex, $"[{_audioFile.UserId}] Blob storage is unavailable");
                 throw;
             }
         }

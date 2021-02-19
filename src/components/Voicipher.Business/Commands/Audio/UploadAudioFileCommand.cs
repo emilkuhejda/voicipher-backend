@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
-using Voicipher.Common.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -51,29 +50,29 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<FileItemOutputModel>> Execute(UploadAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
-                    _logger.Error("Uploaded file source was not found");
+                    _logger.Error("[{userId}] Uploaded file source was not found");
 
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
 
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language {parameter.Language} is not supported");
+                    _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioFileId = Guid.NewGuid();
             var tempFilePath = string.Empty;
 
@@ -83,12 +82,12 @@ namespace Voicipher.Business.Commands.Audio
                 cancellationToken.ThrowIfCancellationRequested();
 
                 tempFilePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);
-                _logger.Information($"Audio file was uploaded on temporary destination: {tempFilePath}");
+                _logger.Information($"[{userId}] Audio file was uploaded on temporary destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"Audio file {parameter.FileName} is not supported");
+                    _logger.Error($"[{userId}] Audio file {parameter.FileName} is not supported");
 
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
@@ -97,7 +96,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
                 var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
-                _logger.Information($"Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
+                _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -119,27 +118,26 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.AddAsync(audioFile);
                 await _audioFileRepository.SaveAsync(cancellationToken);
-                _logger.Information($"Audio file was successfully submitted. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}, user ID = {userId}");
+                _logger.Information($"[{userId}] Audio file was successfully submitted. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, "Blob storage is unavailable");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (DbUpdateException ex)
             {
-                _logger.Error($"Exception occurred during submitting file chunks. Message: {ex.Message}");
-                _logger.Error(ExceptionFormatter.FormatException(ex));
+                _logger.Error(ex, $"[{userId}] Exception occurred during submitting file chunks");
 
                 throw new OperationErrorException(ErrorCode.EC400);
             }
             catch (OperationCanceledException)
             {
-                _logger.Information("Operation was cancelled");
+                _logger.Information($"[{userId}] Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -149,7 +147,7 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(tempFilePath);
 
-                    _logger.Information($"Audio file was removed on destination: {tempFilePath}");
+                    _logger.Information($"[{userId}] Audio file was removed on destination: {tempFilePath}");
                 }
             }
         }

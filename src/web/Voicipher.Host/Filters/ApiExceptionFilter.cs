@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
-using Voicipher.Common.Utils;
 using Voicipher.Domain.Exceptions;
 
 namespace Voicipher.Host.Filters
@@ -32,7 +31,7 @@ namespace Voicipher.Host.Filters
                     Detail = "Operation failed"
                 });
 
-                _logger.Error($"{ExceptionFormatter.FormatException(context.Exception)}");
+                _logger.Error(context.Exception, "Unhandled operation error");
             }
 
             base.OnException(context);

@@ -41,14 +41,13 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(PermanentDeleteAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
-
-            var userId = principal.GetNameIdentifier();
 
             try
             {
@@ -61,26 +60,26 @@ namespace Voicipher.Business.Commands.Audio
                     _audioFileRepository.Remove(audioFile);
                     await _audioFileRepository.AddAsync(deletedEntity);
 
-                    _logger.Information($"Delete audio file source from blob storage. Audio file ID = {audioFile.Id}, User ID = {userId}");
+                    _logger.Information($"[{userId}] Delete audio file source from blob storage. Audio file ID = {audioFile.Id}");
                 }
 
                 await _audioFileRepository.SaveAsync(cancellationToken);
 
                 await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-                _logger.Information($"Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
+                _logger.Information($"[{userId}] Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}, Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable. Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "Permanent audio files deletion failed");
+                _logger.Fatal(ex, $"[{userId}] Permanent audio files deletion failed");
 
                 throw new OperationErrorException(ErrorCode.EC603);
             }

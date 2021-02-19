@@ -37,7 +37,7 @@ namespace Voicipher.Business.Commands.EndUser
             var user = await _userRepository.GetAsync(userId, cancellationToken);
             if (user == null)
             {
-                _logger.Error($"User {userId} was not found");
+                _logger.Error($"[{userId}] User was not found");
 
                 throw new OperationErrorException(StatusCodes.Status401Unauthorized);
             }
@@ -45,7 +45,7 @@ namespace Voicipher.Business.Commands.EndUser
             user.GivenName = parameter.GivenName;
             user.FamilyName = parameter.FamilyName;
 
-            _logger.Information($"User {userId} was successfully updated");
+            _logger.Information($"[{userId}] User was successfully updated");
 
             var outputModel = _mapper.Map<IdentityOutputModel>(user);
             return new CommandResult<IdentityOutputModel>(outputModel);

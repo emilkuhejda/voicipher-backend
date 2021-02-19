@@ -44,11 +44,11 @@ namespace Voicipher.Business.Services
 
         public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken)
         {
-            var speechClient = CreateSpeechClient();
+            var speechClient = CreateSpeechClient(audioFile.UserId);
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
             foreach (var transcribeAudioFile in transcribedAudioFiles)
             {
-                updateMethods.Add(() => RecognizeSpeech(speechClient, transcribeAudioFile, audioFile.Language));
+                updateMethods.Add(() => RecognizeSpeech(speechClient, transcribeAudioFile, audioFile.Language, audioFile.UserId));
             }
 
             _totalTasks = updateMethods.Count;
@@ -75,9 +75,9 @@ namespace Voicipher.Business.Services
             await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionProgressChangedMethod(userId), outputModel);
         }
 
-        private async Task<TranscribeItem> RecognizeSpeech(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language)
+        private async Task<TranscribeItem> RecognizeSpeech(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language, Guid userId)
         {
-            _logger.Information($"Start speech recognition for file {transcribedAudioFile.Path}");
+            _logger.Information($"[{userId}] Start speech recognition for file {transcribedAudioFile.Path}");
 
             var response = await GetRecognizedResponseAsync(speech, transcribedAudioFile, language);
             var alternatives = response.Results
@@ -100,16 +100,16 @@ namespace Voicipher.Business.Services
                 DateUpdatedUtc = dateCreated
             };
 
-            _logger.Information($"Audio file {transcribedAudioFile.Path} was recognized");
+            _logger.Information($"[{userId}] Audio file {transcribedAudioFile.Path} was recognized");
 
             return transcribeItem;
         }
 
         protected abstract Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language);
 
-        private SpeechClient CreateSpeechClient()
+        private SpeechClient CreateSpeechClient(Guid userId)
         {
-            _logger.Information("Create speech recognition client");
+            _logger.Information($"[{userId}] Create speech recognition client");
 
             var serializedCredentials = JsonConvert.SerializeObject(_appSettings.SpeechCredentials);
             var credentials = GoogleCredential

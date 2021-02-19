@@ -39,26 +39,26 @@ namespace Voicipher.Business.Commands
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(SendMailInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(SendMailInputModel.Recipient), ValidationErrorCodes.InvalidEmail))
                 {
-                    _logger.Error($"Recipient email address format {parameter.Recipient} is incorrect");
+                    _logger.Error($"[{userId}] Recipient email address format {parameter.Recipient} is incorrect");
 
                     throw new OperationErrorException(ErrorCode.EC202);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioFile = await _audioFileRepository.GetWithTranscribeItemsAsync(userId, parameter.FileItemId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file {parameter.FileItemId} was not found");
+                _logger.Error($"[{userId}] Audio file {parameter.FileItemId} was not found");
 
                 throw new OperationErrorException(ErrorCode.EC101);
             }
@@ -78,7 +78,7 @@ namespace Voicipher.Business.Commands
 
             await _mailProcessingChannel.AddFileAsync(new MailData(parameter.Recipient, subject, body.ToString()));
 
-            _logger.Information("Email was sent to queue");
+            _logger.Information("[{userId}] Email was sent to queue");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

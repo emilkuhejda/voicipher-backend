@@ -37,14 +37,14 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(DeleteAllAudioFilePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioFileIds = parameter.AudioFiles.Select(x => x.Id).ToArray();
             var audioFiles = await _audioFileRepository.GetForDeleteAllAsync(userId, audioFileIds, parameter.ApplicationId, cancellationToken);
 
@@ -64,7 +64,7 @@ namespace Voicipher.Business.Commands.Audio
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
             var audioFilesIds = audioFiles.Select(x => x.Id).ToList();
-            _logger.Information($"Audio files {JsonConvert.SerializeObject(audioFilesIds)} were deleted");
+            _logger.Information($"[{userId}] Audio files {JsonConvert.SerializeObject(audioFilesIds)} were deleted");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

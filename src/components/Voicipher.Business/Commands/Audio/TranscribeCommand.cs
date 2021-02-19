@@ -45,50 +45,50 @@ namespace Voicipher.Business.Commands.Audio
         protected override async Task<CommandResult<OkOutputModel>> Execute(TranscribePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            _logger.Information($"Start validation before transcription. User ID = {userId}, Audio file ID = {parameter.AudioFileId}");
+            _logger.Information($"[{userId}] Start validation before transcription. Audio file ID = {parameter.AudioFileId}");
 
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
-                    _logger.Error($"Language {parameter.Language} is not supported");
+                    _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
             if (_audioFileProcessingChannel.IsProcessingForUser(userId))
             {
-                _logger.Error($"User {userId} try to run more then one file recognition");
+                _logger.Error($"[{userId}] User try to run more then one file recognition");
                 throw new OperationErrorException(ErrorCode.EC303);
             }
 
             var restartedAttempts = await _backgroundJobRepository.GetAttemptsCountAsync(parameter.AudioFileId, cancellationToken);
             if (restartedAttempts > 1)
             {
-                _logger.Error($"Too many attempts ({restartedAttempts}) to restart has been done for audio file {parameter.AudioFileId}");
+                _logger.Error($"[{userId}] Too many attempts ({restartedAttempts}) to restart has been done for audio file {parameter.AudioFileId}");
                 throw new OperationErrorException(ErrorCode.EC304);
             }
 
             var audioFile = await _audioFileRepository.GetAsync(userId, parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
-                _logger.Error($"Audio file {parameter.AudioFileId} not exists");
+                _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} not exists");
                 throw new OperationErrorException(ErrorCode.EC101);
             }
 
             if (audioFile.UploadStatus != UploadStatus.Completed)
             {
-                _logger.Error($"Audio file source {parameter.AudioFileId} is not uploaded. Uploaded state is {audioFile.UploadStatus}");
+                _logger.Error($"[{userId}] Audio file source {parameter.AudioFileId} is not uploaded. Uploaded state is {audioFile.UploadStatus}");
                 throw new OperationErrorException(ErrorCode.EC104);
             }
 
             if (audioFile.RecognitionState != RecognitionState.None)
             {
-                _logger.Error($"Audio file {parameter.AudioFileId} is in the wrong recognition state. Recognition state is {audioFile.RecognitionState}");
+                _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} is in the wrong recognition state. Recognition state is {audioFile.RecognitionState}");
                 throw new OperationErrorException(ErrorCode.EC103);
             }
 
@@ -96,7 +96,7 @@ namespace Voicipher.Business.Commands.Audio
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(canRunRecognitionPayload, principal, cancellationToken);
             if (!canRunRecognitionResult.IsSuccess)
             {
-                _logger.Error($"User {userId} has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
+                _logger.Error($"[{userId}] User has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 
@@ -105,7 +105,7 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             await _audioFileRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
+            _logger.Information($"[{userId}] Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
 
             await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(userId, audioFile.Id, audioFile.FileName));
 

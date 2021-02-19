@@ -47,7 +47,7 @@ namespace Voicipher.Business.Commands
 
             if (!userSubscription.Validate().IsValid)
             {
-                _logger.Error("Invalid subscription input data");
+                _logger.Error($"[{userId}] Invalid subscription input data");
 
                 return new CommandResult(new OperationError(ValidationErrorCodes.InvalidDateTime));
             }
@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands
             var remainingTicks = userSubscriptions.CalculateRemainingTicks();
             if (parameter.Operation == SubscriptionOperation.Remove && remainingTicks < userSubscription.Time.Ticks)
             {
-                _logger.Error($"Not enough subscription time for user ID = {userId}. Required time: {parameter.Time}, Remaining time: {TimeSpan.FromTicks(remainingTicks)}");
+                _logger.Error($"[{userId}] Not enough subscription time for user ID = {userId}. Required time: {parameter.Time}, Remaining time: {TimeSpan.FromTicks(remainingTicks)}");
 
                 return new CommandResult(new OperationError(ValidationErrorCodes.NotEnoughSubscriptionTime));
             }
@@ -74,7 +74,7 @@ namespace Voicipher.Business.Commands
 
             await _unitOfWork.SaveAsync(cancellationToken);
 
-            _logger.Information($"Current user subscription was updated to time: {currentUserSubscription.Time}. User ID = {userId}");
+            _logger.Information($"[{userId}] Current user subscription was updated to time: {currentUserSubscription.Time}");
 
             return new CommandResult();
         }

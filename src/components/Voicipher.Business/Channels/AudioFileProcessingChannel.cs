@@ -38,14 +38,14 @@ namespace Voicipher.Business.Channels
             {
                 if (!TryAddToCache(recognitionFile))
                 {
-                    _logger.Warning("Recognition file {JsonConvert.SerializeObject(recognitionFile)} was not added to cache");
+                    _logger.Warning($"[{recognitionFile.UserId}] Recognition file {JsonConvert.SerializeObject(recognitionFile)} was not added to cache");
                 }
 
                 _progressCache.TryAdd(recognitionFile.AudioFileId, 0);
 
                 if (_channel.Writer.TryWrite(recognitionFile))
                 {
-                    _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
+                    _logger.Information($"[{recognitionFile.UserId}] Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
 
                     return true;
                 }

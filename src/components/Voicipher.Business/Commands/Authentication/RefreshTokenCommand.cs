@@ -48,7 +48,7 @@ namespace Voicipher.Business.Commands.Authentication
 
             var token = TokenHelper.Generate(_appSettings.SecretKey, claims, parameter);
 
-            _logger.Information($"Token was created for user ID = {userId}");
+            _logger.Information($"[{userId}] Token was created");
 
             return new CommandResult<string>(token);
         }
