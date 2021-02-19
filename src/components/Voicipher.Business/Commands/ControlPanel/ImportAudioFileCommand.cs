@@ -35,7 +35,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             _blobStorage = blobStorage;
             _userRepository = userRepository;
             _unitOfWork = unitOfWork;
-            _logger = logger;
+            _logger = logger.ForContext<ImportAudioFileCommand>();
             _appSettings = options.Value;
         }
 
