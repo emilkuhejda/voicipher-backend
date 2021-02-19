@@ -54,8 +54,6 @@ namespace Voicipher.Domain.Models
 
         public IList<TranscribeItem> TranscribeItems { get; set; }
 
-        //public virtual IList<WavPartialFileEntity> WavPartialFiles { get; set; }
-
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
