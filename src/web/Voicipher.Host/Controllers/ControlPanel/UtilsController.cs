@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.ControlPanel
@@ -14,6 +15,13 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [ApiController]
     public class UtilsController : ControllerBase
     {
+        private readonly Lazy<ISpeechRecognitionService> _speechRecognitionService;
+
+        public UtilsController(Lazy<ISpeechRecognitionService> speechRecognitionService)
+        {
+            _speechRecognitionService = speechRecognitionService;
+        }
+
         [HttpPut("send-message")]
         [ApiExplorerSettings(IgnoreApi = false)]
         public async Task<IActionResult> SendMessage(Guid userId, Guid fileItemId, double percentage)
@@ -30,7 +38,11 @@ namespace Voicipher.Host.Controllers.ControlPanel
         [HttpGet("is-deployment-successful")]
         public IActionResult IsDeploymentSuccessful()
         {
-            throw new NotImplementedException();
+            var canCreateSpeechClient = _speechRecognitionService.Value.CanCreateSpeechClientAsync();
+            if (!canCreateSpeechClient)
+                return BadRequest();
+
+            return Ok();
         }
 
         [HttpGet("generate-hangfire-access")]
