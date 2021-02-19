@@ -12,7 +12,7 @@ namespace Voicipher.Business.Services
 {
     public abstract class DiskStorage : IDiskStorage
     {
-        private const string UploadedFilesDirectory = "uploaded";
+        private const string UploadedFilesDirectory = "uploads";
 
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly string _filesDirectory;
