@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
-using Voicipher.Common.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
