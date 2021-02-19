@@ -43,7 +43,7 @@ namespace Voicipher.Business.Commands
 
             await _informationMessageRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Information messages {parameter} were mark as opened");
+            _logger.Information($"[{userId}] Information messages {parameter} were mark as opened");
 
             var outputModel = informationMessages.Select(_mapper.Map<InformationMessageOutputModel>).ToArray();
             return new CommandResult<InformationMessageOutputModel[]>(outputModel);

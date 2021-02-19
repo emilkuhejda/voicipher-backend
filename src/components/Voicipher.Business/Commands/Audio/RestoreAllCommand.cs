@@ -37,14 +37,14 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(RestoreAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioFiles = await _audioFileRepository.GetForRestoreAsync(userId, parameter.AudioFilesIds.ToArray(), parameter.ApplicationId, cancellationToken);
 
             foreach (var audioFile in audioFiles)
@@ -57,7 +57,7 @@ namespace Voicipher.Business.Commands.Audio
             await _audioFileRepository.SaveAsync(cancellationToken);
             await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-            _logger.Information($"Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were restored");
+            _logger.Information($"[{userId}] Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were restored");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

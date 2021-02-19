@@ -45,7 +45,7 @@ namespace Voicipher.Business.Commands.Authentication
 
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }

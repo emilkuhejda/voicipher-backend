@@ -33,7 +33,7 @@ namespace Voicipher.Business.Commands.EndUser
             var userId = principal.GetNameIdentifier();
             if (!Enum.IsDefined(typeof(Language), parameter.Language))
             {
-                _logger.Error($"Language {parameter.Language} is not supported");
+                _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
 
                 throw new OperationErrorException(ErrorCode.EC200);
             }
@@ -46,7 +46,7 @@ namespace Voicipher.Business.Commands.EndUser
 
                 await _userDeviceRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"Language {lang} was updated for installation ID = {userDevice.InstallationId}");
+                _logger.Information($"[{userId}] Language {lang} was updated for installation ID = {userDevice.InstallationId}");
             }
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());

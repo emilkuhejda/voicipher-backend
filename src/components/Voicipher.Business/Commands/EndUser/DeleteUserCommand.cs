@@ -39,12 +39,12 @@ namespace Voicipher.Business.Commands.EndUser
         protected override async Task<CommandResult<OkOutputModel>> Execute(string parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            _logger.Information($"Start deleting of the user account. User ID = {userId}, email = {parameter}");
+            _logger.Information($"[{userId}] Start deleting of the user account. Email = {parameter}");
 
             var user = await _userRepository.GetByEmailAsync(userId, parameter, cancellationToken);
             if (user == null)
             {
-                _logger.Error($"User with ID {userId} and email {parameter} not found");
+                _logger.Error($"[{userId}] User ID {userId} and email {parameter} not found");
 
                 throw new OperationErrorException(StatusCodes.Status404NotFound);
             }
@@ -65,17 +65,17 @@ namespace Voicipher.Business.Commands.EndUser
                 var blobSettings = new BlobContainerSettings(userId);
                 await _blobStorage.DeleteContainer(blobSettings, cancellationToken);
 
-                _logger.Information($"User account with ID = {userId} was successfully deleted");
+                _logger.Information($"[{userId}] User account was successfully deleted");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {userId}");
+                _logger.Error(ex, $"[{userId}] Blob storage is unavailable");
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"Error occurred during deleting of the user {userId}");
+                _logger.Error(ex, $"[{userId}] Delete user failed");
             }
 
             throw new OperationErrorException(StatusCodes.Status400BadRequest);

@@ -37,18 +37,18 @@ namespace Voicipher.Business.Commands
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(CreateSpeechResultInputModel parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            var userId = principal.GetNameIdentifier();
             var audioSample = await _recognizedAudioSampleRepository.GetAsync(parameter.RecognizedAudioSampleId, cancellationToken);
             if (audioSample == null)
             {
-                _logger.Error($"Recognized audio sample {parameter.RecognizedAudioSampleId} not found for user {userId}");
+                _logger.Error($"[{userId}] Recognized audio sample {parameter.RecognizedAudioSampleId} not found for user {userId}");
 
                 throw new OperationErrorException(ErrorCode.EC105);
             }
@@ -58,7 +58,7 @@ namespace Voicipher.Business.Commands
             await _speechResultRepository.AddAsync(speechResult);
             await _speechResultRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"User with ID = {userId} inserted speech result");
+            _logger.Information($"[{userId}] User inserted speech result");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

@@ -42,12 +42,12 @@ namespace Voicipher.Business.Services
 
         public async Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
-            _logger.Information($"Start conversion audio file {audioFile.Id} to wav format");
+            _logger.Information($"[{audioFile.UserId}] Start conversion audio file {audioFile.Id} to wav format");
 
             var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
             if (File.Exists(sourceFileNamePath))
             {
-                _logger.Information($"Source wav file is already exists in destination in destination {sourceFileNamePath}");
+                _logger.Information($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
                 return;
             }
 
@@ -57,16 +57,16 @@ namespace Voicipher.Business.Services
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(bloBytes, cancellationToken);
-                var (wavFilePath, fileName) = await ConvertToWavAsync(tempFilePath);
+                var (wavFilePath, fileName) = await ConvertToWavAsync(tempFilePath, audioFile.UserId);
 
                 audioFile.SourceFileName = fileName;
                 await _unitOfWork.SaveAsync(cancellationToken);
 
-                _logger.Information($"Conversion audio file {audioFile.Id} to wav format finished. New audio file was stored in destination {wavFilePath}");
+                _logger.Information($"[{audioFile.UserId}] Conversion audio file {audioFile.Id} to wav format finished. New audio file was stored in destination {wavFilePath}");
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"Blob storage is unavailable. User ID = {audioFile.Id}, Audio files = {audioFile.Id}, file name = {audioFile.OriginalSourceFileName}");
+                _logger.Error(ex, $"[{audioFile.UserId}] Blob storage is unavailable. Audio file = {audioFile.Id}, file name = {audioFile.OriginalSourceFileName}");
                 throw;
             }
             finally
@@ -89,14 +89,14 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id).ToArray();
+            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId).ToArray();
 
             File.Delete(wavFilePath);
 
             return transcribedAudioFiles;
         }
 
-        private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath)
+        private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath, Guid userId)
         {
             var fileName = $"{Guid.NewGuid()}.voc";
             var filePath = Path.Combine(_diskStorage.GetDirectoryPath(), fileName);
@@ -108,12 +108,12 @@ namespace Voicipher.Business.Services
                 }
             });
 
-            _logger.Information($"File {inputFilePath} was converted and stored in new destination {filePath}");
+            _logger.Information($"[{userId}] File {inputFilePath} was converted and stored in new destination {filePath}");
 
             return (filePath, fileName);
         }
 
-        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId)
+        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId, Guid userId)
         {
             var transcribedAudioFiles = new List<TranscribedAudioFile>();
             var processedTime = TimeSpan.Zero;
@@ -140,7 +140,7 @@ namespace Voicipher.Business.Services
             }
             catch (Exception)
             {
-                _logger.Error($"Remove wav audio files ({transcribedAudioFiles.Count}) from disk storage");
+                _logger.Error($"[{userId}] Remove wav audio files ({transcribedAudioFiles.Count}) from disk storage");
 
                 if (transcribedAudioFiles.Any())
                 {

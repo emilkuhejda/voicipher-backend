@@ -8,7 +8,6 @@ using AutoMapper;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
-using Voicipher.Common.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -43,17 +42,18 @@ namespace Voicipher.Business.Commands.Audio
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(UploadFileChunkPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
+            var userId = principal.GetNameIdentifier();
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
                 if (validationResult.Errors.ContainsError(nameof(UploadFileChunkPayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
-                    _logger.Error("Uploaded file source was not found");
+                    _logger.Error($"[{userId}] Uploaded file source was not found");
 
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
 
-                _logger.Error("Invalid input data");
+                _logger.Error($"[{userId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -65,7 +65,7 @@ namespace Voicipher.Business.Commands.Audio
                 cancellationToken.ThrowIfCancellationRequested();
 
                 filePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);
-                _logger.Information($"File chunk was created on destination: {filePath}");
+                _logger.Information($"[{userId}] File chunk was created on destination: {filePath}");
 
                 var fileChunk = _mapper.Map<FileChunk>(
                     parameter,
@@ -73,7 +73,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (!fileChunk.Validate().IsValid)
                 {
-                    _logger.Error("Invalid input data for file chunk entity");
+                    _logger.Error($"[{userId}] Invalid input data for file chunk entity");
 
                     throw new OperationErrorException(ErrorCode.EC600);
                 }
@@ -81,13 +81,13 @@ namespace Voicipher.Business.Commands.Audio
                 await _fileChunkRepository.AddAsync(fileChunk);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunk for audio file {parameter.AudioFileId} was uploaded");
+                _logger.Information($"[{userId}] File chunk for audio file {parameter.AudioFileId} was uploaded");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (OperationCanceledException)
             {
-                _logger.Information("Operation was cancelled");
+                _logger.Information($"[{userId}] Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -97,12 +97,10 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(filePath);
 
-                    _logger.Information($"File chunk was removed on destination: {filePath}");
+                    _logger.Information($"[{userId}] File chunk was removed on destination: {filePath}");
                 }
 
-                _logger.Error("File chunk was not uploaded correctly");
-                _logger.Error(ExceptionFormatter.FormatException(ex));
-
+                _logger.Error(ex, $"[{userId}] File chunk was not uploaded correctly");
                 throw;
             }
         }
