@@ -74,7 +74,7 @@ namespace Voicipher.Business.Commands
 
             await _unitOfWork.SaveAsync(cancellationToken);
 
-            _logger.Information($"Current user subscription was updated to time: {currentUserSubscription.Time}. User ID = {userId}");
+            _logger.Information($"[{userId}] Current user subscription was updated to time: {currentUserSubscription.Time}");
 
             return new CommandResult();
         }

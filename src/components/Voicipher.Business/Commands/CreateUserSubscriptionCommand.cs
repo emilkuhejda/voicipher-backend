@@ -50,7 +50,7 @@ namespace Voicipher.Business.Commands
         {
             var userId = principal.GetNameIdentifier();
 
-            _logger.Information($"Start billing purchase registration. User ID = {userId}, Product ID = {parameter.ProductId}");
+            _logger.Information($"[{userId}] Start billing purchase registration. Product ID = {parameter.ProductId}");
             if (!parameter.Validate().IsValid)
             {
                 _logger.Error($"Invalid input data. User ID = {userId}");
@@ -75,7 +75,7 @@ namespace Voicipher.Business.Commands
                     if (!isSuccess)
                         throw new OperationErrorException(ErrorCode.EC302);
 
-                    _logger.Information($"Billing purchase was successfully registered. Billing purchase: {billingPurchase.Id}");
+                    _logger.Information($"[{userId}] Billing purchase was successfully registered. Billing purchase: {billingPurchase.Id}");
 
                     await transaction.CommitAsync(cancellationToken);
 
@@ -119,7 +119,7 @@ namespace Voicipher.Business.Commands
                 return false;
             }
 
-            _logger.Information($"Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}");
+            _logger.Information($"[{principal.GetNameIdentifier()}] Purchase was registered. Purchase ID = {billingPurchase.Id}, Subscription time = {subscriptionProduct.Time}");
 
             return true;
         }

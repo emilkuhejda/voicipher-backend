@@ -47,7 +47,7 @@ namespace Voicipher.Business.Commands.Transcription
 
             await _unitOfWork.SaveAsync(cancellationToken);
 
-            _logger.Information($"Audio file {parameter.AudioFileId} changed recognition state from {oldRecognitionState} to {parameter.RecognitionState}");
+            _logger.Information($"[{parameter.UserId}] Audio file {parameter.AudioFileId} changed recognition state from {oldRecognitionState} to {parameter.RecognitionState}");
 
             await _messageCenterService.SendAsync(
                 HubMethodsHelper.GetRecognitionStateChangedMethod(parameter.UserId),

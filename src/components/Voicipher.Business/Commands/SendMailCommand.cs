@@ -78,7 +78,7 @@ namespace Voicipher.Business.Commands
 
             await _mailProcessingChannel.AddFileAsync(new MailData(parameter.Recipient, subject, body.ToString()));
 
-            _logger.Information("Email was sent to queue");
+            _logger.Information("[{userId}] Email was sent to queue");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

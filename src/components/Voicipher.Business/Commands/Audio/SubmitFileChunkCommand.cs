@@ -60,9 +60,9 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
-            _logger.Information("Start submitting audio file to blob storage");
-
             var userId = principal.GetNameIdentifier();
+            _logger.Information($"[{userId}] Start submitting audio file to blob storage");
+
             var audioFile = await _audioFileRepository.GetAsync(parameter.AudioFileId, cancellationToken);
             if (audioFile == null)
             {
@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileBytes = await _diskStorage.ReadAllBytesAsync(fileChunks, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(audioFileBytes, cancellationToken);
 
-                _logger.Information($"Audio file was created on destination: {tempFilePath}");
+                _logger.Information($"[{userId}] Audio file was created on destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
@@ -103,7 +103,7 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, parameter.AudioFileId);
                 var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                _logger.Information($"Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFile.Id}");
+                _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFile.Id}");
 
                 audioFile.ApplicationId = parameter.ApplicationId;
                 audioFile.OriginalSourceFileName = sourceName;
@@ -113,7 +113,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"Audio file {audioFile.Id} was successfully submitted");
+                _logger.Information($"[{userId}] Audio file {audioFile.Id} was successfully submitted");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
                 return new CommandResult<FileItemOutputModel>(outputModel);
@@ -133,7 +133,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (OperationCanceledException)
             {
-                _logger.Information("Operation was cancelled");
+                _logger.Information($"[{userId}] Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -143,14 +143,14 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(tempFilePath);
 
-                    _logger.Information($"Audio file was removed on destination: {tempFilePath}");
+                    _logger.Information($"[{userId}] Audio file was removed on destination: {tempFilePath}");
                 }
 
                 _diskStorage.RemoveRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
+                _logger.Information($"[{userId}] File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
             }
         }
     }

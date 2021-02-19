@@ -46,7 +46,7 @@ namespace Voicipher.Business.Commands.EndUser
 
                 await _userDeviceRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"Language {lang} was updated for installation ID = {userDevice.InstallationId}");
+                _logger.Information($"[{userId}] Language {lang} was updated for installation ID = {userDevice.InstallationId}");
             }
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());

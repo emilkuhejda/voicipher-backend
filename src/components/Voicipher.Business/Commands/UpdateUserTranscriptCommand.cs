@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
+using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
@@ -50,7 +51,7 @@ namespace Voicipher.Business.Commands
 
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"Transcribe item {parameter.TranscribeItemId} was updated");
+            _logger.Information($"[{principal.GetNameIdentifier()}] Transcribe item {parameter.TranscribeItemId} was updated");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

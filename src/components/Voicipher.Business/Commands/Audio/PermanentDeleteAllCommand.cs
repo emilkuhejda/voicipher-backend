@@ -61,14 +61,14 @@ namespace Voicipher.Business.Commands.Audio
                     _audioFileRepository.Remove(audioFile);
                     await _audioFileRepository.AddAsync(deletedEntity);
 
-                    _logger.Information($"Delete audio file source from blob storage. Audio file ID = {audioFile.Id}, User ID = {userId}");
+                    _logger.Information($"[{userId}] Delete audio file source from blob storage. Audio file ID = {audioFile.Id}");
                 }
 
                 await _audioFileRepository.SaveAsync(cancellationToken);
 
                 await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
-                _logger.Information($"Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
+                _logger.Information($"[{userId}] Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }

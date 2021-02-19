@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Serilog;
+using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Common.Utils;
 using Voicipher.Domain.Enums;
@@ -50,7 +51,7 @@ namespace Voicipher.Business.Commands.Audio
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
+                _logger.Information($"[{principal.GetNameIdentifier()}] File chunks ({fileChunks.Length}) were deleted for audio file {parameter.AudioFileId}");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
