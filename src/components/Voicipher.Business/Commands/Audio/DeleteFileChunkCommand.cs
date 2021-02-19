@@ -6,7 +6,6 @@ using Autofac.Features.Indexed;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
-using Voicipher.Common.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -58,8 +57,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (Exception ex)
             {
-                _logger.Error($"[{userId}] Operation error");
-                _logger.Error(ExceptionFormatter.FormatException(ex));
+                _logger.Error(ex, $"[{userId}] Operation error");
 
                 throw new OperationErrorException(ErrorCode.EC603);
             }

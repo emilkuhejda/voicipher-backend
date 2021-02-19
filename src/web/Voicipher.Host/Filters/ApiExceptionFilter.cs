@@ -32,7 +32,7 @@ namespace Voicipher.Host.Filters
                     Detail = "Operation failed"
                 });
 
-                _logger.Error($"{ExceptionFormatter.FormatException(context.Exception)}");
+                _logger.Error(context.Exception, "Unhandled operation error");
             }
 
             base.OnException(context);
