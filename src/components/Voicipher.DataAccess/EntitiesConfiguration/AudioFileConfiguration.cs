@@ -28,8 +28,6 @@ namespace Voicipher.DataAccess.EntitiesConfiguration
             builder.Property(x => x.IsDeleted).IsRequired();
             builder.Property(x => x.IsPermanentlyDeleted).IsRequired();
             builder.Property(x => x.WasCleaned).IsRequired();
-
-            builder.HasMany(x => x.TranscribeItems).WithOne(x => x.AudioFile).HasForeignKey(x => x.AudioFileId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

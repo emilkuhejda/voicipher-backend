@@ -10,7 +10,7 @@ using Voicipher.DataAccess;
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210219062618_InitialCreate")]
+    [Migration("20210219063043_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
