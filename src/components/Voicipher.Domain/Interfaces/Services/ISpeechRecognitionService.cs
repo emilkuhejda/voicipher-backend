@@ -6,6 +6,8 @@ namespace Voicipher.Domain.Interfaces.Services
 {
     public interface ISpeechRecognitionService
     {
+        bool CanCreateSpeechClientAsync();
+
         Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken);
     }
 }
