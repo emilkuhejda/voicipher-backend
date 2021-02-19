@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.ControlPanel
@@ -14,10 +17,27 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [ApiController]
     public class UserController : ControllerBase
     {
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        private readonly Lazy<IUserRepository> _userRepository;
+
+        public UserController(Lazy<IUserRepository> userRepository)
         {
-            throw new NotImplementedException();
+            _userRepository = userRepository;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Get(CancellationToken cancellationToken)
+        {
+            var users = await _userRepository.Value.GetAllAsync(cancellationToken);
+            var outputModels = users.Select(x => new
+            {
+                Id = x.Id,
+                Email = x.Email,
+                GivenName = x.GivenName,
+                FamilyName = x.FamilyName,
+                DateRegisteredUtc = x.DateRegisteredUtc
+            });
+
+            return Ok(outputModels);
         }
 
         [HttpDelete("delete")]

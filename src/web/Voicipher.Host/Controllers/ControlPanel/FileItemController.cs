@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Models;
 using Voicipher.Host.Utils;
 
 namespace Voicipher.Host.Controllers.ControlPanel
@@ -14,16 +18,27 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [ApiController]
     public class FileItemController : ControllerBase
     {
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetAll(Guid userId)
+        private readonly Lazy<IAudioFileRepository> _audioFileRepository;
+
+        public FileItemController(Lazy<IAudioFileRepository> audioFileRepository)
         {
-            throw new NotImplementedException();
+            _audioFileRepository = audioFileRepository;
+        }
+
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> GetAll(Guid userId, CancellationToken cancellationToken)
+        {
+            var audioFiles = await _audioFileRepository.Value.GetAllCreatedAsync(userId, cancellationToken);
+
+            return Ok(audioFiles.Select(MapAudioFile).ToArray());
         }
 
         [HttpGet("detail/{fileItemId}")]
-        public async Task<IActionResult> Get(Guid fileItemId)
+        public async Task<IActionResult> Get(Guid fileItemId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var audioFile = await _audioFileRepository.Value.GetAsync(fileItemId, cancellationToken);
+
+            return Ok(MapAudioFile(audioFile));
         }
 
         [HttpPut("restore")]
@@ -36,6 +51,31 @@ namespace Voicipher.Host.Controllers.ControlPanel
         public async Task<IActionResult> UpdateRecognitionState(object updateModel)
         {
             throw new NotImplementedException();
+        }
+
+        private object MapAudioFile(AudioFile audioFile)
+        {
+            return new
+            {
+                Id = audioFile.Id,
+                UserId = audioFile.UserId,
+                ApplicationId = audioFile.ApplicationId,
+                Name = audioFile.Name,
+                FileName = audioFile.FileName,
+                Language = audioFile.Language,
+                RecognitionState = audioFile.RecognitionState,
+                OriginalSourceFileName = audioFile.OriginalSourceFileName,
+                SourceFileName = audioFile.SourceFileName,
+                Storage = audioFile.Storage,
+                UploadStatus = audioFile.UploadStatus,
+                TotalTime = audioFile.TotalTime,
+                TranscribedTime = audioFile.TranscribedTime,
+                DateCreated = audioFile.DateCreated,
+                DateProcessedUtc = audioFile.DateProcessedUtc,
+                DateUpdatedUtc = audioFile.DateUpdatedUtc,
+                IsDeleted = audioFile.IsDeleted,
+                WasCleaned = audioFile.WasCleaned
+            };
         }
     }
 }
