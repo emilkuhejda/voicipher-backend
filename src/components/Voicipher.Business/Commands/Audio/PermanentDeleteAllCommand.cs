@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, "Permanent audio files deletion failed");
+                _logger.Fatal(ex, $"[{userId}] Permanent audio files deletion failed");
 
                 throw new OperationErrorException(ErrorCode.EC603);
             }

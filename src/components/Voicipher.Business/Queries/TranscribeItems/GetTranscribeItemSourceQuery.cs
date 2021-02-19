@@ -60,7 +60,7 @@ namespace Voicipher.Business.Queries.TranscribeItems
             }
             catch (BlobNotExistsException)
             {
-                _logger.Warning($"Blob file {transcribeItem.SourceFileName} not found. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
+                _logger.Warning($"[{principal.GetNameIdentifier()}] Blob file {transcribeItem.SourceFileName} not found. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
 
                 return new QueryResult<byte[]>(new byte[0]);
             }
