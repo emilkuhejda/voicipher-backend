@@ -10,8 +10,8 @@ using Voicipher.DataAccess;
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210216170120_UpdateBackgroundJobEntity")]
-    partial class UpdateBackgroundJobEntity
+    [Migration("20210219063043_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -139,6 +139,9 @@ namespace Voicipher.DataAccess.Migrations
                     b.Property<Guid>("AudioFileId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("DateCompletedUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("DateCreatedUtc")
                         .HasColumnType("datetime2");
 
@@ -146,6 +149,7 @@ namespace Voicipher.DataAccess.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Parameters")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
@@ -200,6 +204,8 @@ namespace Voicipher.DataAccess.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("BillingPurchase");
                 });
@@ -327,6 +333,25 @@ namespace Voicipher.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("InformationMessage");
+                });
+
+            modelBuilder.Entity("Voicipher.Domain.Models.InternalValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Key")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Value")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InternalValue");
                 });
 
             modelBuilder.Entity("Voicipher.Domain.Models.LanguageVersion", b =>
@@ -554,6 +579,15 @@ namespace Voicipher.DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Voicipher.Domain.Models.BillingPurchase", b =>
+                {
+                    b.HasOne("Voicipher.Domain.Models.User", null)
+                        .WithMany("BillingPurchases")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Voicipher.Domain.Models.CurrentUserSubscription", b =>
                 {
                     b.HasOne("Voicipher.Domain.Models.User", null)
@@ -628,6 +662,8 @@ namespace Voicipher.DataAccess.Migrations
             modelBuilder.Entity("Voicipher.Domain.Models.User", b =>
                 {
                     b.Navigation("AudioFiles");
+
+                    b.Navigation("BillingPurchases");
 
                     b.Navigation("CurrentUserSubscription");
 
