@@ -142,7 +142,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             finally
             {
-                if (isOperationSuccessful)
+                if (!isOperationSuccessful)
                 {
                     _logger.Information($"[{userId}] Clean audio file from blob storage");
 
