@@ -22,6 +22,7 @@ namespace Voicipher.Business.Services
 
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
+        private readonly IFileAccessService _fileAccessService;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
@@ -29,12 +30,14 @@ namespace Voicipher.Business.Services
         public WavFileService(
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
+            IFileAccessService fileAccessService,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
             IUnitOfWork unitOfWork,
             ILogger logger)
         {
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Audio];
+            _fileAccessService = fileAccessService;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
             _unitOfWork = unitOfWork;
             _logger = logger.ForContext<WavFileService>();
@@ -45,7 +48,7 @@ namespace Voicipher.Business.Services
             _logger.Information($"[{audioFile.UserId}] Start conversion audio file {audioFile.Id} to wav format");
 
             var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
-            if (File.Exists(sourceFileNamePath))
+            if (_fileAccessService.Exists(sourceFileNamePath))
             {
                 _logger.Information($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
                 return;
@@ -71,27 +74,24 @@ namespace Voicipher.Business.Services
             }
             finally
             {
-                if (File.Exists(tempFilePath))
-                {
-                    File.Delete(tempFilePath);
-                }
+                _fileAccessService.Delete(tempFilePath);
             }
         }
 
         public async Task<TranscribedAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
             var wavFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
-            if (!File.Exists(wavFilePath))
+            if (!_fileAccessService.Exists(wavFilePath))
                 throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
 
             var remainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(audioFile.UserId, cancellationToken);
             if (remainingTime < TimeSpan.FromSeconds(1))
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
-            var wavFileSource = await File.ReadAllBytesAsync(wavFilePath, cancellationToken);
+            var wavFileSource = await _fileAccessService.ReadAllBytesAsync(wavFilePath, cancellationToken);
             var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId).ToArray();
 
-            File.Delete(wavFilePath);
+            _fileAccessService.Delete(wavFilePath);
 
             return transcribedAudioFiles;
         }
@@ -146,8 +146,7 @@ namespace Voicipher.Business.Services
                 {
                     foreach (var audioFile in transcribedAudioFiles)
                     {
-                        if (File.Exists(audioFile.Path))
-                            File.Delete(audioFile.Path);
+                        _fileAccessService.Delete(audioFile.Path);
                     }
                 }
 
