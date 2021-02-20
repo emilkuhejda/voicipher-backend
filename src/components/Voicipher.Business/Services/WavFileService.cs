@@ -129,12 +129,20 @@ namespace Voicipher.Business.Services
 
                     for (var i = 0; i <= countItems; i++)
                     {
-                        var processedSample = ProcessAudioSample(reader, audioTotalTime, remainingTime, processedTime, audioFileId);
-                        if (processedSample.sampleDuration.Ticks <= 0)
+                        var remainingTimeSpan = remainingTime.Subtract(processedTime);
+                        if (remainingTimeSpan.Ticks <= 0)
                             return transcribedAudioFiles;
 
-                        processedTime = processedTime.Add(processedSample.sampleDuration);
-                        transcribedAudioFiles.Add(processedSample.transcribedAudioFile);
+                        var sampleDuration = remainingTimeSpan.TotalSeconds < FileLengthInSeconds
+                            ? remainingTimeSpan
+                            : TimeSpan.FromSeconds(FileLengthInSeconds);
+
+                        var end = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
+                        var endTime = end > audioTotalTime ? audioTotalTime : end;
+                        var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
+
+                        processedTime = processedTime.Add(sampleDuration);
+                        transcribedAudioFiles.Add(transcribedAudioFile);
                     }
 
                     return transcribedAudioFiles;
@@ -156,27 +164,10 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private (TimeSpan sampleDuration, TranscribedAudioFile transcribedAudioFile) ProcessAudioSample(WaveFileReader reader, TimeSpan audioTotalTime, TimeSpan remainingTime, TimeSpan processedTime, Guid audioFileId)
-        {
-            var remainingTimeSpan = remainingTime.Subtract(processedTime);
-            if (remainingTimeSpan.Ticks <= 0)
-                return (TimeSpan.MinValue, null);
-
-            var sampleDuration = remainingTimeSpan.TotalSeconds < FileLengthInSeconds
-                ? remainingTimeSpan
-                : TimeSpan.FromSeconds(FileLengthInSeconds);
-
-            var end = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
-            var endTime = end > audioTotalTime ? audioTotalTime : end;
-
-            var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
-
-            return (sampleDuration, transcribedAudioFile);
-        }
-
         private TranscribedAudioFile CreateTranscribedAudioFile(WaveFileReader reader, TimeSpan start, TimeSpan end, Guid audioFileId)
         {
             var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
+
             using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
             {
                 var fileSegmentLength = reader.WaveFormat.AverageBytesPerSecond / 1000;
