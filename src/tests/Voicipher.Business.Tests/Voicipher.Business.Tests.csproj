@@ -25,4 +25,10 @@
     <ProjectReference Include="..\..\components\Voicipher.Domain\Voicipher.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Samples\sample.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

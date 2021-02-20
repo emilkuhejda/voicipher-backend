@@ -134,21 +134,30 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
-                _logger.Information($"[{_audioFile.UserId}] Start uploading transcribed audio files to blob storage");
+                _logger.Information($"[{_audioFile.UserId}] Start deleting transcribed items {_audioFile.OriginalSourceFileName} from blob storage");
 
                 var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
                 await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
 
+                _logger.Information($"[{_audioFile.UserId}] Transcribed items {_audioFile.OriginalSourceFileName} was deleted from blob storage");
+
                 var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
+                _logger.Information($"[{_audioFile.UserId}] {transcribedAudioFiles?.Length ?? 0} transcription items ready for upload");
+
                 if (transcribedAudioFiles != null && transcribedAudioFiles.Any())
                 {
                     foreach (var transcribedAudioFile in transcribedAudioFiles)
                     {
                         if (File.Exists(transcribedAudioFile.Path))
                         {
+                            _logger.Information($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
+
                             var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
                             var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
                             await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+
+                            _logger.Information($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
+
                             File.Delete(transcribedAudioFile.Path);
                         }
                     }

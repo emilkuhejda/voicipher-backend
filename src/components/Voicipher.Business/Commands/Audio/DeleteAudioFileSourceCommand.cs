@@ -53,6 +53,8 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (!string.IsNullOrWhiteSpace(audioFile.OriginalSourceFileName))
                 {
+                    _logger.Information($"[{parameter.UserId}] Start deleting original audio file source {audioFile.OriginalSourceFileName} from blob storage");
+
                     var deleteBlobSettings = new DeleteBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                     await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, cancellationToken);
 
@@ -61,6 +63,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 if (!string.IsNullOrWhiteSpace(audioFile.SourceFileName))
                 {
+                    _logger.Information($"[{parameter.UserId}] Start deleting audio file source {audioFile.SourceFileName} from blob storage");
+
                     var deleteBlobSettings = new DeleteBlobSettings(audioFile.SourceFileName, audioFile.UserId, audioFile.Id);
                     await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, cancellationToken);
 

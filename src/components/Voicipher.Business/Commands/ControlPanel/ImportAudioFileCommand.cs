@@ -79,11 +79,13 @@ namespace Voicipher.Business.Commands.ControlPanel
                                 var filePath = Path.Combine(rootPath, "source", audioFile.OriginalSourceFileName);
                                 if (File.Exists(filePath))
                                 {
+                                    _logger.Information($"Start uploading audio file {audioFile.OriginalSourceFileName} to blob storage");
+
                                     var uploadSettings = new UploadBlobSettings(filePath, audioFile.UserId, audioFile.Id);
                                     var name = await _blobStorage.UploadAsync(uploadSettings, cancellationToken);
                                     audioFile.OriginalSourceFileName = name;
 
-                                    _logger.Information($"Original audio file {name} source was uploaded to storage");
+                                    _logger.Information($"Original audio file original source {name} source was uploaded to storage");
                                 }
                                 else
                                 {
@@ -100,6 +102,8 @@ namespace Voicipher.Business.Commands.ControlPanel
                                 var filePath = Path.Combine(rootPath, "source", audioFile.SourceFileName);
                                 if (File.Exists(filePath))
                                 {
+                                    _logger.Information($"Start uploading audio file {audioFile.SourceFileName} to blob storage");
+
                                     var uploadSettings = new UploadBlobSettings(filePath, audioFile.UserId, audioFile.Id);
                                     var name = await _blobStorage.UploadAsync(uploadSettings, cancellationToken);
                                     audioFile.SourceFileName = name;
@@ -139,6 +143,9 @@ namespace Voicipher.Business.Commands.ControlPanel
                             if (File.Exists(path))
                             {
                                 var fileName = $"{transcribeItem.SourceFileName}.voc";
+
+                                _logger.Information($"Start uploading transcription audio file source {fileName} to blob storage");
+
                                 var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
                                 var uploadSettings = new UploadBlobSettings(path, audioFile.UserId, audioFile.Id, fileName, metadata);
                                 var name = await _blobStorage.UploadAsync(uploadSettings, cancellationToken);

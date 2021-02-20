@@ -94,8 +94,11 @@ namespace Voicipher.Business.Commands.Audio
 
                 cancellationToken.ThrowIfCancellationRequested();
 
+                _logger.Information($"[{userId}] Start uploading audio file to blob storage");
+
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
                 var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+
                 _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
 
                 cancellationToken.ThrowIfCancellationRequested();
