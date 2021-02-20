@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
@@ -51,6 +52,10 @@ namespace Voicipher.Business.Tests.Services
             var transcribedAudioFiles = await wavFileService.SplitAudioFileAsync(new AudioFile(), default);
 
             // Assert
+            var totalTime = TimeSpan.FromTicks(transcribedAudioFiles.Select(x => x.TotalTime).Sum(x => x.Ticks));
+            Assert.Equal(6, transcribedAudioFiles.Length);
+            Assert.Equal(TimeSpan.FromSeconds(302.5), totalTime);
+            Assert.Equal(TimeSpan.FromSeconds(300), transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero);
         }
     }
 }

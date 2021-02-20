@@ -18,7 +18,7 @@ namespace Voicipher.Business.Services
 {
     public class WavFileService : IWavFileService
     {
-        private const int FileLengthInSeconds = 59;
+        private const int FileLengthInSeconds = 58;
 
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
@@ -166,7 +166,7 @@ namespace Voicipher.Business.Services
 
             var audioTotalTime = reader.TotalTime;
             var end = processedTime.Add(sampleDuration);
-            var endTime = end > audioTotalTime ? audioTotalTime : end;
+            var endTime = end > audioTotalTime ? audioTotalTime : end.Add(TimeSpan.FromSeconds(0.5));
 
             var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
 
