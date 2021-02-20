@@ -24,10 +24,10 @@ namespace Voicipher.Business.Services
         {
             var recognitionConfig = new RecognitionConfig
             {
-                Encoding = RecognitionConfig.Types.AudioEncoding.Linear16,
                 LanguageCode = language,
                 EnableAutomaticPunctuation = true,
                 UseEnhanced = true,
+                Model = "phone_call",
                 EnableWordTimeOffsets = true,
                 AudioChannelCount = transcribedAudioFile.AudioChannels,
                 EnableSeparateRecognitionPerChannel = true
