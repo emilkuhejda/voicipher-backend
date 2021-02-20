@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Moq;
@@ -28,7 +29,9 @@ namespace Voicipher.Business.Tests.Services
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
 
-            var sampleBytes = await File.ReadAllBytesAsync(@"C:\Users\kuem\Downloads\samples\spkr.wav");
+            var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
+            var path = Path.Combine(directory, "Samples", "sample.wav");
+            var sampleBytes = await File.ReadAllBytesAsync(path);
 
             diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
