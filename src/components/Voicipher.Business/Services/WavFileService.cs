@@ -57,9 +57,14 @@ namespace Voicipher.Business.Services
             var tempFilePath = string.Empty;
             try
             {
+                _logger.Information($"[{audioFile.Id}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
+
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(bloBytes, cancellationToken);
+
+                _logger.Information($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
+
                 var (wavFilePath, fileName) = await ConvertToWavAsync(tempFilePath, audioFile.UserId);
 
                 audioFile.SourceFileName = fileName;
@@ -98,6 +103,8 @@ namespace Voicipher.Business.Services
 
         private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath, Guid userId)
         {
+            _logger.Information($"[{userId}] Start conversion audio file to wav format");
+
             var fileName = $"{Guid.NewGuid()}.voc";
             var filePath = Path.Combine(_diskStorage.GetDirectoryPath(), fileName);
             await Task.Run(() =>
