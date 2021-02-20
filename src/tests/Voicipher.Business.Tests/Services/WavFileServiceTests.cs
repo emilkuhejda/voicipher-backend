@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Moq;
@@ -27,8 +28,12 @@ namespace Voicipher.Business.Tests.Services
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
 
-            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(@"C:\Users\kuem\Downloads\samples");
+            var sampleBytes = await File.ReadAllBytesAsync(@"C:\Users\kuem\Downloads\samples\spkr.wav");
+
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock.Setup(x => x.ReadAllBytesAsync(It.IsAny<string>(), default)).ReturnsAsync(sampleBytes);
             currentUserSubscriptionRepositoryMock.Setup(x => x.GetRemainingTimeAsync(It.IsAny<Guid>(), default)).ReturnsAsync(TimeSpan.FromMinutes(10));
 
             var wavFileService = new WavFileService(
@@ -39,13 +44,8 @@ namespace Voicipher.Business.Tests.Services
                 unitOfWorkMock.Object,
                 loggerMock.Object);
 
-            var audioFile = new AudioFile
-            {
-                SourceFileName = "spkr.wma"
-            };
-
             // Act
-            var transcribedAudioFiles = await wavFileService.SplitAudioFileAsync(audioFile, default);
+            var transcribedAudioFiles = await wavFileService.SplitAudioFileAsync(new AudioFile(), default);
 
             // Assert
         }
