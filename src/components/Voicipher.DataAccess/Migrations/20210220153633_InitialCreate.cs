@@ -197,6 +197,7 @@ namespace Voicipher.DataAccess.Migrations
                     Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     FileName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Language = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    IsPhoneCall = table.Column<bool>(type: "bit", nullable: false),
                     RecognitionState = table.Column<int>(type: "int", nullable: false),
                     OriginalSourceFileName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     SourceFileName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
