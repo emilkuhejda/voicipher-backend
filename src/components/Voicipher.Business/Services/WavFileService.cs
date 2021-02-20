@@ -124,10 +124,12 @@ namespace Voicipher.Business.Services
                 using (var reader = new WaveFileReader(stream))
                 {
                     var countItems = (int)Math.Floor(reader.TotalTime.TotalSeconds / FileLengthInSeconds);
+                    var audioTotalTimeTicks = Math.Min(reader.TotalTime.Ticks, remainingTime.Ticks);
+                    var audioTotalTime = TimeSpan.FromTicks(audioTotalTimeTicks);
 
                     for (var i = 0; i <= countItems; i++)
                     {
-                        var processedSample = ProcessAudioSample(reader, remainingTime, processedTime, audioFileId);
+                        var processedSample = ProcessAudioSample(reader, audioTotalTime, remainingTime, processedTime, audioFileId);
                         if (processedSample.sampleDuration.Ticks <= 0)
                             return transcribedAudioFiles;
 
@@ -154,7 +156,7 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private (TimeSpan sampleDuration, TranscribedAudioFile transcribedAudioFile) ProcessAudioSample(WaveFileReader reader, TimeSpan remainingTime, TimeSpan processedTime, Guid audioFileId)
+        private (TimeSpan sampleDuration, TranscribedAudioFile transcribedAudioFile) ProcessAudioSample(WaveFileReader reader, TimeSpan audioTotalTime, TimeSpan remainingTime, TimeSpan processedTime, Guid audioFileId)
         {
             var remainingTimeSpan = remainingTime.Subtract(processedTime);
             if (remainingTimeSpan.Ticks <= 0)
@@ -164,9 +166,8 @@ namespace Voicipher.Business.Services
                 ? remainingTimeSpan
                 : TimeSpan.FromSeconds(FileLengthInSeconds);
 
-            var audioTotalTime = reader.TotalTime;
-            var end = processedTime.Add(sampleDuration);
-            var endTime = end > audioTotalTime ? audioTotalTime : end.Add(TimeSpan.FromSeconds(0.5));
+            var end = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
+            var endTime = end > audioTotalTime ? audioTotalTime : end;
 
             var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
 
