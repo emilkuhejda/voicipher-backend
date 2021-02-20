@@ -62,6 +62,8 @@ namespace Voicipher.Business.Commands.EndUser
                 _userRepository.Remove(user);
                 await _userRepository.SaveAsync(cancellationToken);
 
+                _logger.Information($"[{userId}] Start deleting blob container");
+
                 var blobSettings = new BlobContainerSettings(userId);
                 await _blobStorage.DeleteContainer(blobSettings, cancellationToken);
 

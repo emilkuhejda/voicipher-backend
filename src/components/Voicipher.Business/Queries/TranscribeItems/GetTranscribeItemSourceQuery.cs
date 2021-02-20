@@ -45,10 +45,12 @@ namespace Voicipher.Business.Queries.TranscribeItems
 
             try
             {
+                _logger.Information($"[{userId}] Start downloading  transcription audio file {transcribeItem.SourceFileName} from blob storage");
+
                 var blobSettings = new GetBlobSettings(transcribeItem.SourceFileName, userId, transcribeItem.AudioFileId);
                 var blobItem = await _blobStorage.GetAsync(blobSettings, cancellationToken);
 
-                _logger.Information($"[{userId}] Blob file {transcribeItem.SourceFileName} was downloaded from blob storage. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
+                _logger.Information($"[{userId}] Transcription audio file {transcribeItem.SourceFileName} was downloaded from blob storage. Audio file ID = {transcribeItem.AudioFileId}, Transcribe item ID = {transcribeItem.Id}");
 
                 return new QueryResult<byte[]>(blobItem);
             }
