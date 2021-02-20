@@ -6,6 +6,7 @@ using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
 {
@@ -20,18 +21,23 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, string language)
+        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
             var recognitionConfig = new RecognitionConfig
             {
-                LanguageCode = language,
+                LanguageCode = speechRecognizeConfig.Language,
                 EnableAutomaticPunctuation = true,
-                UseEnhanced = true,
-                Model = "phone_call",
                 EnableWordTimeOffsets = true,
                 AudioChannelCount = transcribedAudioFile.AudioChannels,
                 EnableSeparateRecognitionPerChannel = true
             };
+
+            if (speechRecognizeConfig.IsPhoneCall)
+            {
+                recognitionConfig.UseEnhanced = true;
+                recognitionConfig.Model = RecognitionModel.PhoneCall;
+            }
+
             var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
 
             var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
