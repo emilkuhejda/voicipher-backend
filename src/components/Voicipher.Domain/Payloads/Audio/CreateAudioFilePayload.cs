@@ -19,6 +19,9 @@ namespace Voicipher.Domain.Payloads.Audio
         public string FileName { get; init; }
 
         [Required]
+        public bool IsPhoneCall { get; init; }
+
+        [Required]
         public DateTime DateCreated { get; init; }
 
         [Required]

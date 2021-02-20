@@ -126,13 +126,14 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateFileItem")]
-        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, bool isPhoneCall, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
         {
             var createAudioFilePayload = new CreateAudioFilePayload
             {
                 Name = name,
                 Language = language,
                 FileName = fileName,
+                IsPhoneCall = isPhoneCall,
                 DateCreated = dateCreated,
                 ApplicationId = applicationId
             };
@@ -155,13 +156,14 @@ namespace Voicipher.Host.Controllers.V1
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         [RequestSizeLimit(int.MaxValue)]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> Upload(string name, string language, string fileName, DateTime dateCreated, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
+        public async Task<IActionResult> Upload(string name, string language, string fileName, bool isPhoneCall, DateTime dateCreated, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
             var createAudioFilePayload = new UploadAudioFilePayload
             {
                 Name = name,
                 Language = language,
                 FileName = fileName,
+                IsPhoneCall = isPhoneCall,
                 DateCreated = dateCreated,
                 ApplicationId = applicationId,
                 File = file

@@ -24,6 +24,8 @@ namespace Voicipher.Domain.Models
 
         public string Language { get; set; }
 
+        public bool IsPhoneCall { get; set; }
+
         public RecognitionState RecognitionState { get; set; }
 
         // File name in the Azure blob storage
