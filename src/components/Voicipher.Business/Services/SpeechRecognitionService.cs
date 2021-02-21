@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Api.Gax;
+using Google.Api.Gax.Grpc;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -46,7 +48,7 @@ namespace Voicipher.Business.Services
 
                 var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
 
-                var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
+                var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio, CallSettings.FromExpiration(Expiration.None));
                 longOperation = await longOperation.PollUntilCompletedAsync();
                 var longRunningRecognizeResponse = longOperation.Result;
 
