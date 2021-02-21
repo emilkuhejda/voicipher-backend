@@ -328,6 +328,7 @@ namespace Voicipher.DataAccess.Migrations
                     StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
                     TotalTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    IsIncomplete = table.Column<bool>(type: "bit", nullable: false),
                     DateCreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DateUpdatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },

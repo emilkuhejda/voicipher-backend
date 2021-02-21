@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
@@ -8,6 +9,7 @@ using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
@@ -23,33 +25,43 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<RecognitionAlternative[]> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
-            var recognitionConfig = new RecognitionConfig
+            try
             {
-                LanguageCode = speechRecognizeConfig.Language,
-                EnableAutomaticPunctuation = true,
-                EnableWordTimeOffsets = true,
-                AudioChannelCount = transcribedAudioFile.AudioChannels,
-                EnableSeparateRecognitionPerChannel = true
-            };
+                var recognitionConfig = new RecognitionConfig
+                {
+                    LanguageCode = speechRecognizeConfig.Language,
+                    EnableAutomaticPunctuation = true,
+                    EnableWordTimeOffsets = true,
+                    AudioChannelCount = transcribedAudioFile.AudioChannels,
+                    EnableSeparateRecognitionPerChannel = true
+                };
 
-            if (speechRecognizeConfig.IsPhoneCall)
-            {
-                recognitionConfig.UseEnhanced = true;
-                recognitionConfig.Model = RecognitionModel.PhoneCall;
+                if (speechRecognizeConfig.IsPhoneCall)
+                {
+                    recognitionConfig.UseEnhanced = true;
+                    recognitionConfig.Model = RecognitionModel.PhoneCall;
+                }
+
+                var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
+
+                var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
+                longOperation = await longOperation.PollUntilCompletedAsync();
+                var longRunningRecognizeResponse = longOperation.Result;
+
+                var alternatives = longRunningRecognizeResponse.Results
+                    .SelectMany(x => x.Alternatives)
+                    .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
+
+                return new RecognizedResult(false, alternatives);
             }
+            catch (Exception ex)
+            {
+                Logger.Fatal(ex, $"[{speechRecognizeConfig.UserId}] Recognition failed");
 
-            var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
-
-            var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
-            longOperation = await longOperation.PollUntilCompletedAsync();
-            var longRunningRecognizeResponse = longOperation.Result;
-
-            return longRunningRecognizeResponse.Results
-                .SelectMany(x => x.Alternatives)
-                .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()))
-                .ToArray();
+                return new RecognizedResult(true, Enumerable.Empty<RecognitionAlternative>());
+            }
         }
     }
 }

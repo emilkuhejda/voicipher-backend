@@ -458,6 +458,9 @@ namespace Voicipher.DataAccess.Migrations
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
 
+                    b.Property<bool>("IsIncomplete")
+                        .HasColumnType("bit");
+
                     b.Property<string>("SourceFileName")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");

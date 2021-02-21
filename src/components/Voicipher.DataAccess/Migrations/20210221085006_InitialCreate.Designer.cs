@@ -10,7 +10,7 @@ using Voicipher.DataAccess;
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210220153633_InitialCreate")]
+    [Migration("20210221085006_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -459,6 +459,9 @@ namespace Voicipher.DataAccess.Migrations
 
                     b.Property<TimeSpan>("EndTime")
                         .HasColumnType("time");
+
+                    b.Property<bool>("IsIncomplete")
+                        .HasColumnType("bit");
 
                     b.Property<string>("SourceFileName")
                         .HasMaxLength(255)
