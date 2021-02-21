@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Google.Cloud.Speech.V1;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Voicipher.Business.Extensions;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
@@ -21,7 +23,7 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<LongRunningRecognizeResponse> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        protected override async Task<RecognitionAlternative[]> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
             var recognitionConfig = new RecognitionConfig
             {
@@ -42,7 +44,12 @@ namespace Voicipher.Business.Services
 
             var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio);
             longOperation = await longOperation.PollUntilCompletedAsync();
-            return longOperation.Result;
+            var longRunningRecognizeResponse = longOperation.Result;
+
+            return longRunningRecognizeResponse.Results
+                .SelectMany(x => x.Alternatives)
+                .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()))
+                .ToArray();
         }
     }
 }
