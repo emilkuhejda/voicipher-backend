@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
-                    _logger.Error("[{userId}] Uploaded file source was not found");
+                    _logger.Error($"[{userId}] Uploaded file source was not found");
 
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
