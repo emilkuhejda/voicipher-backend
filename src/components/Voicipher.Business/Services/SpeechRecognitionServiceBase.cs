@@ -81,6 +81,11 @@ namespace Voicipher.Business.Services
                 transcribeItems.AddRange(items);
             }
 
+            if (transcribeItems.Any() && transcribeItems.All(x => x.IsIncomplete))
+            {
+                throw new InvalidOperationException($"[{audioFile.UserId}] Speech recognition operation failed");
+            }
+
             return transcribeItems.ToArray();
         }
 
