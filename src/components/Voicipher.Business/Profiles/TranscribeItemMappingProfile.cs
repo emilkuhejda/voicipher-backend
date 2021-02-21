@@ -33,6 +33,9 @@ namespace Voicipher.Business.Profiles
                     t => t.TotalTimeTicks,
                     opt => opt.MapFrom(x => x.TotalTime.Ticks))
                 .ForMember(
+                    t => t.IsIncomplete,
+                    opt => opt.MapFrom(x => x.IsIncomplete))
+                .ForMember(
                     t => t.DateCreatedUtc,
                     opt => opt.MapFrom(x => x.DateCreatedUtc))
                 .ForMember(

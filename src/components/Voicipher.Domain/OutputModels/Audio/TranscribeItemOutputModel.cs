@@ -32,6 +32,9 @@ namespace Voicipher.Domain.OutputModels.Audio
         public long TotalTimeTicks { get; init; }
 
         [Required]
+        public bool IsIncomplete { get; set; }
+
+        [Required]
         public DateTime DateCreatedUtc { get; init; }
 
         [Required]
