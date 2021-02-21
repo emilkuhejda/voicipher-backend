@@ -8,6 +8,8 @@
         Validated = 3,
         Converting = 4,
         Converted = 5,
+        Uploading = 6,
+        Uploaded = 7,
         Processing = 6,
         Processed = 7,
         Completed = 8
