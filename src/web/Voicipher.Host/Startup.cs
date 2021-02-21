@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -146,6 +147,35 @@ namespace Voicipher.Host
 
             // Clean temporary data
             app.CleanTemporaryData();
+
+            app.Use(async (context, next) =>
+            {
+                // Eliminates Cross-site Scripting (XSS) Attack
+                context.Response.Headers.Add("X-Xss-Protection", "1");
+
+                await next().ConfigureAwait(false);
+
+                if (context.Response.StatusCode == 404 &&
+                    !Path.HasExtension(context.Request.Path.Value) &&
+                    context.Request.Path.Value != null &&
+                    !context.Request.Path.Value.StartsWith("/api/", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    if (context.Request.Path.Value.StartsWith("/control-panel/", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        context.Request.Path = "/control-panel/index.html";
+                    }
+                    else if (context.Request.Path.Value.StartsWith("/profile/", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        context.Request.Path = "/profile/index.html";
+                    }
+                    else
+                    {
+                        context.Request.Path = "/home/index.html";
+                    }
+
+                    await next().ConfigureAwait(false);
+                }
+            });
 
             // Enable CORS
             app.UseCors(Constants.CorsPolicy);
