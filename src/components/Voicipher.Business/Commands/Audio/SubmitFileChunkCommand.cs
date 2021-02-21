@@ -71,7 +71,9 @@ namespace Voicipher.Business.Commands.Audio
             }
 
             var tempFilePath = string.Empty;
+            var sourceName = string.Empty;
             var fileChunks = await _fileChunkRepository.GetByAudioFileIdAsync(parameter.AudioFileId);
+            var isOperationSuccessful = false;
 
             try
             {
@@ -102,7 +104,7 @@ namespace Voicipher.Business.Commands.Audio
                 _logger.Information($"[{userId}] Start uploading audio file to blob storage");
 
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, parameter.AudioFileId);
-                var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+                sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                 _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFile.Id}");
 
@@ -113,6 +115,7 @@ namespace Voicipher.Business.Commands.Audio
                 audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
                 await _fileChunkRepository.SaveAsync(cancellationToken);
+                isOperationSuccessful = true;
 
                 _logger.Information($"[{userId}] Audio file {audioFile.Id} was successfully submitted");
 
@@ -139,6 +142,14 @@ namespace Voicipher.Business.Commands.Audio
             }
             finally
             {
+                if (!isOperationSuccessful)
+                {
+                    _logger.Information($"[{userId}] Clean audio file from blob storage");
+
+                    var deleteBlobSettings = new DeleteBlobSettings(sourceName, userId, parameter.AudioFileId);
+                    await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, default);
+                }
+
                 if (File.Exists(tempFilePath))
                 {
                     File.Delete(tempFilePath);

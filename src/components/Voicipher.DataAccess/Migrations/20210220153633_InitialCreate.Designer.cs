@@ -10,16 +10,16 @@ using Voicipher.DataAccess;
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210219063043_InitialCreate")]
+    [Migration("20210220153633_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .UseIdentityColumns()
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.3")
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("Voicipher.Domain.Models.Administrator", b =>
                 {
@@ -79,6 +79,9 @@ namespace Voicipher.DataAccess.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsPermanentlyDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPhoneCall")
                         .HasColumnType("bit");
 
                     b.Property<string>("Language")

@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
-            
+
             var audioFile = new AudioFile
             {
                 Id = Guid.NewGuid(),
@@ -65,6 +65,7 @@ namespace Voicipher.Business.Commands.Audio
                 Name = parameter.Name,
                 FileName = parameter.FileName,
                 Language = parameter.Language,
+                IsPhoneCall = parameter.IsPhoneCall,
                 Storage = StorageSetting.Azure,
                 DateCreated = parameter.DateCreated,
                 DateUpdatedUtc = DateTime.UtcNow
