@@ -25,7 +25,7 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speechClient, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
