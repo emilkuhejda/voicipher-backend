@@ -10,8 +10,8 @@
         Converted = 5,
         Uploading = 6,
         Uploaded = 7,
-        Processing = 6,
-        Processed = 7,
-        Completed = 8
+        Processing = 8,
+        Processed = 9,
+        Completed = 10
     }
 }
