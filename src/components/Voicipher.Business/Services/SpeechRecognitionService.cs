@@ -54,13 +54,13 @@ namespace Voicipher.Business.Services
                     .SelectMany(x => x.Alternatives)
                     .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
 
-                return new RecognizedResult(true, alternatives);
+                return new RecognizedResult(false, alternatives);
             }
             catch (Exception ex)
             {
                 Logger.Fatal(ex, $"[{speechRecognizeConfig.UserId}] Recognition failed");
 
-                return new RecognizedResult(false, Enumerable.Empty<RecognitionAlternative>());
+                return new RecognizedResult(true, Enumerable.Empty<RecognitionAlternative>());
             }
         }
     }
