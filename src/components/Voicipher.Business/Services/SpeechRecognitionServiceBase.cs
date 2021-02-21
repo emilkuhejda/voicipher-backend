@@ -129,7 +129,7 @@ namespace Voicipher.Business.Services
             return transcribeItem;
         }
 
-        protected abstract Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig);
+        protected abstract Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speechClient, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig);
 
         private SpeechClient CreateSpeechClient()
         {
