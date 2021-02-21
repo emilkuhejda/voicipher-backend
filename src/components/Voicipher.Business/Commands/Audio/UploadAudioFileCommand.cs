@@ -75,6 +75,8 @@ namespace Voicipher.Business.Commands.Audio
 
             var audioFileId = Guid.NewGuid();
             var tempFilePath = string.Empty;
+            var sourceName = string.Empty;
+            var isOperationSuccessful = false;
 
             try
             {
@@ -97,7 +99,7 @@ namespace Voicipher.Business.Commands.Audio
                 _logger.Information($"[{userId}] Start uploading audio file to blob storage");
 
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
-                var sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+                sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                 _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
 
@@ -111,6 +113,7 @@ namespace Voicipher.Business.Commands.Audio
                     Name = parameter.Name,
                     FileName = parameter.FileName,
                     Language = parameter.Language,
+                    IsPhoneCall = parameter.IsPhoneCall,
                     OriginalSourceFileName = sourceName,
                     Storage = StorageSetting.Azure,
                     UploadStatus = UploadStatus.Completed,
@@ -121,6 +124,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.AddAsync(audioFile);
                 await _audioFileRepository.SaveAsync(cancellationToken);
+                isOperationSuccessful = true;
+
                 _logger.Information($"[{userId}] Audio file was successfully submitted. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}");
 
                 var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
@@ -146,6 +151,14 @@ namespace Voicipher.Business.Commands.Audio
             }
             finally
             {
+                if (!isOperationSuccessful)
+                {
+                    _logger.Information($"[{userId}] Clean audio file from blob storage");
+
+                    var deleteBlobSettings = new DeleteBlobSettings(sourceName, userId, audioFileId);
+                    await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, default);
+                }
+
                 if (File.Exists(tempFilePath))
                 {
                     File.Delete(tempFilePath);
