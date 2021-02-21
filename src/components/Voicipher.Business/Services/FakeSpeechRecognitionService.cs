@@ -9,6 +9,7 @@ using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
@@ -24,7 +25,7 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<RecognitionAlternative[]> GetRecognizedResponseAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
 
@@ -46,10 +47,11 @@ namespace Voicipher.Business.Services
                 }
             };
 
-            return longRunningRecognizeResponse.Results
+            var alternatives = longRunningRecognizeResponse.Results
                 .SelectMany(x => x.Alternatives)
-                .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()))
-                .ToArray();
+                .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
+
+            return new RecognizedResult(true, alternatives);
         }
     }
 }

@@ -26,6 +26,8 @@ namespace Voicipher.Domain.Models
 
         public TimeSpan TotalTime { get; set; }
 
+        public bool IsIncomplete { get; set; }
+
         public DateTime DateCreatedUtc { get; set; }
 
         public DateTime DateUpdatedUtc { get; set; }
