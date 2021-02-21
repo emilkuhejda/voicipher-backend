@@ -27,7 +27,7 @@ namespace Voicipher.Business.Services
         {
         }
 
-        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speech, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        protected override async Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speechClient, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace Voicipher.Business.Services
 
                 var recognitionAudio = await RecognitionAudio.FromFileAsync(transcribedAudioFile.Path);
 
-                var longOperation = await speech.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio, CallSettings.FromExpiration(Expiration.None));
+                var longOperation = await speechClient.LongRunningRecognizeAsync(recognitionConfig, recognitionAudio, CallSettings.FromExpiration(Expiration.None));
                 longOperation = await longOperation.PollUntilCompletedAsync();
                 var longRunningRecognizeResponse = longOperation.Result;
 
