@@ -6,6 +6,7 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\global\Voicipher.CodeAnalysis.ruleset</CodeAnalysisRuleSet>
+    <UserSecretsId>b12ec264-a4f4-4b54-97e4-bdfd0dad5dd1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
