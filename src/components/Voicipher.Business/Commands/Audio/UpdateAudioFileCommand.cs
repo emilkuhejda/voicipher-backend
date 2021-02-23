@@ -62,6 +62,7 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Name = parameter.Name;
             audioFile.Language = parameter.Language;
+            audioFile.IsPhoneCall = parameter.IsPhoneCall;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
             await _audioFileRepository.SaveAsync(cancellationToken);

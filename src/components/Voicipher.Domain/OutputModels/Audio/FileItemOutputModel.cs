@@ -19,6 +19,9 @@ namespace Voicipher.Domain.OutputModels.Audio
         public string Language { get; init; }
 
         [Required]
+        public bool IsPhoneCall { get; set; }
+
+        [Required]
         public string RecognitionStateString { get; init; }
 
         [Required]
