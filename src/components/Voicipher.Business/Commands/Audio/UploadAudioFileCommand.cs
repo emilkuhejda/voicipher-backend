@@ -57,15 +57,19 @@ namespace Voicipher.Business.Commands.Audio
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.File), ValidationErrorCodes.ParameterIsNull))
                 {
                     _logger.Error($"[{userId}] Uploaded file source was not found");
-
                     throw new OperationErrorException(ErrorCode.EC100);
                 }
 
                 if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
                     _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
-
                     throw new OperationErrorException(ErrorCode.EC200);
+                }
+
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.Language), ValidationErrorCodes.NotSupportedLanguageModel))
+                {
+                    _logger.Error($"[{userId}] Language phone call model is not supported");
+                    throw new OperationErrorException(ErrorCode.EC203);
                 }
 
                 _logger.Error($"[{userId}] Invalid input data");

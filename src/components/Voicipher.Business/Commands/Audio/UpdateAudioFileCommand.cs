@@ -42,12 +42,16 @@ namespace Voicipher.Business.Commands.Audio
                 if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
                     _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
-
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                _logger.Error($"[{userId}] Invalid input data");
+                if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.Language), ValidationErrorCodes.NotSupportedLanguageModel))
+                {
+                    _logger.Error($"[{userId}] Language phone call model is not supported");
+                    throw new OperationErrorException(ErrorCode.EC203);
+                }
 
+                _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
@@ -62,6 +66,7 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Name = parameter.Name;
             audioFile.Language = parameter.Language;
+            audioFile.IsPhoneCall = parameter.IsPhoneCall;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
             await _audioFileRepository.SaveAsync(cancellationToken);

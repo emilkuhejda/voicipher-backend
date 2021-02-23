@@ -22,6 +22,9 @@ namespace Voicipher.Business.Profiles
                     f => f.Language,
                     opt => opt.MapFrom(a => a.Language))
                 .ForMember(
+                    f => f.IsPhoneCall,
+                    opt => opt.MapFrom(a => a.IsPhoneCall))
+                .ForMember(
                     f => f.RecognitionStateString,
                     opt => opt.MapFrom(a => a.RecognitionState.ToString()))
                 .ForMember(
