@@ -34,6 +34,7 @@ namespace Voicipher.Domain.InputModels.Audio
             errors.ValidateRequired(Name, nameof(Name));
             errors.ValidateRequired(Language, nameof(Language));
             errors.ValidateLanguage(Language, nameof(Language));
+            errors.ValidateLanguageModel(Language, IsPhoneCall, nameof(IsPhoneCall));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
 
             return new ValidationResult(errors);

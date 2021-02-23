@@ -16,6 +16,7 @@ using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
 using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Payloads.Audio;
+using Voicipher.Domain.Utils;
 using Voicipher.Domain.Validation;
 
 namespace Voicipher.Business.Commands.Audio
@@ -78,6 +79,12 @@ namespace Voicipher.Business.Commands.Audio
             {
                 _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} not exists");
                 throw new OperationErrorException(ErrorCode.EC101);
+            }
+
+            if (audioFile.IsPhoneCall && !SupportedLanguages.IsPhoneCallModelSupported(parameter.Language))
+            {
+                _logger.Error($"[{userId}] Language phone call model is not supported");
+                throw new OperationErrorException(ErrorCode.EC203);
             }
 
             if (audioFile.UploadStatus != UploadStatus.Completed)
