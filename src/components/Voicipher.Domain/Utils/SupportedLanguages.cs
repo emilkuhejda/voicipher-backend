@@ -7,10 +7,22 @@ namespace Voicipher.Domain.Utils
     /// </summary>
     public static class SupportedLanguages
     {
+        public static bool IsPhoneCallModelSupported(string language)
+        {
+            return PhoneCallModels.Contains(language);
+        }
+
         public static bool IsSupported(string language)
         {
             return Languages.Contains(language);
         }
+
+        private static IList<string> PhoneCallModels { get; } = new List<string>
+        {
+            "en-GB",
+            "en-US",
+            "ru-RU"
+        };
 
         private static IList<string> Languages { get; } = new List<string>
         {

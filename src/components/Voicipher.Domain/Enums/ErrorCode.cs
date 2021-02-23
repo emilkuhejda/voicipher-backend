@@ -39,7 +39,9 @@ namespace Voicipher.Domain.Enums
         // Email address is invalid
         EC202 = 202,
 
+        // Phone call model not supported
         EC203 = 203,
+        
         EC204 = 204,
         EC205 = 205,
         EC206 = 206,

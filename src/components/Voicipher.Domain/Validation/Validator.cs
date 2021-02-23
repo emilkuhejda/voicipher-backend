@@ -82,6 +82,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateLanguageModel(this IList<ValidationError> errorList, string value, bool isPhoneCallModel, string field, string objectName = null)
+        {
+            if (isPhoneCallModel && !SupportedLanguages.IsPhoneCallModelSupported(value))
+                return errorList.Add(ValidationErrorCodes.NotSupportedLanguageModel, field, objectName);
+
+            return errorList;
+        }
+
         public static IList<ValidationError> Merge(this IList<ValidationError> errorList, ValidationResult validationResult)
         {
             var errors = errorList ?? new List<ValidationError>();

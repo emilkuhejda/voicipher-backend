@@ -16,6 +16,8 @@
 
         public static string NotSupportedLanguage => nameof(NotSupportedLanguage);
 
+        public static string NotSupportedLanguageModel => nameof(NotSupportedLanguageModel);
+
         public static string NotEnoughSubscriptionTime => nameof(NotEnoughSubscriptionTime);
 
         public static string OperationFailed => nameof(OperationFailed);
