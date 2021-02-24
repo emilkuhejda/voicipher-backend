@@ -5,8 +5,6 @@ namespace Voicipher.Domain.Utils
 {
     public static class MediaContentTypes
     {
-        private const string Audio = "audio";
-
         private static readonly IList<string> Mp3ContentTypes = new List<string>
         {
             "audio/mpeg",
@@ -18,7 +16,7 @@ namespace Voicipher.Domain.Utils
 
         public static bool IsUnsupported(string contentType)
         {
-            return !contentType.Contains(Audio, StringComparison.InvariantCultureIgnoreCase) || Mp3ContentTypes.Contains(contentType);
+            return !contentType.Contains("audio", StringComparison.InvariantCultureIgnoreCase) || Mp3ContentTypes.Contains(contentType);
         }
     }
 }
