@@ -57,7 +57,7 @@ namespace Voicipher.DataAccess
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(_connectionString, providerOptions => providerOptions.CommandTimeout(60));
+                optionsBuilder.UseSqlServer(_connectionString, providerOptions => providerOptions.CommandTimeout(300));
             }
         }
 
