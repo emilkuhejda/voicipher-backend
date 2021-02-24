@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Voicipher.Common.Utils;
+using Voicipher.Domain.Extensions;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Domain.Validation
@@ -62,6 +64,14 @@ namespace Voicipher.Domain.Validation
         {
             if (value == null)
                 return errorList.Add(ValidationErrorCodes.ParameterIsNull, field, objectName);
+
+            return errorList;
+        }
+
+        public static IList<ValidationError> ValidateFileContentType(this IList<ValidationError> errorList, IFormFile value, string field, string objectName = null)
+        {
+            if (!value.IsContentTypeSupported())
+                return errorList.Add(ValidationErrorCodes.NotSupportedContentType, field, objectName);
 
             return errorList;
         }

@@ -72,8 +72,13 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC203);
                 }
 
-                _logger.Error($"[{userId}] Invalid input data");
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.File), ValidationErrorCodes.NotSupportedContentType))
+                {
+                    _logger.Error($"[{userId}] Audio file content type {parameter.File.ContentType} is not supported");
+                    throw new OperationErrorException(ErrorCode.EC201);
+                }
 
+                _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
@@ -93,8 +98,7 @@ namespace Voicipher.Business.Commands.Audio
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
                 {
-                    _logger.Error($"[{userId}] Audio file {parameter.FileName} is not supported");
-
+                    _logger.Error($"[{userId}] Audio file content type {parameter.File.ContentType} is not supported");
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
