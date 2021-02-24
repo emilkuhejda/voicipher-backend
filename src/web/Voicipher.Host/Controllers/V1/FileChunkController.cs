@@ -44,7 +44,7 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "GetChunksStorageConfiguration")]
         public IActionResult GetChunksStorageConfiguration()
         {
-            return Ok(new StorageConfigurationOutputModel(StorageSetting.Disk));
+            return Ok(new StorageConfigurationOutputModel(StorageSetting.Azure));
         }
 
         [HttpPost]
