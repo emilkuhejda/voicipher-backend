@@ -34,6 +34,7 @@ namespace Voicipher.Domain.Payloads.Audio
             errors.ValidateDateTime(DateCreated, nameof(DateCreated));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
             errors.ValidateNotNull(File, nameof(File));
+            errors.ValidateFileContentType(File, nameof(File));
 
             return new ValidationResult(errors);
         }
