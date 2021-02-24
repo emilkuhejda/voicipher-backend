@@ -53,7 +53,7 @@ namespace Voicipher.Host
             services.Configure<AppSettings>(appSettingsSection);
 
             // Database connection
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(appSettings.ConnectionString, providerOptions => providerOptions.CommandTimeout(60)));
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(appSettings.ConnectionString, providerOptions => providerOptions.CommandTimeout(300)));
 
             // SignalR
             services.AddSignalR();
