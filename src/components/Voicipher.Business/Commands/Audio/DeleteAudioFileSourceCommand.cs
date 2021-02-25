@@ -53,22 +53,22 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (!string.IsNullOrWhiteSpace(audioFile.OriginalSourceFileName))
                 {
-                    _logger.Information($"[{parameter.UserId}] Start deleting original audio file source {audioFile.OriginalSourceFileName} from blob storage");
+                    _logger.Verbose($"[{parameter.UserId}] Start deleting original audio file source {audioFile.OriginalSourceFileName} from blob storage");
 
                     var deleteBlobSettings = new DeleteBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                     await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, cancellationToken);
 
-                    _logger.Information($"[{parameter.UserId}] Original audio file source {audioFile.OriginalSourceFileName} was deleted from storage");
+                    _logger.Verbose($"[{parameter.UserId}] Original audio file source {audioFile.OriginalSourceFileName} was deleted from storage");
                 }
 
                 if (!string.IsNullOrWhiteSpace(audioFile.SourceFileName))
                 {
-                    _logger.Information($"[{parameter.UserId}] Start deleting audio file source {audioFile.SourceFileName} from blob storage");
+                    _logger.Verbose($"[{parameter.UserId}] Start deleting audio file source {audioFile.SourceFileName} from blob storage");
 
                     var deleteBlobSettings = new DeleteBlobSettings(audioFile.SourceFileName, audioFile.UserId, audioFile.Id);
                     await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, cancellationToken);
 
-                    _logger.Information($"[{parameter.UserId}] Audio file source {audioFile.SourceFileName} was deleted from storage");
+                    _logger.Verbose($"[{parameter.UserId}] Audio file source {audioFile.SourceFileName} was deleted from storage");
                 }
 
                 audioFile.OriginalSourceFileName = string.Empty;
