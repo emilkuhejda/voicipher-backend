@@ -75,8 +75,8 @@ namespace Voicipher.Host
                 {
                     const string ending = "OutputModel";
                     var returnedValue = tpye.Name;
-                    if (returnedValue.EndsWith(ending, StringComparison.Ordinal))
-                        returnedValue = returnedValue.Replace(ending, string.Empty, StringComparison.Ordinal);
+                    if (returnedValue.EndsWith(ending, StringComparison.OrdinalIgnoreCase))
+                        returnedValue = returnedValue.Replace(ending, string.Empty, StringComparison.OrdinalIgnoreCase);
 
                     return returnedValue;
                 });
@@ -158,13 +158,13 @@ namespace Voicipher.Host
                 if (context.Response.StatusCode == 404 &&
                     !Path.HasExtension(context.Request.Path.Value) &&
                     context.Request.Path.Value != null &&
-                    !context.Request.Path.Value.StartsWith("/api/", StringComparison.InvariantCultureIgnoreCase))
+                    !context.Request.Path.Value.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (context.Request.Path.Value.StartsWith("/control-panel/", StringComparison.InvariantCultureIgnoreCase))
+                    if (context.Request.Path.Value.StartsWith("/control-panel/", StringComparison.OrdinalIgnoreCase))
                     {
                         context.Request.Path = "/control-panel/index.html";
                     }
-                    else if (context.Request.Path.Value.StartsWith("/profile/", StringComparison.InvariantCultureIgnoreCase))
+                    else if (context.Request.Path.Value.StartsWith("/profile/", StringComparison.OrdinalIgnoreCase))
                     {
                         context.Request.Path = "/profile/index.html";
                     }
