@@ -69,7 +69,7 @@ namespace Voicipher.Business.Services
             var blobItems = container.GetBlobs()
                 .AsPages()
                 .SelectMany(x => x.Values)
-                .Where(x => x.Name.Contains(blobSettings.AudioFileId, StringComparison.InvariantCulture));
+                .Where(x => x.Name.Contains(blobSettings.AudioFileId, StringComparison.OrdinalIgnoreCase));
 
             foreach (var blobItem in blobItems)
             {
@@ -85,8 +85,8 @@ namespace Voicipher.Business.Services
                 .AsPages()
                 .SelectMany(x => x.Values)
                 .Where(x =>
-                    x.Name.Contains(blobSettings.AudioFileId, StringComparison.InvariantCulture) &&
-                    !x.Name.Contains(blobSettings.FileName, StringComparison.InvariantCulture));
+                    x.Name.Contains(blobSettings.AudioFileId, StringComparison.OrdinalIgnoreCase) &&
+                    !x.Name.Contains(blobSettings.FileName, StringComparison.OrdinalIgnoreCase));
 
             foreach (var blobItem in blobItems)
             {

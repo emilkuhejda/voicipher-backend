@@ -16,7 +16,7 @@ namespace Voicipher.Domain.Utils
 
         public static bool IsUnsupported(string contentType)
         {
-            return !contentType.Contains("audio", StringComparison.InvariantCultureIgnoreCase) || Mp3ContentTypes.Contains(contentType);
+            return !contentType.Contains("audio", StringComparison.OrdinalIgnoreCase) || Mp3ContentTypes.Contains(contentType);
         }
     }
 }
