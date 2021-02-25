@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands
                 SubscriptionRemainingTimeTicks = remainingTime.Ticks
             };
 
-            _logger.Information($"[{userId}] User retrieved speech recognition configuration");
+            _logger.Verbose($"[{userId}] User retrieved speech recognition configuration");
 
             return new CommandResult<SpeechConfigurationOutputModel>(outputModel);
         }

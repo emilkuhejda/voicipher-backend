@@ -93,7 +93,7 @@ namespace Voicipher.Business.Commands.Audio
                 cancellationToken.ThrowIfCancellationRequested();
 
                 tempFilePath = await _diskStorage.UploadAsync(uploadedFileSource, cancellationToken);
-                _logger.Information($"[{userId}] Audio file was uploaded on temporary destination: {tempFilePath}");
+                _logger.Verbose($"[{userId}] Audio file was uploaded on temporary destination: {tempFilePath}");
 
                 var audioFileTime = _audioService.GetTotalTime(tempFilePath);
                 if (!audioFileTime.HasValue)
@@ -104,12 +104,12 @@ namespace Voicipher.Business.Commands.Audio
 
                 cancellationToken.ThrowIfCancellationRequested();
 
-                _logger.Information($"[{userId}] Start uploading audio file to blob storage");
+                _logger.Verbose($"[{userId}] Start uploading audio file to blob storage");
 
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
                 sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                _logger.Information($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
+                _logger.Verbose($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -153,7 +153,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (OperationCanceledException)
             {
-                _logger.Information($"[{userId}] Operation was cancelled");
+                _logger.Warning($"[{userId}] Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
@@ -161,7 +161,7 @@ namespace Voicipher.Business.Commands.Audio
             {
                 if (!isOperationSuccessful)
                 {
-                    _logger.Information($"[{userId}] Clean audio file from blob storage");
+                    _logger.Verbose($"[{userId}] Clean audio file from blob storage");
 
                     var deleteBlobSettings = new DeleteBlobSettings(sourceName, userId, audioFileId);
                     await _blobStorage.DeleteFileBlobAsync(deleteBlobSettings, default);
@@ -171,7 +171,7 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     File.Delete(tempFilePath);
 
-                    _logger.Information($"[{userId}] Audio file was removed on destination: {tempFilePath}");
+                    _logger.Verbose($"[{userId}] Audio file was removed on destination: {tempFilePath}");
                 }
             }
         }

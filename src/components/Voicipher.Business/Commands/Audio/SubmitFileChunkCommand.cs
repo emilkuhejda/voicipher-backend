@@ -136,7 +136,7 @@ namespace Voicipher.Business.Commands.Audio
             }
             catch (OperationCanceledException)
             {
-                _logger.Information($"[{userId}] Operation was cancelled");
+                _logger.Warning($"[{userId}] Operation was cancelled");
 
                 throw new OperationErrorException(ErrorCode.EC800);
             }
