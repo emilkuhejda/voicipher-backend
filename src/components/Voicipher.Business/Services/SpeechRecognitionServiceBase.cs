@@ -103,7 +103,7 @@ namespace Voicipher.Business.Services
         {
             var speechClient = CreateSpeechClient();
 
-            Logger.Information($"[{speechRecognizeConfig.UserId}] Start speech recognition for file {transcribedAudioFile.Path}");
+            Logger.Verbose($"[{speechRecognizeConfig.UserId}] Start speech recognition for file {transcribedAudioFile.Path}");
 
             var recognizedResult = await GetRecognizedResultAsync(speechClient, transcribedAudioFile, speechRecognizeConfig);
 
@@ -124,7 +124,7 @@ namespace Voicipher.Business.Services
                 DateUpdatedUtc = dateCreated
             };
 
-            Logger.Information($"[{speechRecognizeConfig.UserId}] Audio file {transcribedAudioFile.Path} was recognized");
+            Logger.Verbose($"[{speechRecognizeConfig.UserId}] Audio file {transcribedAudioFile.Path} was recognized");
 
             return transcribeItem;
         }

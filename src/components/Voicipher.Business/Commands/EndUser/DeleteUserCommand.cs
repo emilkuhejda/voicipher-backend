@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.EndUser
         protected override async Task<CommandResult<OkOutputModel>> Execute(string parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            _logger.Information($"[{userId}] Start deleting of the user account. Email = {parameter}");
+            _logger.Information($"[{userId}] Start deleting of the user account with email {parameter}");
 
             var user = await _userRepository.GetByEmailAsync(userId, parameter, cancellationToken);
             if (user == null)
@@ -62,7 +62,7 @@ namespace Voicipher.Business.Commands.EndUser
                 _userRepository.Remove(user);
                 await _userRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"[{userId}] Start deleting blob container");
+                _logger.Verbose($"[{userId}] Start deleting blob container");
 
                 var blobSettings = new BlobContainerSettings(userId);
                 await _blobStorage.DeleteContainer(blobSettings, cancellationToken);

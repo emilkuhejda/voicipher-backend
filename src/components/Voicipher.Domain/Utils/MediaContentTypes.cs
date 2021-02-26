@@ -5,7 +5,7 @@ namespace Voicipher.Domain.Utils
 {
     public static class MediaContentTypes
     {
-        private static readonly IList<string> Mp3ContentTypes = new List<string>
+        private static readonly HashSet<string> Mp3ContentTypes = new(StringComparer.OrdinalIgnoreCase)
         {
             "audio/mpeg",
             "audio/mpeg3",
