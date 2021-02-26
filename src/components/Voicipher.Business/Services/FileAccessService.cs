@@ -7,7 +7,7 @@ namespace Voicipher.Business.Services
 {
     public class FileAccessService : IFileAccessService
     {
-        public bool Exists(string? path)
+        public bool Exists(string path)
         {
             return File.Exists(path);
         }

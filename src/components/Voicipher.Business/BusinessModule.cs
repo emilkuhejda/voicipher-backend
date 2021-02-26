@@ -41,6 +41,7 @@ namespace Voicipher.Business
             builder.RegisterType<WavFileService>().As<IWavFileService>();
             builder.RegisterType<SpeechRecognitionService>().As<ISpeechRecognitionService>();
             builder.RegisterType<FileAccessService>().As<IFileAccessService>();
+            builder.RegisterType<ZipFileService>().As<IZipFileService>();
 
             builder.RegisterType<ChunkStorage>().Keyed<IDiskStorage>(StorageLocation.Chunk);
             builder.RegisterType<AudioStorage>().Keyed<IDiskStorage>(StorageLocation.Audio);

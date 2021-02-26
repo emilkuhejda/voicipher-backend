@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Services;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
@@ -31,6 +32,7 @@ namespace Voicipher.Business.Commands.ControlPanel
     {
         private readonly IPermanentDeleteAllCommand _permanentDeleteAllCommand;
         private readonly IFileAccessService _fileAccessService;
+        private readonly IZipFileService _zipFileService;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
         private readonly IAudioFileRepository _audioFileRepository;
@@ -41,6 +43,7 @@ namespace Voicipher.Business.Commands.ControlPanel
         public CleanUpAudioFilesCommand(
             IPermanentDeleteAllCommand permanentDeleteAllCommand,
             IFileAccessService fileAccessService,
+            IZipFileService zipFileService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
             IAudioFileRepository audioFileRepository,
@@ -50,6 +53,7 @@ namespace Voicipher.Business.Commands.ControlPanel
         {
             _permanentDeleteAllCommand = permanentDeleteAllCommand;
             _fileAccessService = fileAccessService;
+            _zipFileService = zipFileService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Backup];
             _audioFileRepository = audioFileRepository;
@@ -112,6 +116,18 @@ namespace Voicipher.Business.Commands.ControlPanel
                             _logger.Error(ex, $"Backup process for audio file {audioFile.Id} failed");
                         }
                     }
+                }
+
+                try
+                {
+                    _logger.Verbose($"[{group}] Start compressing user data");
+                    var destinationFileName = Path.Combine(rootPath, $"{group}.zip");
+                    _zipFileService.CreateFromDirectory(rootPath, destinationFileName);
+                    _logger.Information($"[{group}] User data was compressed");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, $"[{group}] Compression failed");
                 }
             }
 
