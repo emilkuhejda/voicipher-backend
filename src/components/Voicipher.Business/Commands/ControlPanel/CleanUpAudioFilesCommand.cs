@@ -64,8 +64,12 @@ namespace Voicipher.Business.Commands.ControlPanel
             if (!audioFiles.Any())
                 return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
 
+            _logger.Information($"There was found {audioFiles} audio files for backup");
+
             foreach (var group in audioFiles.GroupBy(x => x.UserId))
             {
+                _logger.Information($"Start backup for user ID {group}");
+
                 var rootDirectory = Path.Combine("audio-files", group.Key.ToString());
                 var rootPath = _diskStorage.GetDirectoryPath(rootDirectory);
                 _fileAccessService.DeleteDirectory(rootPath);
@@ -74,6 +78,8 @@ namespace Voicipher.Business.Commands.ControlPanel
                 {
                     foreach (var audioFile in group)
                     {
+                        _logger.Verbose($"Start backup of the audio file ID {audioFile.Id}");
+
                         try
                         {
                             var folderPath = Path.Combine(rootDirectory, audioFile.Id.ToString());
@@ -90,9 +96,12 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                             var serializedAudioFile = JsonConvert.SerializeObject(audioFile);
                             var jsonBytes = Encoding.UTF8.GetBytes(serializedAudioFile);
-                            await _diskStorage.UploadAsync(jsonBytes, new UploadSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
+                            var jsonPath = await _diskStorage.UploadAsync(jsonBytes, new UploadSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
+                            _logger.Verbose($"Json for audio file {audioFile.Id} was created on destination {jsonPath}");
 
                             await transaction.CommitAsync(cancellationToken);
+
+                            _logger.Information($"Audio file {audioFile.Id} was successfully backed up");
                         }
                         catch (RequestFailedException ex)
                         {
@@ -116,15 +125,18 @@ namespace Voicipher.Business.Commands.ControlPanel
 
             try
             {
+                _logger.Verbose($"Start downloading audio source {settings.FileName}");
                 var blobSettings = new GetBlobSettings(settings.FileName, settings.UserId, settings.AudioFileId);
                 var source = await _blobStorage.GetAsync(blobSettings, cancellationToken);
+                _logger.Verbose($"Audio source {settings.FileName} was downloaded");
 
                 var uploadSettings = new UploadSettings(settings.FolderName, settings.FileName);
-                await _diskStorage.UploadAsync(source, uploadSettings, cancellationToken);
+                var sourcePath = await _diskStorage.UploadAsync(source, uploadSettings, cancellationToken);
+                _logger.Verbose($"Audio source {settings.FileName} was uploaded to disk storage on destination {sourcePath}");
             }
             catch (BlobNotExistsException)
             {
-                _logger.Information($"File {settings.FileName} not exists in the blob storage. User ID = {settings.UserId}, Audio file ID = {settings.AudioFileId}");
+                _logger.Error($"File {settings.FileName} not exists in the blob storage. User ID = {settings.UserId}, Audio file ID = {settings.AudioFileId}");
             }
         }
 
