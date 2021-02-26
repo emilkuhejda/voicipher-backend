@@ -122,5 +122,14 @@ namespace Voicipher.DataAccess.Repositories
                 .Where(x => x.RecognitionState == RecognitionState.InProgress)
                 .ToArrayAsync(cancellationToken);
         }
+
+        public Task<AudioFile[]> GetAllForCleanUpAsync(CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Include(x => x.TranscribeItems)
+                .AsNoTracking()
+                .Where(x => x.IsDeleted)
+                .ToArrayAsync(cancellationToken);
+        }
     }
 }

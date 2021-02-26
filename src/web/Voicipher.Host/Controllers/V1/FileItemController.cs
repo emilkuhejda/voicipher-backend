@@ -230,7 +230,7 @@ namespace Voicipher.Host.Controllers.V1
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> PermanentDeleteAll(IEnumerable<Guid> audioFilesIds, Guid applicationId, CancellationToken cancellationToken)
         {
-            var permanentDeleteAllPayload = new PermanentDeleteAllPayload(audioFilesIds, applicationId);
+            var permanentDeleteAllPayload = new PermanentDeleteAllPayload(audioFilesIds, HttpContext.User.GetNameIdentifier(), applicationId);
             var commandResult = await _permanentDeleteAllCommand.Value.ExecuteAsync(permanentDeleteAllPayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);

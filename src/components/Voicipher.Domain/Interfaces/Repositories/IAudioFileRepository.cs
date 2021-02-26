@@ -31,5 +31,7 @@ namespace Voicipher.Domain.Interfaces.Repositories
         Task<AudioFile> GetWithTranscribeItemsAsync(Guid userId, Guid audioFileId, CancellationToken cancellationToken);
 
         Task<AudioFile[]> GetInProgressAsync(CancellationToken cancellationToken);
+
+        Task<AudioFile[]> GetAllForCleanUpAsync(CancellationToken cancellationToken);
     }
 }

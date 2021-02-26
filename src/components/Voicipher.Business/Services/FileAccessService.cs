@@ -24,5 +24,13 @@ namespace Voicipher.Business.Services
                 File.Delete(path);
             }
         }
+
+        public void DeleteDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
     }
 }
