@@ -34,6 +34,8 @@ namespace Voicipher.Domain.Models
 
         public AudioFile AudioFile { get; set; }
 
+        public bool WasCleaned { get; set; }
+
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
