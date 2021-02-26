@@ -82,9 +82,12 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                 _logger.Information($"Start backup for user ID {userId}");
 
-                var rootDirectory = Path.Combine("audio-files", userId.ToString());
+                var rootDirectory = "audio-files";
                 var rootPath = _diskStorage.GetDirectoryPath(rootDirectory);
-                _fileAccessService.DeleteDirectory(rootPath);
+
+                var userRootDirectory = Path.Combine(rootDirectory, userId.ToString());
+                var userRootPath = Path.Combine(rootPath, userId.ToString());
+                _fileAccessService.DeleteDirectory(userRootPath);
 
                 using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
                 {
@@ -94,7 +97,7 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                         try
                         {
-                            var folderPath = Path.Combine(rootDirectory, audioFile.Id.ToString());
+                            var folderPath = Path.Combine(userRootDirectory, audioFile.Id.ToString());
                             await BackupSourceAsync(new BackupSourceSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id, folderPath), cancellationToken);
                             await BackupSourceAsync(new BackupSourceSettings(audioFile.SourceFileName, audioFile.UserId, audioFile.Id, folderPath), cancellationToken);
 
@@ -134,8 +137,11 @@ namespace Voicipher.Business.Commands.ControlPanel
                 {
                     _logger.Verbose($"[{userId}] Start compressing user data");
                     var destinationFileName = Path.Combine(rootPath, $"{userId}.zip");
-                    _zipFileService.CreateFromDirectory(rootPath, destinationFileName);
+                    _zipFileService.CreateFromDirectory(userRootPath, destinationFileName);
                     _logger.Information($"[{userId}] User data was compressed");
+
+                    _fileAccessService.DeleteDirectory(userRootPath);
+                    _logger.Information($"[{userId}] User data was deleted from dist storage");
                 }
                 catch (Exception ex)
                 {
