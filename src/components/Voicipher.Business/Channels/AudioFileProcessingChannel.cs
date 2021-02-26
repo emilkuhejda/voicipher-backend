@@ -45,7 +45,7 @@ namespace Voicipher.Business.Channels
 
                 if (_channel.Writer.TryWrite(recognitionFile))
                 {
-                    _logger.Information($"[{recognitionFile.UserId}] Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
+                    _logger.Verbose($"[{recognitionFile.UserId}] Recognition file {JsonConvert.SerializeObject(recognitionFile)} was written to the channel");
 
                     return true;
                 }
@@ -83,7 +83,7 @@ namespace Voicipher.Business.Channels
                     else
                     {
                         var countAfter = _cache[recognitionFile.UserId].Count;
-                        _logger.Information($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was not found in the cache. Cache ({countBefore}) -> ({countAfter})");
+                        _logger.Warning($"Recognition file {JsonConvert.SerializeObject(recognitionFile)} was not found in the cache. Cache ({countBefore}) -> ({countAfter})");
                     }
                 }
             }

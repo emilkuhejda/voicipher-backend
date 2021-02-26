@@ -52,7 +52,7 @@ namespace Voicipher.Business.Commands
 
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"[{userId}] Transcribe item {parameter.TranscribeItemId} was updated");
+            _logger.Information($"[{userId}] User transcript for transcribe item {parameter.TranscribeItemId} was updated");
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

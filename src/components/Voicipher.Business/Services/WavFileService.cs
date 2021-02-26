@@ -50,20 +50,20 @@ namespace Voicipher.Business.Services
             var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
             if (_fileAccessService.Exists(sourceFileNamePath))
             {
-                _logger.Information($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
+                _logger.Error($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
                 return;
             }
 
             var tempFilePath = string.Empty;
             try
             {
-                _logger.Information($"[{audioFile.Id}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
+                _logger.Verbose($"[{audioFile.Id}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
 
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(bloBytes, cancellationToken);
 
-                _logger.Information($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
+                _logger.Verbose($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
 
                 var (wavFilePath, fileName) = await ConvertToWavAsync(tempFilePath, audioFile.UserId);
 
@@ -103,7 +103,7 @@ namespace Voicipher.Business.Services
 
         private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath, Guid userId)
         {
-            _logger.Information($"[{userId}] Start conversion audio file to wav format");
+            _logger.Verbose($"[{userId}] Start conversion audio file to wav format");
 
             var fileName = $"{Guid.NewGuid()}.voc";
             var filePath = Path.Combine(_diskStorage.GetDirectoryPath(), fileName);
@@ -115,7 +115,7 @@ namespace Voicipher.Business.Services
                 }
             });
 
-            _logger.Information($"[{userId}] File {inputFilePath} was converted and stored in new destination {filePath}");
+            _logger.Verbose($"[{userId}] File {inputFilePath} was converted and stored in new destination {filePath}");
 
             return (filePath, fileName);
         }

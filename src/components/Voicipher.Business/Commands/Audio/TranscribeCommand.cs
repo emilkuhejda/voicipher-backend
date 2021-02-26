@@ -46,7 +46,7 @@ namespace Voicipher.Business.Commands.Audio
         protected override async Task<CommandResult<OkOutputModel>> Execute(TranscribePayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            _logger.Information($"[{userId}] Start validation before transcription. Audio file ID = {parameter.AudioFileId}");
+            _logger.Verbose($"[{userId}] Start validation before transcription. Audio file ID = {parameter.AudioFileId}");
 
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
@@ -112,7 +112,7 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             await _audioFileRepository.SaveAsync(cancellationToken);
 
-            _logger.Information($"[{userId}] Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
+            _logger.Verbose($"[{userId}] Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
 
             await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(userId, audioFile.Id, audioFile.FileName));
 
