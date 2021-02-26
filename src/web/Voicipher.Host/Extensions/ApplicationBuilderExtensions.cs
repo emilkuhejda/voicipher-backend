@@ -25,6 +25,7 @@ namespace Voicipher.Host.Extensions
                 var index = serviceScope.ServiceProvider.GetRequiredService<IIndex<StorageLocation, IDiskStorage>>();
                 var chunkStorage = index[StorageLocation.Chunk];
                 var audioStorage = index[StorageLocation.Audio];
+                var backupStorage = index[StorageLocation.Backup];
                 var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>().ForContext<Startup>();
 
                 try
@@ -35,6 +36,7 @@ namespace Voicipher.Host.Extensions
 
                     chunkStorage.RemoveTemporaryFolder();
                     audioStorage.RemoveTemporaryFolder();
+                    backupStorage.RemoveTemporaryFolder();
 
                     logger.Information("Finish of the cleaning temporary data");
                 }

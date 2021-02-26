@@ -44,6 +44,7 @@ namespace Voicipher.Business
 
             builder.RegisterType<ChunkStorage>().Keyed<IDiskStorage>(StorageLocation.Chunk);
             builder.RegisterType<AudioStorage>().Keyed<IDiskStorage>(StorageLocation.Audio);
+            builder.RegisterType<BackupStorage>().Keyed<IDiskStorage>(StorageLocation.Backup);
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
 
             builder.RegisterType<JobStateMachine>().As<IJobStateMachine>();
