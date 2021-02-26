@@ -7,15 +7,15 @@ namespace Voicipher.Domain.OutputModels.ControlPanel
     public record CleanUpAudioFilesOutputModel
     {
         public CleanUpAudioFilesOutputModel()
-            : this(0, new Dictionary<Guid, Guid[]>(), new Dictionary<Guid, Guid[]>())
+            : this(0, new Dictionary<Guid, IList<Guid>>(), new Dictionary<Guid, IList<Guid>>())
         {
         }
 
-        public CleanUpAudioFilesOutputModel(int audioFilesToBackup, Dictionary<Guid, Guid[]> succeededIds, Dictionary<Guid, Guid[]> failedIds)
+        public CleanUpAudioFilesOutputModel(int audioFilesToBackup, Dictionary<Guid, IList<Guid>> succeededIds, Dictionary<Guid, IList<Guid>> failedIds)
         {
             AudioFilesToBackup = audioFilesToBackup;
-            SucceededTotal = succeededIds.Sum(x => x.Value.Length);
-            FailedTotal = failedIds.Sum(x => x.Value.Length);
+            SucceededTotal = succeededIds.Sum(x => x.Value.Count);
+            FailedTotal = failedIds.Sum(x => x.Value.Count);
             SucceededIds = succeededIds;
             FailedIds = failedIds;
         }
@@ -26,8 +26,8 @@ namespace Voicipher.Domain.OutputModels.ControlPanel
 
         public int FailedTotal { get; }
 
-        public Dictionary<Guid, Guid[]> SucceededIds { get; }
+        public Dictionary<Guid, IList<Guid>> SucceededIds { get; }
 
-        public Dictionary<Guid, Guid[]> FailedIds { get; }
+        public Dictionary<Guid, IList<Guid>> FailedIds { get; }
     }
 }

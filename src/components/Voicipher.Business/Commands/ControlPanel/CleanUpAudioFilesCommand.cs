@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -68,13 +69,20 @@ namespace Voicipher.Business.Commands.ControlPanel
             if (!audioFiles.Any())
                 return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
 
+            var succeededIds = new Dictionary<Guid, IList<Guid>>();
+            var failedIds = new Dictionary<Guid, IList<Guid>>();
+
             _logger.Information($"There was found {audioFiles} audio files for backup");
 
             foreach (var group in audioFiles.GroupBy(x => x.UserId))
             {
-                _logger.Information($"Start backup for user ID {group}");
+                var userId = group.Key;
+                succeededIds.Add(userId, new List<Guid>());
+                failedIds.Add(userId, new List<Guid>());
 
-                var rootDirectory = Path.Combine("audio-files", group.Key.ToString());
+                _logger.Information($"Start backup for user ID {userId}");
+
+                var rootDirectory = Path.Combine("audio-files", userId.ToString());
                 var rootPath = _diskStorage.GetDirectoryPath(rootDirectory);
                 _fileAccessService.DeleteDirectory(rootPath);
 
@@ -106,32 +114,37 @@ namespace Voicipher.Business.Commands.ControlPanel
                             await transaction.CommitAsync(cancellationToken);
 
                             _logger.Information($"Audio file {audioFile.Id} was successfully backed up");
+
+                            succeededIds[userId].Add(audioFile.Id);
                         }
                         catch (RequestFailedException ex)
                         {
                             _logger.Error(ex, "Blob storage is unavailable");
+                            failedIds[userId].Add(audioFile.Id);
                         }
                         catch (Exception ex)
                         {
                             _logger.Error(ex, $"Backup process for audio file {audioFile.Id} failed");
+                            failedIds[userId].Add(audioFile.Id);
                         }
                     }
                 }
 
                 try
                 {
-                    _logger.Verbose($"[{group}] Start compressing user data");
-                    var destinationFileName = Path.Combine(rootPath, $"{group}.zip");
+                    _logger.Verbose($"[{userId}] Start compressing user data");
+                    var destinationFileName = Path.Combine(rootPath, $"{userId}.zip");
                     _zipFileService.CreateFromDirectory(rootPath, destinationFileName);
-                    _logger.Information($"[{group}] User data was compressed");
+                    _logger.Information($"[{userId}] User data was compressed");
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, $"[{group}] Compression failed");
+                    _logger.Error(ex, $"[{userId}] Compression failed");
                 }
             }
 
-            return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
+            var cleanUpAudioFilesOutputModel = new CleanUpAudioFilesOutputModel(audioFiles.Length, succeededIds, failedIds);
+            return new CommandResult<CleanUpAudioFilesOutputModel>(cleanUpAudioFilesOutputModel);
         }
 
         private async Task BackupSourceAsync(BackupSourceSettings settings, CancellationToken cancellationToken)
