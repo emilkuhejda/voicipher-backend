@@ -20,6 +20,7 @@ namespace Voicipher.DataAccess.EntitiesConfiguration
             builder.Property(x => x.TotalTime).IsRequired();
             builder.Property(x => x.DateCreatedUtc).IsRequired();
             builder.Property(x => x.DateUpdatedUtc).IsRequired();
+            builder.Property(x => x.WasCleaned).IsRequired();
         }
     }
 }

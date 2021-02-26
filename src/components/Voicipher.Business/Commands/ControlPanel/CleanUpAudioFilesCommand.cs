@@ -98,6 +98,13 @@ namespace Voicipher.Business.Commands.ControlPanel
                         try
                         {
                             var folderPath = Path.Combine(userRootDirectory, audioFile.Id.ToString());
+
+                            var jsonSerializerSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+                            var serializedAudioFile = JsonConvert.SerializeObject(audioFile, Formatting.None, jsonSerializerSettings);
+                            var jsonBytes = Encoding.UTF8.GetBytes(serializedAudioFile);
+                            var jsonPath = await _diskStorage.UploadAsync(jsonBytes, new UploadSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
+                            _logger.Verbose($"Json for audio file {audioFile.Id} was created on destination {jsonPath}");
+
                             await BackupSourceAsync(new BackupSourceSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id, folderPath), cancellationToken);
                             await BackupSourceAsync(new BackupSourceSettings(audioFile.SourceFileName, audioFile.UserId, audioFile.Id, folderPath), cancellationToken);
 
@@ -108,11 +115,6 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                             var permanentDeleteAllPayload = new PermanentDeleteAllPayload(new[] { audioFile.Id }, audioFile.UserId, _appSettings.ApplicationId);
                             await _permanentDeleteAllCommand.ExecuteAsync(permanentDeleteAllPayload, principal, cancellationToken);
-
-                            var serializedAudioFile = JsonConvert.SerializeObject(audioFile);
-                            var jsonBytes = Encoding.UTF8.GetBytes(serializedAudioFile);
-                            var jsonPath = await _diskStorage.UploadAsync(jsonBytes, new UploadSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
-                            _logger.Verbose($"Json for audio file {audioFile.Id} was created on destination {jsonPath}");
 
                             await transaction.CommitAsync(cancellationToken);
 

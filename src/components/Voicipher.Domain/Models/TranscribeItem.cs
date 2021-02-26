@@ -32,9 +32,9 @@ namespace Voicipher.Domain.Models
 
         public DateTime DateUpdatedUtc { get; set; }
 
-        public AudioFile AudioFile { get; set; }
-
         public bool WasCleaned { get; set; }
+
+        public AudioFile AudioFile { get; set; }
 
         public ValidationResult Validate()
         {
