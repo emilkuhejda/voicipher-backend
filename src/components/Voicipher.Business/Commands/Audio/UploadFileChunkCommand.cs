@@ -81,7 +81,7 @@ namespace Voicipher.Business.Commands.Audio
                 await _fileChunkRepository.AddAsync(fileChunk);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"[{userId}] File chunk for audio file {parameter.AudioFileId} was uploaded");
+                _logger.Verbose($"[{userId}] File chunk for audio file {parameter.AudioFileId} was uploaded");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }

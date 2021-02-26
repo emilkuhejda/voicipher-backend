@@ -78,7 +78,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.SaveAsync(cancellationToken);
 
-                _logger.Information($"[{parameter.UserId}] Audio file {audioFile.Id} source was updated");
+                _logger.Information($"[{parameter.UserId}] Audio file {audioFile.Id} source was deleted");
 
                 await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(audioFile.UserId));
 

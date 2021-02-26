@@ -82,7 +82,7 @@ namespace Voicipher.Business.Commands
                         throw new OperationErrorException(ErrorCode.EC603);
                     }
 
-                    _logger.Information($"[{userId}] Update speech results total time");
+                    _logger.Verbose($"[{userId}] Update speech results ({parameter.Length})");
 
                     await transaction.CommitAsync(cancellationToken);
                 }

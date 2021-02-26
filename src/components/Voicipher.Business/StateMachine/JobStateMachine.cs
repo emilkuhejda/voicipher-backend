@@ -123,7 +123,10 @@ namespace Voicipher.Business.StateMachine
             await _unitOfWork.SaveAsync(cancellationToken);
             _logger.Information($"[{_audioFile.UserId}] Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
 
+            _logger.Information($"[{_audioFile.UserId}] Start speech recognition for audio file {_audioFile.Id}");
             var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribedAudioFiles, cancellationToken);
+            _logger.Information($"[{_audioFile.UserId}] Speech recognition for audio file {_audioFile.Id} finished");
+
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 

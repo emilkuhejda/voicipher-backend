@@ -66,6 +66,8 @@ namespace Voicipher.Business.Commands.Job
                     await transaction.CommitAsync(cancellationToken);
                     _jobStateMachine.DoClean();
                 }
+
+                _logger.Error($"Background job {parameter.Id} is completed");
             }
 
             var payload = new DeleteAudioFileSourcePayload(parameter.AudioFileId, parameter.UserId);

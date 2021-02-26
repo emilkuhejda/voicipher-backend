@@ -39,7 +39,7 @@ namespace Voicipher.Business.Commands.EndUser
         protected override async Task<CommandResult<OkOutputModel>> Execute(string parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var userId = principal.GetNameIdentifier();
-            _logger.Information($"[{userId}] Start deleting of the user account. Email = {parameter}");
+            _logger.Information($"[{userId}] Start deleting of the user account with email {parameter}");
 
             var user = await _userRepository.GetByEmailAsync(userId, parameter, cancellationToken);
             if (user == null)
