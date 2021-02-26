@@ -136,9 +136,9 @@ namespace Voicipher.Business.Commands.ControlPanel
                 try
                 {
                     _logger.Verbose($"[{userId}] Start compressing user data");
-                    var destinationFileName = Path.Combine(rootPath, $"{userId}.zip");
-                    _zipFileService.CreateFromDirectory(userRootPath, destinationFileName);
-                    _logger.Information($"[{userId}] User data was compressed");
+                    var destinationFilePath = Path.Combine(rootPath, $"{userId}.zip");
+                    _zipFileService.CreateFromDirectory(userRootPath, destinationFilePath);
+                    _logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFilePath}");
 
                     _fileAccessService.DeleteDirectory(userRootPath);
                     _logger.Information($"[{userId}] User data was deleted from dist storage");
