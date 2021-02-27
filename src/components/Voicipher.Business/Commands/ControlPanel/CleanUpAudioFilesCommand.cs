@@ -71,7 +71,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             var audioFiles = await _audioFileRepository.GetAllForCleanUpAsync(deleteBefore, cancellationToken);
             if (!audioFiles.Any())
             {
-                _logger.Information("No audio files for backup");
+                _logger.Information("No audio files for cleanup");
                 return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
             }
 
@@ -80,7 +80,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             var succeededIds = new Dictionary<Guid, IList<Guid>>();
             var failedIds = new Dictionary<Guid, IList<Guid>>();
 
-            _logger.Information($"There was found {audioFiles} audio files for backup");
+            _logger.Information($"There was found {audioFiles} audio files for cleanup");
 
             foreach (var group in audioFiles.GroupBy(x => x.UserId))
             {
@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.ControlPanel
                 succeededIds.Add(userId, new List<Guid>());
                 failedIds.Add(userId, new List<Guid>());
 
-                _logger.Information($"Start backup for user ID {userId}");
+                _logger.Information($"Start cleanup for user ID {userId}");
 
                 var userRootPath = Path.Combine(rootPath, userId.ToString());
                 _fileAccessService.DeleteDirectory(userRootPath);
@@ -98,7 +98,7 @@ namespace Voicipher.Business.Commands.ControlPanel
                 {
                     using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
                     {
-                        _logger.Verbose($"Start backup of the audio file ID {audioFile.Id}");
+                        _logger.Verbose($"Start cleanup of the audio file ID {audioFile.Id}");
 
                         try
                         {
@@ -123,7 +123,7 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                             await transaction.CommitAsync(cancellationToken);
 
-                            _logger.Information($"Audio file {audioFile.Id} was successfully backed up");
+                            _logger.Information($"Audio file {audioFile.Id} was successfully cleaned up");
 
                             succeededIds[userId].Add(audioFile.Id);
                         }
@@ -134,7 +134,7 @@ namespace Voicipher.Business.Commands.ControlPanel
                         }
                         catch (Exception ex)
                         {
-                            _logger.Error(ex, $"Backup process for audio file {audioFile.Id} failed");
+                            _logger.Error(ex, $"Cleanup process for audio file {audioFile.Id} failed");
                             failedIds[userId].Add(audioFile.Id);
                         }
                     }
