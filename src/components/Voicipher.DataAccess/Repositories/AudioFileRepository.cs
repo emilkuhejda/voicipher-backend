@@ -94,6 +94,7 @@ namespace Voicipher.DataAccess.Repositories
         public Task<AudioFile[]> GetForPermanentDeleteAllAsync(Guid userId, IEnumerable<Guid> fileItemIds, Guid applicationId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
+                .Include(x => x.TranscribeItems)
                 .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
