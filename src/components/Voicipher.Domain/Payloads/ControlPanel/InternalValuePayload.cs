@@ -2,9 +2,9 @@
 
 namespace Voicipher.Domain.Payloads.ControlPanel
 {
-    public record GetInternalValuePayload<T>
+    public record InternalValuePayload<T>
     {
-        public GetInternalValuePayload(InternalValueKey key, T defaultValue)
+        public InternalValuePayload(InternalValueKey key, T defaultValue)
         {
             Key = key;
             DefaultValue = defaultValue;

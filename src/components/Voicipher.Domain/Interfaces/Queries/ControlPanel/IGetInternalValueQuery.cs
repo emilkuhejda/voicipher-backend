@@ -5,7 +5,7 @@ using Voicipher.Domain.Payloads.ControlPanel;
 
 namespace Voicipher.Domain.Interfaces.Queries.ControlPanel
 {
-    public interface IGetInternalValueQuery<T> : IQuery<GetInternalValuePayload<T>, QueryResult<InternalValueOutputModel<T>>>
+    public interface IGetInternalValueQuery<T> : IQuery<InternalValuePayload<T>, QueryResult<InternalValueOutputModel<T>>>
     {
     }
 }

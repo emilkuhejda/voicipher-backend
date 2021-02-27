@@ -11,7 +11,7 @@ using Voicipher.Domain.Payloads.ControlPanel;
 
 namespace Voicipher.Business.Queries.ControlPanel
 {
-    public class GetInternalValueQuery<T> : Query<GetInternalValuePayload<T>, QueryResult<InternalValueOutputModel<T>>>, IGetInternalValueQuery<T>
+    public class GetInternalValueQuery<T> : Query<InternalValuePayload<T>, QueryResult<InternalValueOutputModel<T>>>, IGetInternalValueQuery<T>
     {
         private readonly IInternalValueRepository _internalValueRepository;
 
@@ -20,7 +20,7 @@ namespace Voicipher.Business.Queries.ControlPanel
             _internalValueRepository = internalValueRepository;
         }
 
-        protected override async Task<QueryResult<InternalValueOutputModel<T>>> Execute(GetInternalValuePayload<T> parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
+        protected override async Task<QueryResult<InternalValueOutputModel<T>>> Execute(InternalValuePayload<T> parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var internalValue = await _internalValueRepository.GetValueAsync(parameter.Key.ToString(), cancellationToken);
             if (internalValue == null)
