@@ -142,7 +142,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             try
             {
                 Logger.Verbose($"[{userId}] Start compressing user data");
-                var destinationFileName = Path.Combine(rootPath, $"{userId}-{DateTime.UtcNow}.zip");
+                var destinationFileName = Path.Combine(rootPath, $"{userId}-{DateTime.UtcNow:yyyy-MM-dd_HH-mm-ss}.zip");
                 _zipFileService.CreateFromDirectory(sourcePath, destinationFileName);
                 Logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFileName}");
 
