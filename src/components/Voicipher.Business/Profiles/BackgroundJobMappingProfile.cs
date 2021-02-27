@@ -32,6 +32,9 @@ namespace Voicipher.Business.Profiles
                     j => j.Parameters,
                     opt => opt.MapFrom(c => JsonConvert.SerializeObject(c.Parameters)))
                 .ForMember(
+                    j => j.Exception,
+                    opt => opt.MapFrom(c => string.Empty))
+                .ForMember(
                     j => j.DateCreatedUtc,
                     opt => opt.MapFrom(c => DateTime.UtcNow))
                 .ForMember(

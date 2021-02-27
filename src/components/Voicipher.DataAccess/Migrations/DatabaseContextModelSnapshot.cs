@@ -146,6 +146,10 @@ namespace Voicipher.DataAccess.Migrations
                     b.Property<DateTime>("DateCreatedUtc")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Exception")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("JobState")
                         .HasColumnType("int");
 
