@@ -27,26 +27,28 @@ namespace Voicipher.Business.Commands.ControlPanel
         private const string RootDirectory = "deleted-audio-files";
 
         private readonly IPermanentDeleteAllCommand _permanentDeleteAllCommand;
+        private readonly IAudioFileRepository _audioFileRepository;
 
         public CleanUpAudioFilesCommand(
             IPermanentDeleteAllCommand permanentDeleteAllCommand,
+            IAudioFileRepository audioFileRepository,
             IFileAccessService fileAccessService,
             IZipFileService zipFileService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IAudioFileRepository audioFileRepository,
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, audioFileRepository, unitOfWork, options, logger.ForContext<CleanUpAudioFilesCommand>())
+            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, unitOfWork, options, logger.ForContext<CleanUpAudioFilesCommand>())
         {
             _permanentDeleteAllCommand = permanentDeleteAllCommand;
+            _audioFileRepository = audioFileRepository;
         }
 
         protected override async Task<CommandResult<CleanUpAudioFilesOutputModel>> Execute(CleanUpAudioFilesPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var deleteBefore = DateTime.UtcNow.AddDays(-30);
-            var audioFiles = await AudioFileRepository.GetAllForPermanentDeleteAsync(deleteBefore, cancellationToken);
+            var audioFiles = await _audioFileRepository.GetAllForPermanentDeleteAsync(deleteBefore, cancellationToken);
             if (!audioFiles.Any())
             {
                 Logger.Information("No audio files for cleanup");

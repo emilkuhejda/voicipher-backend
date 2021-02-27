@@ -24,23 +24,26 @@ namespace Voicipher.Business.Commands.ControlPanel
     {
         private const string RootDirectory = "cleaned-audio-files";
 
+        private readonly IAudioFileRepository _audioFileRepository;
+
         public CleanUpTranscribeItemsCommand(
+            IAudioFileRepository audioFileRepository,
             IFileAccessService fileAccessService,
             IZipFileService zipFileService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IAudioFileRepository audioFileRepository,
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, audioFileRepository, unitOfWork, options, logger)
+            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, unitOfWork, options, logger)
         {
+            _audioFileRepository = audioFileRepository;
         }
 
         protected override async Task<CommandResult<CleanUpAudioFilesOutputModel>> Execute(CleanUpTranscribeItemsPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var deleteBefore = DateTime.UtcNow.AddDays(-60);
-            var audioFiles = await AudioFileRepository.GetAllForCleanUpAsync(deleteBefore, cancellationToken);
+            var audioFiles = await _audioFileRepository.GetAllForCleanUpAsync(deleteBefore, cancellationToken);
             if (!audioFiles.Any())
             {
                 Logger.Information("No audio files for cleanup");

@@ -16,7 +16,6 @@ using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
-using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels.ControlPanel;
@@ -38,7 +37,6 @@ namespace Voicipher.Business.Commands.ControlPanel
             IZipFileService zipFileService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IAudioFileRepository audioFileRepository,
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
@@ -48,13 +46,10 @@ namespace Voicipher.Business.Commands.ControlPanel
             _zipFileService = zipFileService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Backup];
-            AudioFileRepository = audioFileRepository;
             UnitOfWork = unitOfWork;
             AppSettings = options.Value;
             Logger = logger;
         }
-
-        protected IAudioFileRepository AudioFileRepository { get; }
 
         protected IUnitOfWork UnitOfWork { get; }
 
