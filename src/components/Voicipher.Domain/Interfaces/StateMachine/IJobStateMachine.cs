@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Domain.Models;
 
@@ -16,7 +17,7 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 
         Task DoCompleteAsync(CancellationToken cancellationToken);
 
-        Task DoErrorAsync(CancellationToken cancellationToken);
+        Task DoErrorAsync(Exception exception, CancellationToken cancellationToken);
 
         Task SaveAsync(CancellationToken cancellationToken);
 

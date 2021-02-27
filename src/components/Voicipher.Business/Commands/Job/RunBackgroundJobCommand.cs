@@ -54,9 +54,9 @@ namespace Voicipher.Business.Commands.Job
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
                     await _jobStateMachine.DoCompleteAsync(cancellationToken);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    await _jobStateMachine.DoErrorAsync(cancellationToken);
+                    await _jobStateMachine.DoErrorAsync(ex, cancellationToken);
 
                     throw;
                 }

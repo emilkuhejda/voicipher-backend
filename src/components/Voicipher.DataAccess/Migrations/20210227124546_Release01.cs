@@ -12,6 +12,13 @@ namespace Voicipher.DataAccess.Migrations
                 type: "bit",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Exception",
+                table: "BackgroundJob",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -19,6 +26,10 @@ namespace Voicipher.DataAccess.Migrations
             migrationBuilder.DropColumn(
                 name: "WasCleaned",
                 table: "TranscribeItem");
+
+            migrationBuilder.DropColumn(
+                name: "Exception",
+                table: "BackgroundJob");
         }
     }
 }

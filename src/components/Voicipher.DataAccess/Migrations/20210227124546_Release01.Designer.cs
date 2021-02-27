@@ -10,7 +10,7 @@ using Voicipher.DataAccess;
 namespace Voicipher.DataAccess.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210226161555_Release01")]
+    [Migration("20210227124546_Release01")]
     partial class Release01
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -147,6 +147,10 @@ namespace Voicipher.DataAccess.Migrations
 
                     b.Property<DateTime>("DateCreatedUtc")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Exception")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("JobState")
                         .HasColumnType("int");

@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Utils;
+using Voicipher.Common.Utils;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
@@ -196,8 +197,11 @@ namespace Voicipher.Business.StateMachine
             }
         }
 
-        public async Task DoErrorAsync(CancellationToken cancellationToken)
+        public async Task DoErrorAsync(Exception exception, CancellationToken cancellationToken)
         {
+            _backgroundJob.Exception = ExceptionFormatter.FormatException(exception);
+            await _unitOfWork.SaveAsync(cancellationToken);
+
             var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_backgroundJob.AudioFileId, _backgroundJob.UserId, _appSettings.ApplicationId, RecognitionState.None);
             await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
