@@ -5,7 +5,7 @@ using Voicipher.Domain.Payloads.ControlPanel;
 
 namespace Voicipher.Domain.Interfaces.Commands.ControlPanel
 {
-    public interface ICleanUpTranscribeItemsCommand : ICommand<CleanUpTranscribeItemsPayload, CommandResult<CleanUpTranscribeItemsOutputModel>>
+    public interface ICleanUpTranscribeItemsCommand : ICommand<CleanUpTranscribeItemsPayload, CommandResult<CleanUpAudioFilesOutputModel>>
     {
     }
 }

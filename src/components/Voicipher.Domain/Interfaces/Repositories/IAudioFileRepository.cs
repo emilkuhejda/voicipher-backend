@@ -32,6 +32,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
 
         Task<AudioFile[]> GetInProgressAsync(CancellationToken cancellationToken);
 
+        Task<AudioFile[]> GetAllForPermanentDeleteAsync(DateTime deleteBefore, CancellationToken cancellationToken);
+
         Task<AudioFile[]> GetAllForCleanUpAsync(DateTime deleteBefore, CancellationToken cancellationToken);
     }
 }
