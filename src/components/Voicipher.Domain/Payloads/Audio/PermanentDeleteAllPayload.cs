@@ -6,13 +6,16 @@ namespace Voicipher.Domain.Payloads.Audio
 {
     public record PermanentDeleteAllPayload
     {
-        public PermanentDeleteAllPayload(IEnumerable<Guid> audioFilesIds, Guid applicationId)
+        public PermanentDeleteAllPayload(IEnumerable<Guid> audioFilesIds, Guid userId, Guid applicationId)
         {
             AudioFilesIds = audioFilesIds;
+            UserId = userId;
             ApplicationId = applicationId;
         }
 
         public IEnumerable<Guid> AudioFilesIds { get; }
+
+        public Guid UserId { get; }
 
         public Guid ApplicationId { get; }
 

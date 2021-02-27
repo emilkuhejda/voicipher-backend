@@ -8,6 +8,7 @@ using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -23,63 +24,65 @@ namespace Voicipher.Business.Commands.Audio
     public class PermanentDeleteAllCommand : Command<PermanentDeleteAllPayload, CommandResult<OkOutputModel>>, IPermanentDeleteAllCommand
     {
         private readonly IMessageCenterService _messageCenterService;
-        private readonly IAudioFileRepository _audioFileRepository;
         private readonly IBlobStorage _blobStorage;
+        private readonly IAudioFileRepository _audioFileRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
         public PermanentDeleteAllCommand(
             IMessageCenterService messageCenterService,
-            IAudioFileRepository audioFileRepository,
             IBlobStorage blobStorage,
+            IAudioFileRepository audioFileRepository,
+            IUnitOfWork unitOfWork,
             ILogger logger)
         {
             _messageCenterService = messageCenterService;
-            _audioFileRepository = audioFileRepository;
             _blobStorage = blobStorage;
+            _audioFileRepository = audioFileRepository;
+            _unitOfWork = unitOfWork;
             _logger = logger.ForContext<PermanentDeleteAllCommand>();
         }
 
         protected override async Task<CommandResult<OkOutputModel>> Execute(PermanentDeleteAllPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var userId = principal.GetNameIdentifier();
             if (!parameter.Validate().IsValid)
             {
-                _logger.Error($"[{userId}] Invalid input data");
+                _logger.Error($"[{parameter.UserId}] Invalid input data");
 
                 throw new OperationErrorException(ErrorCode.EC600);
             }
 
             try
             {
-                var audioFilesToDelete = await _audioFileRepository.GetForPermanentDeleteAllAsync(userId, parameter.AudioFilesIds, parameter.ApplicationId, cancellationToken);
+                var audioFilesToDelete = await _audioFileRepository.GetForPermanentDeleteAllAsync(parameter.UserId, parameter.AudioFilesIds, parameter.ApplicationId, cancellationToken);
                 foreach (var audioFile in audioFilesToDelete)
                 {
-                    _logger.Verbose($"[{userId}] Start deleting audio file {audioFile.Id}");
-                    await _blobStorage.DeleteAudioFileAsync(new BlobSettings(audioFile.Id, userId), cancellationToken);
-                    _logger.Verbose($"[{userId}] Delete audio file {audioFile.Id} from blob storage");
+                    _logger.Verbose($"[{parameter.UserId}] Start deleting audio file {audioFile.Id}");
+                    await _blobStorage.DeleteAudioFileAsync(new BlobSettings(audioFile.Id, parameter.UserId), cancellationToken);
+                    _logger.Verbose($"[{parameter.UserId}] Delete audio file {audioFile.Id} from blob storage");
 
                     var deletedEntity = audioFile.CreateDeletedEntity(parameter.ApplicationId);
                     _audioFileRepository.Remove(audioFile);
                     await _audioFileRepository.AddAsync(deletedEntity);
                 }
 
-                await _audioFileRepository.SaveAsync(cancellationToken);
+                await _unitOfWork.SaveAsync(cancellationToken);
 
-                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
+                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(parameter.UserId));
 
-                _logger.Information($"[{userId}] Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
+                _logger.Information($"[{parameter.UserId}] Audio files {JsonConvert.SerializeObject(parameter.AudioFilesIds)} were permanently deleted");
 
                 return new CommandResult<OkOutputModel>(new OkOutputModel());
             }
             catch (RequestFailedException ex)
             {
-                _logger.Error(ex, $"[{userId}] Blob storage is unavailable. Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
+                _logger.Error(ex, $"[{parameter.UserId}] Blob storage is unavailable. Audio files = {JsonConvert.SerializeObject(parameter.AudioFilesIds)}");
 
                 throw new OperationErrorException(ErrorCode.EC700);
             }
             catch (Exception ex)
             {
-                _logger.Fatal(ex, $"[{userId}] Permanent audio files deletion failed");
+                _logger.Fatal(ex, $"[{parameter.UserId}] Permanent audio files deletion failed");
 
                 throw new OperationErrorException(ErrorCode.EC603);
             }

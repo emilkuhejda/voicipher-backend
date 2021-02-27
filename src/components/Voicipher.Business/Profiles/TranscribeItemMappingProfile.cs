@@ -41,6 +41,9 @@ namespace Voicipher.Business.Profiles
                 .ForMember(
                     t => t.DateCreatedUtc,
                     opt => opt.MapFrom(x => x.DateUpdatedUtc))
+                .ForMember(
+                    t => t.WasCleaned,
+                    opt => opt.MapFrom(x => x.WasCleaned))
                 .AfterMap((t, o, c) =>
                 {
                     var outputModels = t.GetAlternatives().Select(x => c.Mapper.Map<RecognitionAlternativeOutputModel>(x));

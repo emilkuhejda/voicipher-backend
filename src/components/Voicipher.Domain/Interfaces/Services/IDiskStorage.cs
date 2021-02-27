@@ -8,6 +8,8 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken);
 
+        Task<string> UploadAsync(byte[] bytes, UploadSettings uploadSettings, CancellationToken cancellationToken);
+
         void RemoveRange(FileChunk[] fileChunks);
 
         Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken);
@@ -15,5 +17,7 @@ namespace Voicipher.Domain.Interfaces.Services
         void RemoveTemporaryFolder();
 
         string GetDirectoryPath();
+
+        string GetDirectoryPath(string folderName);
     }
 }

@@ -7,8 +7,12 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         bool Exists(string path);
 
+        bool DirectoryExists(string path);
+
         Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken);
 
         void Delete(string path);
+
+        void DeleteDirectory(string path);
     }
 }

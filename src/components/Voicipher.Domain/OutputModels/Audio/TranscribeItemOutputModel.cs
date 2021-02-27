@@ -39,5 +39,8 @@ namespace Voicipher.Domain.OutputModels.Audio
 
         [Required]
         public DateTime DateUpdatedUtc { get; init; }
+
+        [Required]
+        public bool WasCleaned { get; set; }
     }
 }
