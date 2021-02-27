@@ -146,9 +146,6 @@ namespace Voicipher.DataAccess.Migrations
                     b.Property<DateTime>("DateCreatedUtc")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Exception")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("JobState")
                         .HasColumnType("int");
 
@@ -479,9 +476,6 @@ namespace Voicipher.DataAccess.Migrations
 
                     b.Property<string>("UserTranscript")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("WasCleaned")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
