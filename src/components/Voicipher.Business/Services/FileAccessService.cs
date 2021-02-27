@@ -12,6 +12,11 @@ namespace Voicipher.Business.Services
             return File.Exists(path);
         }
 
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
+        }
+
         public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
         {
             return File.ReadAllBytesAsync(path, cancellationToken);

@@ -31,6 +31,8 @@ namespace Voicipher.Business.Commands.ControlPanel
 {
     public class CleanUpAudioFilesCommand : Command<CleanUpAudioFilesPayload, CommandResult<CleanUpAudioFilesOutputModel>>, ICleanUpAudioFilesCommand
     {
+        private const string RootDirectory = "audio-files";
+
         private readonly IPermanentDeleteAllCommand _permanentDeleteAllCommand;
         private readonly IFileAccessService _fileAccessService;
         private readonly IZipFileService _zipFileService;
@@ -69,6 +71,8 @@ namespace Voicipher.Business.Commands.ControlPanel
             if (!audioFiles.Any())
                 return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
 
+            var rootPath = _diskStorage.GetDirectoryPath(RootDirectory);
+
             var succeededIds = new Dictionary<Guid, IList<Guid>>();
             var failedIds = new Dictionary<Guid, IList<Guid>>();
 
@@ -82,10 +86,6 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                 _logger.Information($"Start backup for user ID {userId}");
 
-                var rootDirectory = "audio-files";
-                var rootPath = _diskStorage.GetDirectoryPath(rootDirectory);
-
-                var userRootDirectory = Path.Combine(rootDirectory, userId.ToString());
                 var userRootPath = Path.Combine(rootPath, userId.ToString());
                 _fileAccessService.DeleteDirectory(userRootPath);
 
@@ -97,7 +97,7 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                         try
                         {
-                            var folderPath = Path.Combine(userRootDirectory, audioFile.Id.ToString());
+                            var folderPath = Path.Combine(RootDirectory, userId.ToString(), audioFile.Id.ToString());
 
                             var jsonSerializerSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                             var serializedAudioFile = JsonConvert.SerializeObject(audioFile, Formatting.None, jsonSerializerSettings);
@@ -135,24 +135,35 @@ namespace Voicipher.Business.Commands.ControlPanel
                     }
                 }
 
-                try
+                if (succeededIds[userId].Any())
                 {
-                    _logger.Verbose($"[{userId}] Start compressing user data");
-                    var destinationFilePath = Path.Combine(rootPath, $"{userId}.zip");
-                    _zipFileService.CreateFromDirectory(userRootPath, destinationFilePath);
-                    _logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFilePath}");
-
-                    _fileAccessService.DeleteDirectory(userRootPath);
-                    _logger.Information($"[{userId}] User data was deleted from dist storage");
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, $"[{userId}] Compression failed");
+                    CompressData(userId, rootPath, userRootPath);
                 }
             }
 
             var cleanUpAudioFilesOutputModel = new CleanUpAudioFilesOutputModel(audioFiles.Length, succeededIds, failedIds);
             return new CommandResult<CleanUpAudioFilesOutputModel>(cleanUpAudioFilesOutputModel);
+        }
+
+        private void CompressData(Guid userId, string sourcePath, string destinationPath)
+        {
+            if (!_fileAccessService.DirectoryExists(sourcePath))
+                return;
+
+            try
+            {
+                _logger.Verbose($"[{userId}] Start compressing user data");
+                var destinationFilePath = Path.Combine(sourcePath, $"{userId}.zip");
+                _zipFileService.CreateFromDirectory(destinationFilePath, destinationFilePath);
+                _logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFilePath}");
+
+                _fileAccessService.DeleteDirectory(destinationPath);
+                _logger.Information($"[{userId}] User data was deleted from dist storage");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"[{userId}] Compression failed");
+            }
         }
 
         private async Task BackupSourceAsync(BackupSourceSettings settings, CancellationToken cancellationToken)
