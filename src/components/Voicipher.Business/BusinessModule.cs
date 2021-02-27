@@ -2,11 +2,15 @@
 using Autofac;
 using AutoMapper;
 using Voicipher.Business.Channels;
+using Voicipher.Business.Commands.ControlPanel;
+using Voicipher.Business.Queries.ControlPanel;
 using Voicipher.Business.Services;
 using Voicipher.Business.StateMachine;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
+using Voicipher.Domain.Interfaces.Commands.ControlPanel;
 using Voicipher.Domain.Interfaces.Infrastructure;
+using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Module = Autofac.Module;
@@ -35,6 +39,9 @@ namespace Voicipher.Business
                 .AsImplementedInterfaces();
 
             builder.RegisterAssemblyTypes(assembly).Where(t => t.IsAssignableTo<Profile>()).As<Profile>().AsSelf();
+
+            builder.RegisterGeneric(typeof(GetInternalValueQuery<>)).As(typeof(IGetInternalValueQuery<>));
+            builder.RegisterGeneric(typeof(UpdateInternalValueCommand<>)).As(typeof(IUpdateInternalValueCommand<>));
 
             builder.RegisterType<MessageCenterService>().As<IMessageCenterService>();
             builder.RegisterType<AudioService>().As<IAudioService>();

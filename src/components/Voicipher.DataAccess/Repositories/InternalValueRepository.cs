@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
@@ -12,9 +13,9 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
-        public Task<InternalValue> GetValueAsync(string key)
+        public Task<InternalValue> GetValueAsync(string key, CancellationToken cancellationToken)
         {
-            return Context.InternalValues.FirstOrDefaultAsync(x => x.Key == key);
+            return Context.InternalValues.FirstOrDefaultAsync(x => x.Key == key, cancellationToken);
         }
     }
 }
