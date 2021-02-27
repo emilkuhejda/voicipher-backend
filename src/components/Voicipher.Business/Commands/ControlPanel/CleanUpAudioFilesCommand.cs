@@ -31,7 +31,7 @@ namespace Voicipher.Business.Commands.ControlPanel
 {
     public class CleanUpAudioFilesCommand : Command<CleanUpAudioFilesPayload, CommandResult<CleanUpAudioFilesOutputModel>>, ICleanUpAudioFilesCommand
     {
-        private const string RootDirectory = "audio-files";
+        private const string RootDirectory = "deleted-audio-files";
 
         private readonly IPermanentDeleteAllCommand _permanentDeleteAllCommand;
         private readonly IFileAccessService _fileAccessService;
