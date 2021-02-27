@@ -13,7 +13,6 @@ namespace Voicipher.Business.Commands.ControlPanel
     {
         protected override async Task<CommandResult<CleanUpTranscribeItemsOutputModel>> Execute(CleanUpTranscribeItemsPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
         }
     }
 }

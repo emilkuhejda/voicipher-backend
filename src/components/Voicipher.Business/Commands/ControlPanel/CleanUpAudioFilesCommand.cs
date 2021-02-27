@@ -68,7 +68,7 @@ namespace Voicipher.Business.Commands.ControlPanel
         protected override async Task<CommandResult<CleanUpAudioFilesOutputModel>> Execute(CleanUpAudioFilesPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
             var deleteBefore = DateTime.UtcNow.AddDays(-30);
-            var audioFiles = await _audioFileRepository.GetAllForCleanUpAsync(deleteBefore, cancellationToken);
+            var audioFiles = await _audioFileRepository.GetAllForPermanentDeleteAsync(deleteBefore, cancellationToken);
             if (!audioFiles.Any())
             {
                 _logger.Information("No audio files for cleanup");

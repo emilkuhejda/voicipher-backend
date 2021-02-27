@@ -16,6 +16,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [Route("api/v{version:apiVersion}/control-panel/clean-up")]
     [Authorize(Policy = nameof(VoicipherPolicy.Admin))]
     [ApiController]
+    [AllowAnonymous]
     public class CleanUpController : ControllerBase
     {
         private readonly Lazy<ICleanUpAudioFilesCommand> _cleanUpAudioFilesCommand;
