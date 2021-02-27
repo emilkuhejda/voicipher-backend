@@ -30,7 +30,7 @@ namespace Voicipher.Business.Queries.ControlPanel
             return new QueryResult<InternalValueOutputModel<T>>(new InternalValueOutputModel<T>(value));
         }
 
-        private T ParseResult<T>(string value, T defaultValue)
+        private T ParseResult(string value, T defaultValue)
         {
             try
             {
