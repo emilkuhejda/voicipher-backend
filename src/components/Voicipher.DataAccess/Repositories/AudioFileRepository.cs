@@ -123,12 +123,13 @@ namespace Voicipher.DataAccess.Repositories
                 .ToArrayAsync(cancellationToken);
         }
 
-        public Task<AudioFile[]> GetAllForCleanUpAsync(CancellationToken cancellationToken)
+        public Task<AudioFile[]> GetAllForCleanUpAsync(DateTime deleteBefore, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Include(x => x.TranscribeItems)
                 .AsNoTracking()
                 .Where(x => x.IsDeleted && !x.IsPermanentlyDeleted)
+                .Where(x => x.DateUpdatedUtc < deleteBefore)
                 .ToArrayAsync(cancellationToken);
         }
     }

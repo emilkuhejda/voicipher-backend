@@ -67,9 +67,13 @@ namespace Voicipher.Business.Commands.ControlPanel
 
         protected override async Task<CommandResult<CleanUpAudioFilesOutputModel>> Execute(CleanUpAudioFilesPayload parameter, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            var audioFiles = await _audioFileRepository.GetAllForCleanUpAsync(cancellationToken);
+            var deleteBefore = DateTime.UtcNow.AddDays(-30);
+            var audioFiles = await _audioFileRepository.GetAllForCleanUpAsync(deleteBefore, cancellationToken);
             if (!audioFiles.Any())
+            {
+                _logger.Information("No audio files for backup");
                 return new CommandResult<CleanUpAudioFilesOutputModel>(new CleanUpAudioFilesOutputModel());
+            }
 
             var rootPath = _diskStorage.GetDirectoryPath(RootDirectory);
 
