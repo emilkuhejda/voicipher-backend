@@ -94,6 +94,7 @@ namespace Voicipher.DataAccess.Repositories
         public Task<AudioFile[]> GetForPermanentDeleteAllAsync(Guid userId, IEnumerable<Guid> fileItemIds, Guid applicationId, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
+                .Include(x => x.TranscribeItems)
                 .Where(x => fileItemIds.Contains(x.Id) && x.UserId == userId)
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
@@ -123,12 +124,22 @@ namespace Voicipher.DataAccess.Repositories
                 .ToArrayAsync(cancellationToken);
         }
 
-        public Task<AudioFile[]> GetAllForCleanUpAsync(DateTime deleteBefore, CancellationToken cancellationToken)
+        public Task<AudioFile[]> GetAllForPermanentDeleteAsync(DateTime deleteBefore, CancellationToken cancellationToken)
         {
             return Context.AudioFiles
                 .Include(x => x.TranscribeItems)
                 .AsNoTracking()
                 .Where(x => x.IsDeleted && !x.IsPermanentlyDeleted)
+                .Where(x => x.DateUpdatedUtc < deleteBefore)
+                .ToArrayAsync(cancellationToken);
+        }
+
+        public Task<AudioFile[]> GetAllForCleanUpAsync(DateTime deleteBefore, CancellationToken cancellationToken)
+        {
+            return Context.AudioFiles
+                .Include(x => x.TranscribeItems)
+                .Where(x => !x.IsPermanentlyDeleted && !x.WasCleaned)
+                .Where(x => x.RecognitionState == RecognitionState.Completed)
                 .Where(x => x.DateUpdatedUtc < deleteBefore)
                 .ToArrayAsync(cancellationToken);
         }
