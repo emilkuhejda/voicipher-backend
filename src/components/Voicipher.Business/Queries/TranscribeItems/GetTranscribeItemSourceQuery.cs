@@ -43,6 +43,13 @@ namespace Voicipher.Business.Queries.TranscribeItems
                 return new QueryResult<byte[]>(new OperationError(ValidationErrorCodes.NotFound));
             }
 
+            if (transcribeItem.WasCleaned)
+            {
+                _logger.Information($"[{userId}] Audio file {transcribeItem.AudioFileId} was cleaned up");
+
+                return new QueryResult<byte[]>(new byte[0]);
+            }
+
             try
             {
                 _logger.Verbose($"[{userId}] Start downloading  transcription audio file {transcribeItem.SourceFileName} from blob storage");
