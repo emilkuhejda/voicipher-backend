@@ -28,7 +28,6 @@ namespace Voicipher.Business.Commands.ControlPanel
         private readonly string _rootDirectory;
         private readonly IFileAccessService _fileAccessService;
         private readonly IZipFileService _zipFileService;
-        private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
 
         protected CleanUpBaseCommand(
@@ -44,12 +43,15 @@ namespace Voicipher.Business.Commands.ControlPanel
             _rootDirectory = rootDirectory;
             _fileAccessService = fileAccessService;
             _zipFileService = zipFileService;
-            _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Backup];
+
+            BlobStorage = blobStorage;
             UnitOfWork = unitOfWork;
             AppSettings = options.Value;
             Logger = logger;
         }
+
+        protected IBlobStorage BlobStorage { get; }
 
         protected IUnitOfWork UnitOfWork { get; }
 
@@ -164,7 +166,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             {
                 Logger.Verbose($"Start downloading audio source {settings.FileName}");
                 var blobSettings = new GetBlobSettings(settings.FileName, settings.UserId, settings.AudioFileId);
-                var source = await _blobStorage.GetAsync(blobSettings, cancellationToken);
+                var source = await BlobStorage.GetAsync(blobSettings, cancellationToken);
                 Logger.Verbose($"Audio source {settings.FileName} was downloaded");
 
                 var uploadSettings = new UploadSettings(settings.FolderName, settings.FileName);

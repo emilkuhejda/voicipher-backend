@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
+using Azure;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Voicipher.Business.Services;
@@ -35,7 +36,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, unitOfWork, options, logger)
+            : base(RootDirectory, fileAccessService, zipFileService, blobStorage, index, unitOfWork, options, logger.ForContext<CleanUpTranscribeItemsCommand>())
         {
             _audioFileRepository = audioFileRepository;
         }
@@ -68,6 +69,21 @@ namespace Voicipher.Business.Commands.ControlPanel
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             audioFile.WasCleaned = true;
             await UnitOfWork.SaveAsync(cancellationToken);
+
+            try
+            {
+                Logger.Verbose($"[{audioFile.UserId}] Start deleting audio file {audioFile.Id}");
+                await BlobStorage.DeleteAudioFileAsync(new BlobSettings(audioFile.Id, audioFile.UserId), cancellationToken);
+                Logger.Verbose($"[{audioFile.UserId}] Delete audio file {audioFile.Id} from blob storage");
+            }
+            catch (RequestFailedException ex)
+            {
+                Logger.Error(ex, $"[{audioFile.UserId}] Blob storage is unavailable. Audio file {audioFile.Id}");
+            }
+            catch (Exception ex)
+            {
+                Logger.Fatal(ex, $"[{audioFile.UserId}] Delete audio file for blob storage failed");
+            }
         }
     }
 }
