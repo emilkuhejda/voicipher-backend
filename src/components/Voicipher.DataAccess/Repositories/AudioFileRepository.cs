@@ -140,7 +140,7 @@ namespace Voicipher.DataAccess.Repositories
                 .Include(x => x.TranscribeItems)
                 .Where(x => !x.IsPermanentlyDeleted && !x.WasCleaned)
                 .Where(x => x.RecognitionState == RecognitionState.Completed)
-                .Where(x => x.DateUpdatedUtc < deleteBefore)
+                .Where(x => x.DateProcessedUtc.HasValue && x.DateProcessedUtc < deleteBefore)
                 .ToArrayAsync(cancellationToken);
         }
     }
