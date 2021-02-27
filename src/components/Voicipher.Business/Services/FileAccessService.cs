@@ -7,9 +7,14 @@ namespace Voicipher.Business.Services
 {
     public class FileAccessService : IFileAccessService
     {
-        public bool Exists(string? path)
+        public bool Exists(string path)
         {
             return File.Exists(path);
+        }
+
+        public bool DirectoryExists(string path)
+        {
+            return Directory.Exists(path);
         }
 
         public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
@@ -22,6 +27,14 @@ namespace Voicipher.Business.Services
             if (Exists(path))
             {
                 File.Delete(path);
+            }
+        }
+
+        public void DeleteDirectory(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
             }
         }
     }

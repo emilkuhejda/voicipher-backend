@@ -23,10 +23,15 @@ namespace Voicipher.Business.Services
             _filesDirectory = filesDirectory;
         }
 
-        public async Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
+        public Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
         {
-            var fileName = $"{Guid.NewGuid()}.tmp";
-            var rootPath = GetDirectoryPath();
+            return UploadAsync(bytes, new UploadSettings(), cancellationToken);
+        }
+
+        public async Task<string> UploadAsync(byte[] bytes, UploadSettings uploadSettings, CancellationToken cancellationToken)
+        {
+            var fileName = string.IsNullOrWhiteSpace(uploadSettings.FileName) ? $"{Guid.NewGuid()}.tmp" : uploadSettings.FileName;
+            var rootPath = GetDirectoryPath(uploadSettings.FolderName ?? string.Empty);
             var filePath = Path.Combine(rootPath, fileName);
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
@@ -67,7 +72,12 @@ namespace Voicipher.Business.Services
 
         public string GetDirectoryPath()
         {
-            var rootDirectoryPath = Path.Combine(_webHostEnvironment.WebRootPath, UploadedFilesDirectory, _filesDirectory);
+            return GetDirectoryPath(string.Empty);
+        }
+
+        public string GetDirectoryPath(string folderName)
+        {
+            var rootDirectoryPath = Path.Combine(_webHostEnvironment.WebRootPath, UploadedFilesDirectory, _filesDirectory, folderName);
             if (!Directory.Exists(rootDirectoryPath))
                 Directory.CreateDirectory(rootDirectoryPath);
 

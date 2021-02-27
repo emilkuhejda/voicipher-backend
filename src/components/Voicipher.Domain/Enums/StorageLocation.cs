@@ -3,6 +3,7 @@
     public enum StorageLocation
     {
         Chunk,
-        Audio
+        Audio,
+        Backup
     }
 }

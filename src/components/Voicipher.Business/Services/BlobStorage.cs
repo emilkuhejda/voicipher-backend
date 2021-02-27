@@ -24,7 +24,7 @@ namespace Voicipher.Business.Services
 
         public async Task<byte[]> GetAsync(GetBlobSettings blobSettings, CancellationToken cancellationToken)
         {
-            var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName);
+            var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName ?? string.Empty);
             var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);
             var exists = await client.ExistsAsync(cancellationToken);
