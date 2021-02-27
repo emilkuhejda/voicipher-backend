@@ -89,9 +89,10 @@ namespace Voicipher.Business.Commands.ControlPanel
                 var userRootPath = Path.Combine(rootPath, userId.ToString());
                 _fileAccessService.DeleteDirectory(userRootPath);
 
-                using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
+
+                foreach (var audioFile in group)
                 {
-                    foreach (var audioFile in group)
+                    using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
                     {
                         _logger.Verbose($"Start backup of the audio file ID {audioFile.Id}");
 
