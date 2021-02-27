@@ -138,7 +138,7 @@ namespace Voicipher.DataAccess.Repositories
         {
             return Context.AudioFiles
                 .Include(x => x.TranscribeItems)
-                .Where(x => !x.IsPermanentlyDeleted)
+                .Where(x => !x.IsPermanentlyDeleted && !x.WasCleaned)
                 .Where(x => x.RecognitionState == RecognitionState.Completed)
                 .Where(x => x.DateUpdatedUtc < deleteBefore)
                 .ToArrayAsync(cancellationToken);
