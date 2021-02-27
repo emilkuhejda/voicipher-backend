@@ -145,7 +145,7 @@ namespace Voicipher.Business.Commands.ControlPanel
             return new CommandResult<CleanUpAudioFilesOutputModel>(cleanUpAudioFilesOutputModel);
         }
 
-        private void CompressData(Guid userId, string sourcePath, string destinationPath)
+        private void CompressData(Guid userId, string rootPath, string sourcePath)
         {
             if (!_fileAccessService.DirectoryExists(sourcePath))
                 return;
@@ -153,11 +153,11 @@ namespace Voicipher.Business.Commands.ControlPanel
             try
             {
                 _logger.Verbose($"[{userId}] Start compressing user data");
-                var destinationFilePath = Path.Combine(sourcePath, $"{userId}.zip");
-                _zipFileService.CreateFromDirectory(destinationFilePath, destinationFilePath);
-                _logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFilePath}");
+                var destinationFileName = Path.Combine(rootPath, $"{userId}.zip");
+                _zipFileService.CreateFromDirectory(sourcePath, destinationFileName);
+                _logger.Information($"[{userId}] User data was compressed to zip file in the destination {destinationFileName}");
 
-                _fileAccessService.DeleteDirectory(destinationPath);
+                _fileAccessService.DeleteDirectory(sourcePath);
                 _logger.Information($"[{userId}] User data was deleted from dist storage");
             }
             catch (Exception ex)
