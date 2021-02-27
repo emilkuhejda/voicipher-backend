@@ -63,6 +63,11 @@ namespace Voicipher.Business.Commands.ControlPanel
 
                 await UnitOfWork.SaveAsync(cancellationToken);
             }
+
+            audioFile.ApplicationId = AppSettings.ApplicationId;
+            audioFile.DateUpdatedUtc = DateTime.UtcNow;
+            audioFile.WasCleaned = true;
+            await UnitOfWork.SaveAsync(cancellationToken);
         }
     }
 }
