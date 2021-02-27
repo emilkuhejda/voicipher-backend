@@ -16,6 +16,7 @@ namespace Voicipher.DataAccess.EntitiesConfiguration
             builder.Property(x => x.JobState).IsRequired();
             builder.Property(x => x.Attempt).IsRequired();
             builder.Property(x => x.Parameters).IsRequired();
+            builder.Property(x => x.Exception);
             builder.Property(x => x.DateCreatedUtc).IsRequired();
             builder.Property(x => x.DateCompletedUtc).IsRequired();
         }
