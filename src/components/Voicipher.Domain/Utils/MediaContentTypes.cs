@@ -7,9 +7,6 @@ namespace Voicipher.Domain.Utils
     {
         private static readonly HashSet<string> Mp3ContentTypes = new(StringComparer.OrdinalIgnoreCase)
         {
-            "audio/mpeg",
-            "audio/mpeg3",
-            "audio/x-mpeg-3",
             "video/mpeg",
             "video/x-mpeg"
         };
