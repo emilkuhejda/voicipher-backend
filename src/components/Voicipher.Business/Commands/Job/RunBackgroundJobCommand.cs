@@ -2,12 +2,18 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.DataAccess;
+using Voicipher.Domain.Configuration;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
+using Voicipher.Domain.Interfaces.Commands.Notifications;
+using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Domain.Payloads.Job;
@@ -16,20 +22,29 @@ namespace Voicipher.Business.Commands.Job
 {
     public class RunBackgroundJobCommand : Command<BackgroundJobPayload, CommandResult>, IRunBackgroundJobCommand
     {
+        private readonly ICreateInformationMessageCommand _createInformationMessageCommand;
         private readonly IDeleteAudioFileSourceCommand _deleteAudioFileSourceCommand;
+        private readonly IGetInternalValueQuery<bool> _getInternalValueQuery;
+        private readonly INotificationService _notificationService;
         private readonly IJobStateMachine _jobStateMachine;
         private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
         public RunBackgroundJobCommand(
+            ICreateInformationMessageCommand createInformationMessageCommand,
             IDeleteAudioFileSourceCommand deleteAudioFileSourceCommand,
+            IGetInternalValueQuery<bool> getInternalValueQuery,
+            INotificationService notificationService,
             IJobStateMachine jobStateMachine,
             IBackgroundJobRepository backgroundJobRepository,
             IUnitOfWork unitOfWork,
             ILogger logger)
         {
+            _createInformationMessageCommand = createInformationMessageCommand;
             _deleteAudioFileSourceCommand = deleteAudioFileSourceCommand;
+            _getInternalValueQuery = getInternalValueQuery;
+            _notificationService = notificationService;
             _jobStateMachine = jobStateMachine;
             _backgroundJobRepository = backgroundJobRepository;
             _unitOfWork = unitOfWork;
@@ -67,6 +82,12 @@ namespace Voicipher.Business.Commands.Job
                     _jobStateMachine.DoClean();
                 }
 
+                var queryResult = await _getInternalValueQuery.ExecuteAsync(InternalValues.IsProgressNotificationsEnabled, null, cancellationToken);
+                if (queryResult.IsSuccess && queryResult.Value.Value)
+                {
+                    await CreateAndSendNotifications(parameter, cancellationToken);
+                }
+
                 _logger.Error($"Background job {parameter.Id} is completed");
             }
 
@@ -80,6 +101,25 @@ namespace Voicipher.Business.Commands.Job
             _logger.Information($"Background job {parameter.Id} is completed");
 
             return new CommandResult();
+        }
+
+        private async Task CreateAndSendNotifications(BackgroundJobPayload parameter, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var informationMessagePayload = GenericNotifications.GetTranscriptionSuccess(parameter.UserId, parameter.AudioFileId);
+                var commandResult = await _createInformationMessageCommand.ExecuteAsync(informationMessagePayload, null, cancellationToken);
+                if (!commandResult.IsSuccess)
+                    return;
+
+                _logger.Verbose($"[{parameter.UserId}] Start sending notification to devices after speech recognition of the audio file {parameter.AudioFileId}");
+                var notificationResults = await _notificationService.SendAsync(commandResult.Value.Id, parameter.UserId, cancellationToken);
+                _logger.Information($"[{parameter.UserId}] Send notification completed with result {JsonConvert.SerializeObject(notificationResults)}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Send notification failed");
+            }
         }
     }
 }

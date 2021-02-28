@@ -6,12 +6,14 @@ using AutoMapper;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.InputModels.Audio;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.OutputModels.Audio;
 using Voicipher.Domain.Validation;
 
@@ -19,15 +21,18 @@ namespace Voicipher.Business.Commands.Audio
 {
     public class UpdateAudioFileCommand : Command<UpdateAudioFileInputModel, CommandResult<FileItemOutputModel>>, IUpdateAudioFileCommand
     {
+        private readonly IMessageCenterService _messageCenterService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
         public UpdateAudioFileCommand(
+            IMessageCenterService messageCenterService,
             IAudioFileRepository audioFileRepository,
             IMapper mapper,
             ILogger logger)
         {
+            _messageCenterService = messageCenterService;
             _audioFileRepository = audioFileRepository;
             _mapper = mapper;
             _logger = logger.ForContext<UpdateAudioFileCommand>();
@@ -70,6 +75,7 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
             await _audioFileRepository.SaveAsync(cancellationToken);
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
 
             var outputModel = _mapper.Map<FileItemOutputModel>(audioFile);
             return new CommandResult<FileItemOutputModel>(outputModel);
