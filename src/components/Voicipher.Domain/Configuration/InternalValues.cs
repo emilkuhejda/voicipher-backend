@@ -9,6 +9,6 @@ namespace Voicipher.Domain.Configuration
 
         public static InternalValuePayload<int> TranscribeItemsCleanUpInDays { get; } = new(InternalValueKey.TranscribeItemsCleanUpInDays, 60);
 
-        public static InternalValuePayload<bool> IsProgressNotificationsEnabled { get; } = new(InternalValueKey.IsProgressNotificationsEnabled, true);
+        public static InternalValuePayload<bool> IsProgressNotificationsEnabled { get; } = new(InternalValueKey.IsProgressNotificationsEnabled, false);
     }
 }
