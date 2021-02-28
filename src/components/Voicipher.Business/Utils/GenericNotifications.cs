@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using Voicipher.Domain.Enums;
-using Voicipher.Domain.Models;
+using Voicipher.Domain.Payloads.Notifications;
 
 namespace Voicipher.Business.Utils
 {
     public static class GenericNotifications
     {
-        public static InformationMessage GetTranscriptionSuccess(Guid userId, Guid audioFileId)
+        public static InformationMessagePayload GetTranscriptionSuccess(Guid userId, Guid audioFileId)
         {
             var informationMessageId = Guid.NewGuid();
 
-            return new InformationMessage
+            return new InformationMessagePayload
             {
                 Id = informationMessageId,
                 UserId = userId,
                 CampaignName = $"File transcription: {audioFileId}",
                 DateCreatedUtc = DateTime.UtcNow,
-                LanguageVersions = new List<LanguageVersion>
+                LanguageVersions = new List<LanguageVersionPayload>
                 {
                     new()
                     {

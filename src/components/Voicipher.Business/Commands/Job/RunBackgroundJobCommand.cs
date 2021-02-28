@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,14 +8,13 @@ using Voicipher.Business.Infrastructure;
 using Voicipher.Business.Utils;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Configuration;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
+using Voicipher.Domain.Interfaces.Commands.Notifications;
 using Voicipher.Domain.Interfaces.Queries.ControlPanel;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
-using Voicipher.Domain.Notifications;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Domain.Payloads.Job;
 
@@ -24,6 +22,7 @@ namespace Voicipher.Business.Commands.Job
 {
     public class RunBackgroundJobCommand : Command<BackgroundJobPayload, CommandResult>, IRunBackgroundJobCommand
     {
+        private readonly ICreateInformationMessageCommand _createInformationMessageCommand;
         private readonly IDeleteAudioFileSourceCommand _deleteAudioFileSourceCommand;
         private readonly IGetInternalValueQuery<bool> _getInternalValueQuery;
         private readonly INotificationService _notificationService;
@@ -33,6 +32,7 @@ namespace Voicipher.Business.Commands.Job
         private readonly ILogger _logger;
 
         public RunBackgroundJobCommand(
+            ICreateInformationMessageCommand createInformationMessageCommand,
             IDeleteAudioFileSourceCommand deleteAudioFileSourceCommand,
             IGetInternalValueQuery<bool> getInternalValueQuery,
             INotificationService notificationService,
@@ -41,6 +41,7 @@ namespace Voicipher.Business.Commands.Job
             IUnitOfWork unitOfWork,
             ILogger logger)
         {
+            _createInformationMessageCommand = createInformationMessageCommand;
             _deleteAudioFileSourceCommand = deleteAudioFileSourceCommand;
             _getInternalValueQuery = getInternalValueQuery;
             _notificationService = notificationService;
@@ -84,9 +85,7 @@ namespace Voicipher.Business.Commands.Job
                 var queryResult = await _getInternalValueQuery.ExecuteAsync(InternalValues.IsProgressNotificationsEnabled, null, cancellationToken);
                 if (queryResult.IsSuccess && queryResult.Value.Value)
                 {
-                    _logger.Verbose($"[{parameter.UserId}] Start sending notification to devices after speech recognition of the audio file {parameter.AudioFileId}");
-                    var notificationResults = await SendNotifications(parameter, cancellationToken);
-                    _logger.Information($"[{parameter.UserId}] Send notification completed with result {JsonConvert.SerializeObject(notificationResults)}");
+                    await CreateAndSendNotifications(parameter, cancellationToken);
                 }
 
                 _logger.Error($"Background job {parameter.Id} is completed");
@@ -104,20 +103,23 @@ namespace Voicipher.Business.Commands.Job
             return new CommandResult();
         }
 
-        private Task<Dictionary<Language, NotificationResult>> SendNotifications(BackgroundJobPayload parameter, CancellationToken cancellationToken)
+        private async Task CreateAndSendNotifications(BackgroundJobPayload parameter, CancellationToken cancellationToken)
         {
             try
             {
+                var informationMessagePayload = GenericNotifications.GetTranscriptionSuccess(parameter.UserId, parameter.AudioFileId);
+                var commandResult = await _createInformationMessageCommand.ExecuteAsync(informationMessagePayload, null, cancellationToken);
+                if (!commandResult.IsSuccess)
+                    return;
 
-                var informationMessage = GenericNotifications.GetTranscriptionSuccess(parameter.UserId, parameter.AudioFileId);
-                return _notificationService.SendAsync(informationMessage, parameter.UserId, cancellationToken);
+                _logger.Verbose($"[{parameter.UserId}] Start sending notification to devices after speech recognition of the audio file {parameter.AudioFileId}");
+                var notificationResults = await _notificationService.SendAsync(commandResult.Value.Id, parameter.UserId, cancellationToken);
+                _logger.Information($"[{parameter.UserId}] Send notification completed with result {JsonConvert.SerializeObject(notificationResults)}");
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Send notification failed");
             }
-
-            return Task.FromResult(new Dictionary<Language, NotificationResult>());
         }
     }
 }

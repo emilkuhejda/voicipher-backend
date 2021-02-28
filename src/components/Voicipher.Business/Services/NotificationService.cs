@@ -16,7 +16,6 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
-using Voicipher.Domain.Models;
 using Voicipher.Domain.Notifications;
 using Voicipher.Domain.Settings;
 
@@ -28,24 +27,34 @@ namespace Voicipher.Business.Services
         private const string MediaType = "application/json";
 
         private readonly IUserDeviceRepository _userDeviceRepository;
+        private readonly IInformationMessageRepository _informationMessageRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         public NotificationService(
             IUserDeviceRepository userDeviceRepository,
+            IInformationMessageRepository informationMessageRepository,
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _userDeviceRepository = userDeviceRepository;
+            _informationMessageRepository = informationMessageRepository;
             _unitOfWork = unitOfWork;
             _appSettings = options.Value;
             _logger = logger.ForContext<NotificationService>();
         }
 
-        public async Task<Dictionary<Language, NotificationResult>> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default)
+        public async Task<Dictionary<Language, NotificationResult>> SendAsync(Guid informationMessageId, Guid? userId = null, CancellationToken cancellationToken = default)
         {
+            var informationMessage = await _informationMessageRepository.GetAsync(informationMessageId, cancellationToken);
+            if (informationMessage == null)
+            {
+                _logger.Error($"Information message {informationMessageId} not found");
+                throw new EntryPointNotFoundException($"Information message {informationMessageId} not found");
+            }
+
             if (!informationMessage.LanguageVersions.Any())
             {
                 _logger.Error($"Information message {informationMessage.Id} does not contain any language version");
