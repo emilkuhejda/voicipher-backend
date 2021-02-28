@@ -12,8 +12,6 @@ namespace Voicipher.Domain.Settings
 
         public Authentication Authentication { get; set; }
 
-        public NotificationSettings NotificationSettings { get; set; }
-
         public AzureStorageAccountSettings AzureStorageAccount { get; set; }
 
         public MailConfiguration MailConfiguration { get; set; }

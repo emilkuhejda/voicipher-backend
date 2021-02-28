@@ -1,54 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
-using Microsoft.Rest;
-using Newtonsoft.Json;
-using Serilog;
-using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
-using Voicipher.Domain.Exceptions;
-using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Notifications;
-using Voicipher.Domain.Settings;
 
 namespace Voicipher.Business.Services
 {
     public class NotificationService : INotificationService
     {
-        private const string TargetType = "devices_target";
-        private const string MediaType = "application/json";
-
-        private readonly IUserDeviceRepository _userDeviceRepository;
-        private readonly IInformationMessageRepository _informationMessageRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly AppSettings _appSettings;
-        private readonly ILogger _logger;
-
-        public NotificationService(
-            IUserDeviceRepository userDeviceRepository,
-            IInformationMessageRepository informationMessageRepository,
-            IUnitOfWork unitOfWork,
-            IOptions<AppSettings> options,
-            ILogger logger)
+        public Task<Dictionary<Language, NotificationResult>> SendAsync(Guid informationMessageId, Guid? userId = null, CancellationToken cancellationToken = default)
         {
-            _userDeviceRepository = userDeviceRepository;
-            _informationMessageRepository = informationMessageRepository;
-            _unitOfWork = unitOfWork;
-            _appSettings = options.Value;
-            _logger = logger.ForContext<NotificationService>();
+            return Task.FromResult(new Dictionary<Language, NotificationResult>());
         }
 
-        public async Task<Dictionary<Language, NotificationResult>> SendAsync(Guid informationMessageId, Guid? userId = null, CancellationToken cancellationToken = default)
+        /*public async Task<Dictionary<Language, NotificationResult>> SendAsync(Guid informationMessageId, Guid? userId = null, CancellationToken cancellationToken = default)
         {
-            var informationMessage = await _informationMessageRepository.GetAsync(informationMessageId, cancellationToken);
+            const string targetType = "devices_target";
+
+            var informationMessage = await _informationMessageRepository.GetByIdAsync(informationMessageId, cancellationToken);
             if (informationMessage == null)
             {
                 _logger.Error($"Information message {informationMessageId} not found");
@@ -76,7 +47,7 @@ namespace Voicipher.Business.Services
                         {
                             Target = new NotificationTarget
                             {
-                                Type = TargetType,
+                                Type = targetType,
                                 Devices = installationIds
                             },
                             Content = new NotificationContent
@@ -117,6 +88,8 @@ namespace Voicipher.Business.Services
 
         private async Task<HttpOperationResponse<NotificationResult>> SendWithHttpMessagesAsync(PushNotification pushNotification, RuntimePlatform runtimePlatform, CancellationToken cancellationToken)
         {
+            const string mediaType = "application/json";
+
             var notificationSettings = _appSettings.NotificationSettings;
 
             HttpClient httpClient = null;
@@ -125,7 +98,7 @@ namespace Voicipher.Business.Services
             try
             {
                 httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaType));
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(mediaType));
                 httpClient.DefaultRequestHeaders.Add(notificationSettings.ApiKeyName, notificationSettings.AccessToken);
 
                 var content = JsonConvert.SerializeObject(pushNotification);
@@ -137,7 +110,7 @@ namespace Voicipher.Business.Services
                 httpRequest = new HttpRequestMessage
                 {
                     Method = new HttpMethod("POST"),
-                    Content = new StringContent(content, Encoding.UTF8, MediaType),
+                    Content = new StringContent(content, Encoding.UTF8, mediaType),
                     RequestUri = new Uri(url, UriKind.Absolute)
                 };
 
@@ -169,6 +142,6 @@ namespace Voicipher.Business.Services
                 httpRequest?.Dispose();
                 httpResponse?.Dispose();
             }
-        }
+        }*/
     }
 }
