@@ -10,13 +10,15 @@ namespace Voicipher.Business.Utils
         public static InformationMessagePayload GetTranscriptionSuccess(Guid userId, Guid audioFileId)
         {
             var informationMessageId = Guid.NewGuid();
+            var utcNow = DateTime.UtcNow;
 
             return new InformationMessagePayload
             {
                 Id = informationMessageId,
                 UserId = userId,
                 CampaignName = $"File transcription: {audioFileId}",
-                DateCreatedUtc = DateTime.UtcNow,
+                DateCreatedUtc = utcNow,
+                DateUpdatedUtc = utcNow,
                 LanguageVersions = new List<LanguageVersionPayload>
                 {
                     new()
