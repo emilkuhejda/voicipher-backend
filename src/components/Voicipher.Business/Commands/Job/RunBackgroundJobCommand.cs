@@ -88,7 +88,7 @@ namespace Voicipher.Business.Commands.Job
                     await CreateAndSendNotifications(parameter, cancellationToken);
                 }
 
-                _logger.Error($"Background job {parameter.Id} is completed");
+                _logger.Verbose($"[{parameter.UserId}] Job state machine ended");
             }
 
             var payload = new DeleteAudioFileSourcePayload(parameter.AudioFileId, parameter.UserId);
