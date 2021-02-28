@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Microsoft.Rest;
 using Serilog;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
@@ -73,5 +74,8 @@ namespace Voicipher.Business.Services
             await Task.CompletedTask;
             return new NotificationResult();
         }
+
+        private async Task<HttpOperationResponse<NotificationResult>> SendWithHttpMessagesAsync(PushNotification pushNotification, RuntimePlatform runtimePlatform, CancellationToken cancellationToken)
+        { }
     }
 }
