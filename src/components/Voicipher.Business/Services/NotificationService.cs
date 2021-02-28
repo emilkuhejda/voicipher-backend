@@ -22,7 +22,7 @@ using Voicipher.Domain.Settings;
 
 namespace Voicipher.Business.Services
 {
-    public class NotificationsService : INotificationsService
+    public class NotificationService : INotificationService
     {
         private const string TargetType = "devices_target";
         private const string MediaType = "application/json";
@@ -32,7 +32,7 @@ namespace Voicipher.Business.Services
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
-        public NotificationsService(
+        public NotificationService(
             IUserDeviceRepository userDeviceRepository,
             IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
@@ -41,7 +41,7 @@ namespace Voicipher.Business.Services
             _userDeviceRepository = userDeviceRepository;
             _unitOfWork = unitOfWork;
             _appSettings = options.Value;
-            _logger = logger.ForContext<NotificationsService>();
+            _logger = logger.ForContext<NotificationService>();
         }
 
         public async Task<Dictionary<Language, NotificationResult>> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default)

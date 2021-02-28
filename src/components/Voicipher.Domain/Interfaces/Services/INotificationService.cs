@@ -8,7 +8,7 @@ using Voicipher.Domain.Notifications;
 
 namespace Voicipher.Domain.Interfaces.Services
 {
-    public interface INotificationsService
+    public interface INotificationService
     {
         Task<Dictionary<Language, NotificationResult>> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default);
     }
