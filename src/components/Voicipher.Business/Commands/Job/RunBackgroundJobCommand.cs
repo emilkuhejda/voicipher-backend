@@ -81,7 +81,7 @@ namespace Voicipher.Business.Commands.Job
                     _jobStateMachine.DoClean();
                 }
 
-                var queryResult = await _getInternalValueQuery.ExecuteAsync(InternalValues.NotificationsEnabled, null, cancellationToken);
+                var queryResult = await _getInternalValueQuery.ExecuteAsync(InternalValues.IsProgressNotificationsEnabled, null, cancellationToken);
                 if (queryResult.IsSuccess && queryResult.Value.Value)
                 {
                     _logger.Verbose($"[{parameter.UserId}] Start sending notification to devices after speech recognition of the audio file {parameter.AudioFileId}");

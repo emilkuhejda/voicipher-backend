@@ -4,6 +4,6 @@
     {
         AudioFilesCleanUpInDays,
         TranscribeItemsCleanUpInDays,
-        NotificationsEnabled
+        IsProgressNotificationsEnabled
     }
 }
