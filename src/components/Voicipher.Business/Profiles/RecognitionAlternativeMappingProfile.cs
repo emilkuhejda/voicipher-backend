@@ -11,6 +11,9 @@ namespace Voicipher.Business.Profiles
         {
             CreateMap<RecognitionAlternative, RecognitionAlternativeOutputModel>()
                 .ForMember(
+                    r => r.ResultNumber,
+                    opt => opt.MapFrom(x => x.ResultNumber))
+                .ForMember(
                     r => r.Transcript,
                     opt => opt.MapFrom(x => x.Transcript))
                 .ForMember(

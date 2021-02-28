@@ -46,7 +46,10 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(x => x.WasCleaned))
                 .AfterMap((t, o, c) =>
                 {
-                    var outputModels = t.GetAlternatives().Select(x => c.Mapper.Map<RecognitionAlternativeOutputModel>(x));
+                    var outputModels = t.GetAlternatives()
+                        .RemoveInvalidAlternatives().
+                        Select(x => c.Mapper.Map<RecognitionAlternativeOutputModel>(x));
+
                     foreach (var model in outputModels)
                     {
                         o.Alternatives.Add(model);

@@ -11,6 +11,9 @@ namespace Voicipher.Domain.OutputModels.Audio
         }
 
         [Required]
+        public int ResultNumber { get; init; }
+
+        [Required]
         public string Transcript { get; init; }
 
         [Required]

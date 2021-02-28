@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Api.Gax;
@@ -52,11 +53,19 @@ namespace Voicipher.Business.Services
                 longOperation = await longOperation.PollUntilCompletedAsync();
                 var longRunningRecognizeResponse = longOperation.Result;
 
-                var alternatives = longRunningRecognizeResponse.Results
-                    .SelectMany(x => x.Alternatives)
-                    .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
+                var recognitionAlternatives = new List<RecognitionAlternative>();
+                for (var i = 0; i < longRunningRecognizeResponse.Results.Count; i++)
+                {
+                    var resultNumber = i;
+                    var speechRecognitionResult = longRunningRecognizeResponse.Results[0];
+                    var alternatives = speechRecognitionResult
+                        .Alternatives
+                        .Select(x => new RecognitionAlternative(resultNumber, x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
 
-                return new RecognizedResult(false, alternatives);
+                    recognitionAlternatives.AddRange(alternatives);
+                }
+
+                return new RecognizedResult(false, recognitionAlternatives);
             }
             catch (Exception ex)
             {

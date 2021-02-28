@@ -51,7 +51,7 @@ namespace Voicipher.Business.Services
 
                 var alternatives = longRunningRecognizeResponse.Results
                     .SelectMany(x => x.Alternatives)
-                    .Select(x => new RecognitionAlternative(x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
+                    .Select(x => new RecognitionAlternative(0, x.Transcript, x.Confidence, x.Words.ToRecognitionWords()));
 
                 return new RecognizedResult(false, alternatives);
             }
