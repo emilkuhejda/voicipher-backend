@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Serilog;
 using Voicipher.Business.Services;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
@@ -20,7 +21,7 @@ namespace Voicipher.Business.Tests.Services
         {
             // Arrange
             var userDeviceRepositoryMock = new Mock<IUserDeviceRepository>();
-            var informationMessageRepositoryMock = new Mock<IInformationMessageRepository>();
+            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var optionsMock = new Mock<IOptions<AppSettings>>();
             var appSettings = new AppSettings();
 
@@ -31,7 +32,7 @@ namespace Voicipher.Business.Tests.Services
 
             var notificationsService = new NotificationsService(
                 userDeviceRepositoryMock.Object,
-                informationMessageRepositoryMock.Object,
+                unitOfWorkMock.Object,
                 optionsMock.Object,
                 Mock.Of<ILogger>());
 

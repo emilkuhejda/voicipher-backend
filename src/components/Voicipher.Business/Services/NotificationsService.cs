@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
+using Newtonsoft.Json;
 using Serilog;
+using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Repositories;
@@ -21,35 +28,38 @@ namespace Voicipher.Business.Services
         private const string MediaType = "application/json";
 
         private readonly IUserDeviceRepository _userDeviceRepository;
-        private readonly IInformationMessageRepository _informationMessageRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
         public NotificationsService(
             IUserDeviceRepository userDeviceRepository,
-            IInformationMessageRepository informationMessageRepository,
+            IUnitOfWork unitOfWork,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _userDeviceRepository = userDeviceRepository;
-            _informationMessageRepository = informationMessageRepository;
+            _unitOfWork = unitOfWork;
             _appSettings = options.Value;
             _logger = logger.ForContext<NotificationsService>();
         }
 
-        public async Task<NotificationResult> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default)
+        public async Task<Dictionary<Language, NotificationResult>> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default)
         {
             if (!informationMessage.LanguageVersions.Any())
             {
-                _logger.Error($"Information message {informationMessage.Id} does not contain language version");
+                _logger.Error($"Information message {informationMessage.Id} does not contain any language version");
                 throw new LanguageVersionNotExistsException();
             }
+
+            var notificationResults = new Dictionary<Language, NotificationResult>();
 
             foreach (var languageVersion in informationMessage.LanguageVersions)
             {
                 foreach (var runtimePlatform in Enum.GetValues(typeof(RuntimePlatform)).Cast<RuntimePlatform>().Where(x => x != RuntimePlatform.Undefined))
                 {
-                    NotificationResult notificationResult = null;
+                    _logger.Verbose($"Start sending push notification for platform {runtimePlatform} and in language version {languageVersion.Language}");
+
                     var installationIds = await _userDeviceRepository.GetPlatformSpecificInstallationIdsAsync(runtimePlatform, languageVersion.Language, userId, cancellationToken);
                     if (installationIds.Any())
                     {
@@ -67,15 +77,99 @@ namespace Voicipher.Business.Services
                                 Body = languageVersion.Message
                             }
                         };
+
+                        using (var operationResponse = await SendWithHttpMessagesAsync(pushNotification, runtimePlatform, cancellationToken))
+                        {
+                            _logger.Information($"Notification {informationMessage.Id} was sent to runtime platform {runtimePlatform} for language {languageVersion.Language}");
+
+                            switch (runtimePlatform)
+                            {
+                                case RuntimePlatform.Android:
+                                    languageVersion.SentOnAndroid = true;
+                                    break;
+                                case RuntimePlatform.Osx:
+                                    languageVersion.SentOnOsx = true;
+                                    break;
+                            }
+
+                            _logger.Verbose($"Update information message sent status for language version {languageVersion.Language} and platform {runtimePlatform} to {true}");
+
+                            notificationResults.Add(languageVersion.Language, operationResponse.Body);
+                        }
                     }
                 }
             }
 
-            await Task.CompletedTask;
-            return new NotificationResult();
+            informationMessage.DatePublishedUtc = DateTime.UtcNow;
+            await _unitOfWork.SaveAsync(cancellationToken);
+
+            return notificationResults;
         }
 
         private async Task<HttpOperationResponse<NotificationResult>> SendWithHttpMessagesAsync(PushNotification pushNotification, RuntimePlatform runtimePlatform, CancellationToken cancellationToken)
-        { }
+        {
+            var notificationSettings = _appSettings.NotificationSettings;
+
+            HttpClient httpClient = null;
+            HttpRequestMessage httpRequest = null;
+            HttpResponseMessage httpResponse = null;
+            try
+            {
+                httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaType));
+                httpClient.DefaultRequestHeaders.Add(notificationSettings.ApiKeyName, notificationSettings.AccessToken);
+
+                var content = JsonConvert.SerializeObject(pushNotification);
+                var applicationName = runtimePlatform == RuntimePlatform.Android
+                    ? notificationSettings.AppNameAndroid
+                    : notificationSettings.AppNameOsx;
+                var url =
+                    $"{notificationSettings.BaseUrl}/{notificationSettings.Organization}/{applicationName}/{notificationSettings.Apis}";
+
+                httpRequest = new HttpRequestMessage
+                {
+                    Method = new HttpMethod("POST"),
+                    Content = new StringContent(content, Encoding.UTF8, MediaType),
+                    RequestUri = new Uri(url, UriKind.Absolute)
+                };
+
+                cancellationToken.ThrowIfCancellationRequested();
+                _logger.Verbose($"Send request to url {url}");
+                httpResponse = await httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+                _logger.Verbose($"Response status code {httpResponse.StatusCode}");
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var responseContent = await httpResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                var statusCode = httpResponse.StatusCode;
+                if (statusCode != HttpStatusCode.Accepted)
+                {
+                    var wrapper = JsonConvert.DeserializeObject<NotificationErrorWrapper>(responseContent);
+                    throw new NotificationErrorException(wrapper.Error);
+                }
+
+                return new HttpOperationResponse<NotificationResult>
+                {
+                    Body = JsonConvert.DeserializeObject<NotificationResult>(responseContent),
+                    Request = httpRequest,
+                    Response = httpResponse
+                };
+            }
+            catch (JsonException ex)
+            {
+                _logger.Error(ex, "Unable to deserialize the response");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Send notification message failed");
+                throw;
+            }
+            finally
+            {
+                httpClient?.Dispose();
+                httpRequest?.Dispose();
+                httpResponse?.Dispose();
+            }
+        }
     }
 }

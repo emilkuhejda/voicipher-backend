@@ -2,12 +2,15 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands.Audio;
 using Voicipher.Domain.Interfaces.Repositories;
+using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Payloads.Audio;
 using Voicipher.Domain.Payloads.Job;
@@ -17,6 +20,7 @@ namespace Voicipher.Business.Commands.Job
     public class RunBackgroundJobCommand : Command<BackgroundJobPayload, CommandResult>, IRunBackgroundJobCommand
     {
         private readonly IDeleteAudioFileSourceCommand _deleteAudioFileSourceCommand;
+        private readonly INotificationsService _notificationsService;
         private readonly IJobStateMachine _jobStateMachine;
         private readonly IBackgroundJobRepository _backgroundJobRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -24,12 +28,14 @@ namespace Voicipher.Business.Commands.Job
 
         public RunBackgroundJobCommand(
             IDeleteAudioFileSourceCommand deleteAudioFileSourceCommand,
+            INotificationsService notificationsService,
             IJobStateMachine jobStateMachine,
             IBackgroundJobRepository backgroundJobRepository,
             IUnitOfWork unitOfWork,
             ILogger logger)
         {
             _deleteAudioFileSourceCommand = deleteAudioFileSourceCommand;
+            _notificationsService = notificationsService;
             _jobStateMachine = jobStateMachine;
             _backgroundJobRepository = backgroundJobRepository;
             _unitOfWork = unitOfWork;
@@ -67,6 +73,8 @@ namespace Voicipher.Business.Commands.Job
                     _jobStateMachine.DoClean();
                 }
 
+                await SendNotification(parameter, cancellationToken);
+
                 _logger.Error($"Background job {parameter.Id} is completed");
             }
 
@@ -80,6 +88,21 @@ namespace Voicipher.Business.Commands.Job
             _logger.Information($"Background job {parameter.Id} is completed");
 
             return new CommandResult();
+        }
+
+        private async Task SendNotification(BackgroundJobPayload parameter, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.Verbose($"[{parameter.UserId}] Start sending notification to devices after speech recognition of the audio file {parameter.AudioFileId}");
+                var informationMessage = GenericNotifications.GetTranscriptionSuccess(parameter.UserId, parameter.AudioFileId);
+                var notificationResults = await _notificationsService.SendAsync(informationMessage, parameter.UserId, cancellationToken);
+                _logger.Information($"[{parameter.UserId}] Send notification completed with result {JsonConvert.SerializeObject(notificationResults)}");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Send notification failed");
+            }
         }
     }
 }
