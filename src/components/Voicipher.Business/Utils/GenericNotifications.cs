@@ -19,6 +19,7 @@ namespace Voicipher.Business.Utils
                 CampaignName = $"File transcription: {audioFileId}",
                 DateCreatedUtc = utcNow,
                 DateUpdatedUtc = utcNow,
+                DatePublishedUtc = utcNow,
                 LanguageVersions = new List<LanguageVersionPayload>
                 {
                     new()
