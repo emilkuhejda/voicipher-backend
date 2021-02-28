@@ -3,6 +3,7 @@
     public enum InternalValueKey
     {
         AudioFilesCleanUpInDays,
-        TranscribeItemsCleanUpInDays
+        TranscribeItemsCleanUpInDays,
+        NotificationsEnabled
     }
 }
