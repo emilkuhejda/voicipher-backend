@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
@@ -34,8 +36,42 @@ namespace Voicipher.Business.Services
             _logger = logger.ForContext<NotificationsService>();
         }
 
-        public Task<NotificationResult> SendAsync(InformationMessage informationMessage, RuntimePlatform runtimePlatform, Language language, Guid? userId = null, CancellationToken cancellationToken = default)
+        public async Task<NotificationResult> SendAsync(InformationMessage informationMessage, Guid? userId = null, CancellationToken cancellationToken = default)
         {
+            if (!informationMessage.LanguageVersions.Any())
+            {
+                _logger.Error($"Information message {informationMessage.Id} does not contain language version");
+                throw new LanguageVersionNotExistsException();
+            }
+
+            foreach (var languageVersion in informationMessage.LanguageVersions)
+            {
+                foreach (var runtimePlatform in Enum.GetValues(typeof(RuntimePlatform)).Cast<RuntimePlatform>().Where(x => x != RuntimePlatform.Undefined))
+                {
+                    NotificationResult notificationResult = null;
+                    var installationIds = await _userDeviceRepository.GetPlatformSpecificInstallationIdsAsync(runtimePlatform, languageVersion.Language, userId, cancellationToken);
+                    if (installationIds.Any())
+                    {
+                        var pushNotification = new PushNotification
+                        {
+                            Target = new NotificationTarget
+                            {
+                                Type = TargetType,
+                                Devices = installationIds
+                            },
+                            Content = new NotificationContent
+                            {
+                                Name = informationMessage.CampaignName,
+                                Title = languageVersion.Title,
+                                Body = languageVersion.Message
+                            }
+                        };
+                    }
+                }
+            }
+
+            await Task.CompletedTask;
+            return new NotificationResult();
         }
     }
 }
