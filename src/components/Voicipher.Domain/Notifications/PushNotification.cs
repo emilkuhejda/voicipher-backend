@@ -6,9 +6,9 @@ namespace Voicipher.Domain.Notifications
     public record PushNotification
     {
         [JsonProperty("notification_target")]
-        public NotificationTarget Target { get; set; }
+        public NotificationTarget Target { get; init; }
 
         [JsonProperty("notification_content")]
-        public NotificationContent Content { get; set; }
+        public NotificationContent Content { get; init; }
     }
 }

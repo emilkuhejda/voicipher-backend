@@ -6,6 +6,6 @@ namespace Voicipher.Domain.Notifications
     public record NotificationResult
     {
         [JsonProperty("notification_id")]
-        public string Id { get; set; }
+        public string Id { get; init; }
     }
 }

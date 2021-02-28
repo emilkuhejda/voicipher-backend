@@ -7,15 +7,15 @@ namespace Voicipher.Domain.Notifications
     public record NotificationContent
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; init; }
 
         [JsonProperty("title")]
-        public string Title { get; set; }
+        public string Title { get; init; }
 
         [JsonProperty("body")]
-        public string Body { get; set; }
+        public string Body { get; init; }
 
         [JsonProperty("custom_data")]
-        public IDictionary<string, string> CustomData { get; set; }
+        public IDictionary<string, string> CustomData { get; init; }
     }
 }

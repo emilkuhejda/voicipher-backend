@@ -7,9 +7,12 @@ namespace Voicipher.Domain.Notifications
     public record NotificationError
     {
         [JsonProperty("code")]
-        public HttpStatusCode Code { get; set; }
+        public string Code { get; init; }
+
+        [JsonProperty("statusCode")]
+        public HttpStatusCode StatusCode { get; init; }
 
         [JsonProperty("message")]
-        public string Message { get; set; }
+        public string Message { get; init; }
     }
 }

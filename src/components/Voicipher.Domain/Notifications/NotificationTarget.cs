@@ -7,9 +7,9 @@ namespace Voicipher.Domain.Notifications
     public record NotificationTarget
     {
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; init; }
 
         [JsonProperty("devices")]
-        public IEnumerable Devices { get; set; }
+        public IEnumerable Devices { get; init; }
     }
 }

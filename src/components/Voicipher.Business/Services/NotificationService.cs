@@ -132,8 +132,7 @@ namespace Voicipher.Business.Services
                 var applicationName = runtimePlatform == RuntimePlatform.Android
                     ? notificationSettings.AppNameAndroid
                     : notificationSettings.AppNameOsx;
-                var url =
-                    $"{notificationSettings.BaseUrl}/{notificationSettings.Organization}/{applicationName}/{notificationSettings.Apis}";
+                var url = $"{notificationSettings.BaseUrl}/{notificationSettings.Organization}/{applicationName}/{notificationSettings.Apis}";
 
                 httpRequest = new HttpRequestMessage
                 {
@@ -144,16 +143,17 @@ namespace Voicipher.Business.Services
 
                 cancellationToken.ThrowIfCancellationRequested();
                 _logger.Verbose($"Send request to url {url}");
-                httpResponse = await httpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+                httpResponse = await httpClient.SendAsync(httpRequest, cancellationToken);
                 _logger.Verbose($"Response status code {httpResponse.StatusCode}");
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var responseContent = await httpResponse.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+                var responseContent = await httpResponse.Content.ReadAsStringAsync(cancellationToken);
                 var statusCode = httpResponse.StatusCode;
                 if (statusCode != HttpStatusCode.Accepted)
                 {
-                    var wrapper = JsonConvert.DeserializeObject<NotificationErrorWrapper>(responseContent);
-                    throw new NotificationErrorException(wrapper.Error);
+                    var notificationError = JsonConvert.DeserializeObject<NotificationError>(responseContent);
+                    _logger.Error($"Notification error received {JsonConvert.SerializeObject(notificationError)}");
+                    throw new NotificationErrorException(notificationError);
                 }
 
                 return new HttpOperationResponse<NotificationResult>
@@ -162,16 +162,6 @@ namespace Voicipher.Business.Services
                     Request = httpRequest,
                     Response = httpResponse
                 };
-            }
-            catch (JsonException ex)
-            {
-                _logger.Error(ex, "Unable to deserialize the response");
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Send notification message failed");
-                throw;
             }
             finally
             {
