@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -26,6 +27,7 @@ namespace Voicipher.Business.Commands.Audio
     public class UploadAudioFileCommand : Command<UploadAudioFilePayload, CommandResult<FileItemOutputModel>>, IUploadAudioFileCommand
     {
         private readonly IAudioService _audioService;
+        private readonly IMessageCenterService _messageCenterService;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
         private readonly IAudioFileRepository _audioFileRepository;
@@ -34,6 +36,7 @@ namespace Voicipher.Business.Commands.Audio
 
         public UploadAudioFileCommand(
             IAudioService audioService,
+            IMessageCenterService messageCenterService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
             IAudioFileRepository audioFileRepository,
@@ -41,6 +44,7 @@ namespace Voicipher.Business.Commands.Audio
             ILogger logger)
         {
             _audioService = audioService;
+            _messageCenterService = messageCenterService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Chunk];
             _audioFileRepository = audioFileRepository;
@@ -132,6 +136,7 @@ namespace Voicipher.Business.Commands.Audio
 
                 await _audioFileRepository.AddAsync(audioFile);
                 await _audioFileRepository.SaveAsync(cancellationToken);
+                await _messageCenterService.SendAsync(HubMethodsHelper.GetFilesListChangedMethod(userId));
                 isOperationSuccessful = true;
 
                 _logger.Information($"[{userId}] Audio file was successfully submitted. Audio file ID = {audioFile.Id}, name = {audioFile.Name}, file name = {audioFile.FileName}");
