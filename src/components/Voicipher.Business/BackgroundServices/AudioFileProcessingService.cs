@@ -55,9 +55,7 @@ namespace Voicipher.Business.BackgroundServices
                         var parameters = new Dictionary<BackgroundJobParameter, object>
                         {
                             {BackgroundJobParameter.FileName, recognitionFile.FileName},
-                            {BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc},
-                            {BackgroundJobParameter.TranscriptionStartTime, recognitionFile.TranscriptionStartTime},
-                            {BackgroundJobParameter.TranscriptionEndTime, recognitionFile.TranscriptionEndTime}
+                            {BackgroundJobParameter.DateUtc, recognitionFile.DateProcessedUtc}
                         };
 
                         var createBackgroundJobPayload = new CreateBackgroundJobPayload(recognitionFile.UserId, recognitionFile.AudioFileId, recognitionFile.JobId, parameters);
