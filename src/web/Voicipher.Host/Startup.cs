@@ -35,19 +35,19 @@ namespace Voicipher.Host
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var appSettingsSection = Configuration.GetSection("ApplicationSettings");
+            var appSettings = appSettingsSection.Get<AppSettings>();
+
             // Enable CORS
             services.AddCors(options =>
             {
                 options.AddPolicy(Constants.CorsPolicy,
                     builder => builder
-                        .WithOrigins("http://localhost:4200", "http://localhost:4210", "https://voicipher.com")
+                        .WithOrigins(appSettings.AllowedHosts)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials());
             });
-
-            var appSettingsSection = Configuration.GetSection("ApplicationSettings");
-            var appSettings = appSettingsSection.Get<AppSettings>();
 
             services.Configure<AppSettings>(appSettingsSection);
 
