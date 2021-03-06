@@ -46,6 +46,8 @@ namespace Voicipher.Business.Tests.Commands
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
 
+            var dbContextTransaction = new Mock<IDbContextTransaction>();
+
             deleteAudioFileSourceCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<DeleteAudioFileSourcePayload>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new CommandResult());
@@ -54,7 +56,7 @@ namespace Voicipher.Business.Tests.Commands
                 .ReturnsAsync(new QueryResult<InternalValueOutputModel<bool>>(new InternalValueOutputModel<bool>(false)));
             unitOfWorkMock
                 .Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Mock.Of<IDbContextTransaction>());
+                .ReturnsAsync(dbContextTransaction.Object);
 
             var backgroundJob = new BackgroundJob
             {
@@ -82,7 +84,7 @@ namespace Voicipher.Business.Tests.Commands
             // Assert
             Assert.True(commandResult.IsSuccess);
 
-            unitOfWorkMock.Verify(x => x.SaveAsync(It.IsAny<CancellationToken>()));
+            dbContextTransaction.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()));
         }
 
         private IJobStateMachine CreateJobStateMachineMock()
