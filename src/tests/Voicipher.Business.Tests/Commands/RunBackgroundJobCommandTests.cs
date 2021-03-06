@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Google.Cloud.Speech.V1;
 using Google.Protobuf.Collections;
@@ -75,6 +76,7 @@ namespace Voicipher.Business.Tests.Commands
             var wavFileServiceMock = new Mock<IWavFileService>();
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var loggerMock = new Mock<ILogger>();
 
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
@@ -83,8 +85,9 @@ namespace Voicipher.Business.Tests.Commands
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(new[] { new TranscribedAudioFile() });
             audioFileRepositoryMock
-                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AudioFile());
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             return new JobStateMachine(
                 canRunRecognitionCommandMock.Object,
@@ -94,11 +97,11 @@ namespace Voicipher.Business.Tests.Commands
                 Mock.Of<ISpeechRecognitionService>(),
                 Mock.Of<IMessageCenterService>(),
                 Mock.Of<IBlobStorage>(),
-                Mock.Of<IAudioFileRepository>(),
+                audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
                 Mock.Of<IOptions<AppSettings>>(),
-                Mock.Of<ILogger>());
+                loggerMock.Object);
         }
 
         private async Task<RepeatedField<SpeechRecognitionResult>> GetSpeechRecognitionResults()
