@@ -8,9 +8,11 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken);
 
-        Task<string> UploadAsync(byte[] bytes, UploadSettings uploadSettings, CancellationToken cancellationToken);
+        Task<string> UploadAsync(byte[] bytes, DiskStorageSettings diskStorageSettings, CancellationToken cancellationToken);
 
         Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken);
+
+        void Delete(DiskStorageSettings diskStorageSettings);
 
         void DeleteRange(FileChunk[] fileChunks);
 

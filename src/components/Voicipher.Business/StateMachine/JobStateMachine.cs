@@ -245,8 +245,8 @@ namespace Voicipher.Business.StateMachine
 
             var fileName = $"{_machineState.AudioFileId}.json";
             var machineStateJson = JsonConvert.SerializeObject(_machineState);
-            var uploadSettings = new UploadSettings(fileName);
-            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), uploadSettings, cancellationToken);
+            var diskStorageSettings = new DiskStorageSettings(fileName);
+            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
         }
 
         private JobState CanTransition(JobState jobState)

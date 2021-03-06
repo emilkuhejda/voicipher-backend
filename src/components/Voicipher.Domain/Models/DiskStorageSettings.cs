@@ -1,18 +1,18 @@
 ﻿namespace Voicipher.Domain.Models
 {
-    public record UploadSettings
+    public record DiskStorageSettings
     {
-        public UploadSettings()
+        public DiskStorageSettings()
             : this(string.Empty)
         {
         }
 
-        public UploadSettings(string fileName)
+        public DiskStorageSettings(string fileName)
             : this(string.Empty, fileName)
         {
         }
 
-        public UploadSettings(string folderName, string fileName)
+        public DiskStorageSettings(string folderName, string fileName)
         {
             FolderName = folderName;
             FileName = fileName;
