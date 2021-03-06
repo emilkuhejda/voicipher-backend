@@ -103,13 +103,10 @@ namespace Voicipher.DataAccess.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int>("Storage")
+                        .HasColumnType("int");
+
                     b.Property<TimeSpan>("TotalTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan>("TranscribedEndTime")
-                        .HasColumnType("time");
-
-                    b.Property<TimeSpan>("TranscribedStartTime")
                         .HasColumnType("time");
 
                     b.Property<TimeSpan>("TranscribedTime")
@@ -474,6 +471,9 @@ namespace Voicipher.DataAccess.Migrations
 
                     b.Property<TimeSpan>("StartTime")
                         .HasColumnType("time");
+
+                    b.Property<int>("Storage")
+                        .HasColumnType("int");
 
                     b.Property<TimeSpan>("TotalTime")
                         .HasColumnType("time");
