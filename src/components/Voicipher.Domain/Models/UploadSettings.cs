@@ -3,7 +3,12 @@
     public record UploadSettings
     {
         public UploadSettings()
-            : this(string.Empty, string.Empty)
+            : this(string.Empty)
+        {
+        }
+
+        public UploadSettings(string fileName)
+            : this(string.Empty, fileName)
         {
         }
 

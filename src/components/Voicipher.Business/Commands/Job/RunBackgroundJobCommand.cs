@@ -63,7 +63,7 @@ namespace Voicipher.Business.Commands.Job
                     if (backgroundJob == null)
                         throw new InvalidOperationException($"Background job {parameter.Id} not found");
 
-                    _jobStateMachine.DoInit(backgroundJob);
+                    await _jobStateMachine.DoInit(backgroundJob, cancellationToken);
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
                     await _jobStateMachine.DoSplitAsync(cancellationToken);

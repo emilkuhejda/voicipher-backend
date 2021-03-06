@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Azure;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Utils;
@@ -85,17 +87,17 @@ namespace Voicipher.Business.StateMachine
 
         private JobState CurrentState => _machineState.JobState;
 
-        public void DoInit(BackgroundJob backgroundJob)
+        public async Task DoInit(BackgroundJob backgroundJob, CancellationToken cancellationToken)
         {
             _backgroundJob = backgroundJob;
             _machineState.FromBackgroundJob(backgroundJob);
 
-            TryChangeState(JobState.Initialized);
+            await TryChangeStateAsync(JobState.Initialized, cancellationToken);
         }
 
         public async Task DoValidationAsync(CancellationToken cancellationToken)
         {
-            TryChangeState(JobState.Validating);
+            await TryChangeStateAsync(JobState.Validating, cancellationToken);
 
             _audioFile = await _audioFileRepository.GetAsync(_machineState.UserId, _machineState.AudioFileId, cancellationToken);
             if (_audioFile == null)
@@ -105,19 +107,19 @@ namespace Voicipher.Business.StateMachine
             if (!canRunRecognitionResult.IsSuccess)
                 throw new InvalidOperationException($"User ID {_machineState.UserId} does not have enough free minutes in the subscription");
 
-            TryChangeState(JobState.Validated);
+            await TryChangeStateAsync(JobState.Validated, cancellationToken);
         }
 
         public async Task DoConvertingAsync(CancellationToken cancellationToken)
         {
-            TryChangeState(JobState.Converting);
+            await TryChangeStateAsync(JobState.Converting, cancellationToken);
             await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
-            TryChangeState(JobState.Converted);
+            await TryChangeStateAsync(JobState.Converted, cancellationToken);
         }
 
         public async Task DoSplitAsync(CancellationToken cancellationToken)
         {
-            TryChangeState(JobState.Splitting);
+            await TryChangeStateAsync(JobState.Splitting, cancellationToken);
 
             var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
             _machineState.TranscribedAudioFiles = transcribedAudioFiles;
@@ -152,12 +154,12 @@ namespace Voicipher.Business.StateMachine
                 _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
             }
 
-            TryChangeState(JobState.Splitted);
+            await TryChangeStateAsync(JobState.Splitted, cancellationToken);
         }
 
         public async Task DoProcessingAsync(CancellationToken cancellationToken)
         {
-            TryChangeState(JobState.Processing);
+            await TryChangeStateAsync(JobState.Processing, cancellationToken);
 
             var transcribedAudioFiles = _machineState.TranscribedAudioFiles.OrderByDescending(x => x.EndTime).ToArray();
             var transcribedTime = transcribedAudioFiles.FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
@@ -172,14 +174,14 @@ namespace Voicipher.Business.StateMachine
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
-            TryChangeState(JobState.Processed);
+            await TryChangeStateAsync(JobState.Processed, cancellationToken);
         }
 
         public async Task DoCompleteAsync(CancellationToken cancellationToken)
         {
             try
             {
-                TryChangeState(JobState.Completing);
+                await TryChangeStateAsync(JobState.Completing, cancellationToken);
 
                 _machineState.DateCompletedUtc = DateTime.UtcNow;
 
@@ -199,7 +201,7 @@ namespace Voicipher.Business.StateMachine
 
                 _audioFile.SourceFileName = string.Empty;
 
-                TryChangeState(JobState.Completed);
+                await TryChangeStateAsync(JobState.Completed, cancellationToken);
             }
             catch (RequestFailedException ex)
             {
@@ -234,12 +236,17 @@ namespace Voicipher.Business.StateMachine
             }
         }
 
-        private void TryChangeState(JobState jobState)
+        private async Task TryChangeStateAsync(JobState jobState, CancellationToken cancellationToken)
         {
             if (CanTransition(CurrentState) != jobState)
                 throw new InvalidOperationException($"Invalid transition operation from {CurrentState} to {jobState}");
 
             _machineState.JobState = jobState;
+
+            var fileName = $"{_machineState.AudioFileId}.json";
+            var machineStateJson = JsonConvert.SerializeObject(_machineState);
+            var uploadSettings = new UploadSettings(fileName);
+            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), uploadSettings, cancellationToken);
         }
 
         private JobState CanTransition(JobState jobState)
