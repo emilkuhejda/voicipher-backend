@@ -83,12 +83,8 @@ namespace Voicipher.Business.StateMachine
 
         public void DoInit(BackgroundJob backgroundJob)
         {
-            _machineState.JobId = backgroundJob.Id;
-            _machineState.Attempt = backgroundJob.Attempt + 1;
-
             _backgroundJob = backgroundJob;
-            _backgroundJob.Attempt += 1;
-            _backgroundJob.JobState = JobState.Idle;
+            _machineState.FromBackgroundJob(backgroundJob);
 
             TryChangeState(JobState.Initialized);
         }
@@ -97,13 +93,13 @@ namespace Voicipher.Business.StateMachine
         {
             TryChangeState(JobState.Validating);
 
-            _audioFile = await _audioFileRepository.GetAsync(_backgroundJob.UserId, _backgroundJob.AudioFileId, cancellationToken);
+            _audioFile = await _audioFileRepository.GetAsync(_machineState.UserId, _machineState.AudioFileId, cancellationToken);
             if (_audioFile == null)
-                throw new FileNotFoundException($"Audio file {_backgroundJob.AudioFileId} not found");
+                throw new FileNotFoundException($"Audio file {_machineState.AudioFileId} not found");
 
-            var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(_backgroundJob.UserId), null, cancellationToken);
+            var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(_machineState.UserId), null, cancellationToken);
             if (!canRunRecognitionResult.IsSuccess)
-                throw new InvalidOperationException($"User ID {_backgroundJob.UserId} does not have enough free minutes in the subscription");
+                throw new InvalidOperationException($"User ID {_machineState.UserId} does not have enough free minutes in the subscription");
 
             TryChangeState(JobState.Validated);
         }
@@ -179,7 +175,7 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
-                _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
+                _machineState.DateCompletedUtc = DateTime.UtcNow;
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {
@@ -211,15 +207,16 @@ namespace Voicipher.Business.StateMachine
             _backgroundJob.Exception = ExceptionFormatter.FormatException(exception);
             await _unitOfWork.SaveAsync(cancellationToken);
 
-            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_backgroundJob.AudioFileId, _backgroundJob.UserId, _appSettings.ApplicationId, RecognitionState.None);
+            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_machineState.AudioFileId, _machineState.UserId, _appSettings.ApplicationId, RecognitionState.None);
             await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
-            var fileName = _backgroundJob.GetParameterValue(BackgroundJobParameter.FileName, string.Empty);
-            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionErrorMethod(_backgroundJob.UserId), fileName);
+            await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionErrorMethod(_machineState.UserId), _machineState.FileName);
         }
 
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
+            _backgroundJob.FromState(_machineState);
+
             await _unitOfWork.SaveAsync(cancellationToken);
         }
 
@@ -236,7 +233,6 @@ namespace Voicipher.Business.StateMachine
             if (CanTransition(CurrentState) != jobState)
                 throw new InvalidOperationException($"Invalid transition operation from {CurrentState} to {jobState}");
 
-            _backgroundJob.JobState = jobState;
             _machineState.JobState = jobState;
         }
 

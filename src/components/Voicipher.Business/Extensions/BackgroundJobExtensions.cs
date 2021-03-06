@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
+using Voicipher.Domain.State;
 
 namespace Voicipher.Business.Extensions
 {
@@ -11,6 +12,13 @@ namespace Voicipher.Business.Extensions
         {
             var parameters = JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, object>>(backgroundJob.Parameters);
             return parameters.GetValue(backgroundJobParameter, defaultValue);
+        }
+
+        public static void FromState(this BackgroundJob backgroundJob, MachineState machineState)
+        {
+            backgroundJob.JobState = machineState.JobState;
+            backgroundJob.Attempt = machineState.Attempt;
+            backgroundJob.DateCompletedUtc = machineState.DateCompletedUtc;
         }
     }
 }
