@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Azure;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -37,6 +38,7 @@ namespace Voicipher.Business.StateMachine
         private readonly ISpeechRecognitionService _speechRecognitionService;
         private readonly IMessageCenterService _messageCenterService;
         private readonly IBlobStorage _blobStorage;
+        private readonly IDiskStorage _diskStorage;
         private readonly IFileAccessService _fileAccessService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
@@ -57,6 +59,7 @@ namespace Voicipher.Business.StateMachine
             ISpeechRecognitionService speechRecognitionService,
             IMessageCenterService messageCenterService,
             IBlobStorage blobStorage,
+            IIndex<StorageLocation, IDiskStorage> index,
             IFileAccessService fileAccessService,
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
@@ -71,6 +74,7 @@ namespace Voicipher.Business.StateMachine
             _speechRecognitionService = speechRecognitionService;
             _messageCenterService = messageCenterService;
             _blobStorage = blobStorage;
+            _diskStorage = index[StorageLocation.State];
             _fileAccessService = fileAccessService;
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
