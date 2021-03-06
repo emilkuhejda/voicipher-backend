@@ -113,8 +113,10 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 
-            audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Language = parameter.Language;
+            audioFile.TranscribedStartTime = parameter.StartTime;
+            audioFile.TranscribedEndTime = parameter.EndTime;
+            audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             await _audioFileRepository.SaveAsync(cancellationToken);
 
