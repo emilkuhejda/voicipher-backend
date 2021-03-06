@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Cloud.Speech.V1;
-using Google.Protobuf.Collections;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json;
@@ -24,7 +21,10 @@ using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
+using Voicipher.Domain.OutputModels.ControlPanel;
 using Voicipher.Domain.Payloads;
+using Voicipher.Domain.Payloads.Audio;
+using Voicipher.Domain.Payloads.ControlPanel;
 using Voicipher.Domain.Payloads.Job;
 using Voicipher.Domain.Settings;
 using Xunit;
@@ -45,6 +45,16 @@ namespace Voicipher.Business.Tests.Commands
             var backgroundJobRepositoryMock = new Mock<IBackgroundJobRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
+
+            deleteAudioFileSourceCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<DeleteAudioFileSourcePayload>(), null, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new CommandResult());
+            getInternalValueQueryMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<InternalValuePayload<bool>>(), null, It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new QueryResult<InternalValueOutputModel<bool>>(new InternalValueOutputModel<bool>(false)));
+            unitOfWorkMock
+                .Setup(x => x.BeginTransactionAsync(It.IsAny<CancellationToken>()))
+                .ReturnsAsync(Mock.Of<IDbContextTransaction>());
 
             var backgroundJob = new BackgroundJob
             {
@@ -67,20 +77,30 @@ namespace Voicipher.Business.Tests.Commands
                 loggerMock.Object);
 
             // Act
-            await runBackgroundJobCommand.ExecuteAsync(new BackgroundJobPayload(), null, default);
+            var commandResult = await runBackgroundJobCommand.ExecuteAsync(new BackgroundJobPayload(), null, default);
+
+            // Assert
+            Assert.True(commandResult.IsSuccess);
+
+            unitOfWorkMock.Verify(x => x.SaveAsync(It.IsAny<CancellationToken>()));
         }
 
         private IJobStateMachine CreateJobStateMachineMock()
         {
             var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var modifySubscriptionTimeCommandMock = new Mock<IModifySubscriptionTimeCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
+            var optionsMock = new Mock<IOptions<AppSettings>>();
             var loggerMock = new Mock<ILogger>();
 
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            modifySubscriptionTimeCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
@@ -88,11 +108,12 @@ namespace Voicipher.Business.Tests.Commands
             audioFileRepositoryMock
                 .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AudioFile());
+            optionsMock.Setup(x => x.Value).Returns(new AppSettings());
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             return new JobStateMachine(
                 canRunRecognitionCommandMock.Object,
-                Mock.Of<IModifySubscriptionTimeCommand>(),
+                modifySubscriptionTimeCommandMock.Object,
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
@@ -102,17 +123,8 @@ namespace Voicipher.Business.Tests.Commands
                 audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
-                Mock.Of<IOptions<AppSettings>>(),
+                optionsMock.Object,
                 loggerMock.Object);
-        }
-
-        private async Task<RepeatedField<SpeechRecognitionResult>> GetSpeechRecognitionResults()
-        {
-            var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
-            var pathToJson = Path.Combine(directory, "JsonData", "alternatives.json");
-            var jsonText = await File.ReadAllTextAsync(pathToJson);
-
-            return JsonConvert.DeserializeObject<RepeatedField<SpeechRecognitionResult>>(jsonText);
         }
     }
 }
