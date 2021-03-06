@@ -127,7 +127,6 @@ namespace Voicipher.Business.Commands.Audio
                     Language = parameter.Language,
                     IsPhoneCall = parameter.IsPhoneCall,
                     OriginalSourceFileName = sourceName,
-                    Storage = StorageSetting.Azure,
                     UploadStatus = UploadStatus.Completed,
                     TotalTime = audioFileTime.Value,
                     DateCreated = parameter.DateCreated,

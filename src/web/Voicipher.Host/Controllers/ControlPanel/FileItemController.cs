@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 using Voicipher.Host.Utils;
@@ -68,7 +69,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
                 RecognitionState = audioFile.RecognitionState,
                 OriginalSourceFileName = audioFile.OriginalSourceFileName,
                 SourceFileName = audioFile.SourceFileName,
-                Storage = audioFile.Storage,
+                Storage = StorageSetting.Azure,
                 UploadStatus = audioFile.UploadStatus,
                 TotalTime = audioFile.TotalTime,
                 TranscribedTime = audioFile.TranscribedTime,

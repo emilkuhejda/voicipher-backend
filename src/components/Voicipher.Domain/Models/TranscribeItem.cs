@@ -18,8 +18,6 @@ namespace Voicipher.Domain.Models
 
         public string SourceFileName { get; set; }
 
-        public StorageSetting Storage { get; set; }
-
         public TimeSpan StartTime { get; set; }
 
         public TimeSpan EndTime { get; set; }

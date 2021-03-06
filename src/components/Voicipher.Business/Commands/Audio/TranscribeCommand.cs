@@ -113,8 +113,6 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 
-            throw new OperationErrorException(ErrorCode.EC100);
-
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Language = parameter.Language;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;

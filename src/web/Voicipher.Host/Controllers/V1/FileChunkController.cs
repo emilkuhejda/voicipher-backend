@@ -57,13 +57,12 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "UploadChunkFile")]
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         [RequestSizeLimit(int.MaxValue)]
-        public async Task<IActionResult> Upload(Guid fileItemId, int order, StorageSetting storageSetting, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
+        public async Task<IActionResult> Upload(Guid fileItemId, int order, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
             var uploadFileChunkPayload = new UploadFileChunkPayload
             {
                 AudioFileId = fileItemId,
                 Order = order,
-                StorageSetting = storageSetting,
                 ApplicationId = applicationId,
                 File = file
             };
@@ -99,7 +98,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "SubmitChunks")]
-        public async Task<IActionResult> Submit(Guid fileItemId, int chunksCount, StorageSetting _, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Submit(Guid fileItemId, int chunksCount, Guid applicationId, CancellationToken cancellationToken)
         {
             var submitFileChunkPayload = new SubmitFileChunkPayload
             {
