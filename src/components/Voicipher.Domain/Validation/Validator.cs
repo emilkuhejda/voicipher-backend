@@ -60,6 +60,14 @@ namespace Voicipher.Domain.Validation
             return errorList;
         }
 
+        public static IList<ValidationError> ValidateTimeRange(this IList<ValidationError> errorList, TimeSpan value, string field, TimeSpan startTime, string objectName = null)
+        {
+            if (value < startTime)
+                return errorList.Add(ValidationErrorCodes.EndTimeGreaterThanStartTime, field, objectName);
+
+            return errorList;
+        }
+
         public static IList<ValidationError> ValidateNotNull(this IList<ValidationError> errorList, object value, string field, string objectName = null)
         {
             if (value == null)

@@ -24,6 +24,8 @@
 
         public static string OperationFailed => nameof(OperationFailed);
 
+        public static string EndTimeGreaterThanStartTime => nameof(EndTimeGreaterThanStartTime);
+
         public static string InvalidId => nameof(InvalidId);
 
         public static string InvalidDateTime => nameof(InvalidDateTime);

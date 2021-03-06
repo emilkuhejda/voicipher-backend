@@ -57,6 +57,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.EndTimeGreaterThanStartTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater than end time");
+                    throw new OperationErrorException(ErrorCode.EC600);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -106,6 +112,8 @@ namespace Voicipher.Business.Commands.Audio
                 _logger.Error($"[{userId}] User has no enough left minutes in subscription. Command finished with error code {canRunRecognitionResult.Error.ErrorCode}");
                 throw new OperationErrorException(ErrorCode.EC300);
             }
+
+            throw new OperationErrorException(ErrorCode.EC100);
 
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Language = parameter.Language;
