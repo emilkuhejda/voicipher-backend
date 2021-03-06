@@ -115,7 +115,7 @@ namespace Voicipher.Business.Commands.Audio
 
             audioFile.Language = parameter.Language;
             audioFile.TranscriptionStartTime = parameter.StartTime;
-            audioFile.TranscriptionEndTime = parameter.EndTime;
+            audioFile.TranscriptionEndTime = parameter.EndTime == TimeSpan.Zero ? audioFile.TotalTime : parameter.EndTime;
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             await _audioFileRepository.SaveAsync(cancellationToken);

@@ -65,9 +65,9 @@ namespace Voicipher.Business.Services
 
                 _logger.Verbose($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
 
-                var (wavFilePath, fileName) = await ConvertToWavAsync(tempFilePath, audioFile.UserId);
+                var wavFilePath = await ConvertToWavAsync(tempFilePath, audioFile);
 
-                audioFile.SourceFileName = fileName;
+                audioFile.SourceFileName = Path.GetFileName(wavFilePath);
                 await _unitOfWork.SaveAsync(cancellationToken);
 
                 _logger.Information($"[{audioFile.UserId}] Conversion audio file {audioFile.Id} to wav format finished. New audio file was stored in destination {wavFilePath}");
@@ -94,33 +94,29 @@ namespace Voicipher.Business.Services
                 throw new InvalidOperationException($"User {audioFile.UserId} does not have enough free minutes in the subscription");
 
             var wavFileSource = await _fileAccessService.ReadAllBytesAsync(wavFilePath, cancellationToken);
-            var transcribedAudioFiles = SplitWavFile(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId).ToArray();
+            var transcribedAudioFiles = await SplitWavFileAsync(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId);
 
             _fileAccessService.Delete(wavFilePath);
 
-            return transcribedAudioFiles;
+            return transcribedAudioFiles.ToArray();
         }
 
-        private async Task<(string filePath, string fileName)> ConvertToWavAsync(string inputFilePath, Guid userId)
+        private async Task<string> ConvertToWavAsync(string inputFilePath, AudioFile audioFile)
         {
-            _logger.Verbose($"[{userId}] Start conversion audio file to wav format");
+            _logger.Verbose($"[{audioFile.UserId}] Start conversion audio file to wav format");
 
-            var fileName = $"{Guid.NewGuid()}.voc";
-            var filePath = Path.Combine(_diskStorage.GetDirectoryPath(), fileName);
-            await Task.Run(() =>
+            using (var reader = new MediaFoundationReader(inputFilePath))
             {
-                using (var reader = new MediaFoundationReader(inputFilePath))
-                {
-                    WaveFileWriter.CreateWaveFile(filePath, reader);
-                }
-            });
+                var endTime = Math.Min(audioFile.TranscriptionEndTime.Ticks, audioFile.TotalTime.Ticks);
+                var trimmedAudioFile = await TrimAudioFileAsync(reader, audioFile.TranscriptionStartTime, TimeSpan.FromTicks(endTime));
 
-            _logger.Verbose($"[{userId}] File {inputFilePath} was converted and stored in new destination {filePath}");
+                _logger.Verbose($"[{audioFile.UserId}] File {inputFilePath} was converted and stored in new destination {trimmedAudioFile.filePath}");
 
-            return (filePath, fileName);
+                return trimmedAudioFile.filePath;
+            }
         }
 
-        private IList<TranscribedAudioFile> SplitWavFile(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId, Guid userId)
+        private async Task<IList<TranscribedAudioFile>> SplitWavFileAsync(byte[] inputFile, TimeSpan remainingTime, Guid audioFileId, Guid userId)
         {
             var transcribedAudioFiles = new List<TranscribedAudioFile>();
             var processedTime = TimeSpan.Zero;
@@ -144,9 +140,20 @@ namespace Voicipher.Business.Services
                             ? remainingTimeSpan
                             : TimeSpan.FromSeconds(FileLengthInSeconds);
 
-                        var end = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
-                        var endTime = end > audioTotalTime ? audioTotalTime : end;
-                        var transcribedAudioFile = CreateTranscribedAudioFile(reader, processedTime, endTime, audioFileId);
+                        var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
+                        var endTime = requestedEndTime > audioTotalTime ? audioTotalTime : requestedEndTime;
+                        var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime);
+
+                        var transcribedAudioFile = new TranscribedAudioFile
+                        {
+                            Id = Guid.NewGuid(),
+                            AudioFileId = audioFileId,
+                            Path = trimmedAudioFile.filePath,
+                            AudioChannels = reader.WaveFormat.Channels,
+                            StartTime = processedTime,
+                            EndTime = endTime,
+                            TotalTime = trimmedAudioFile.totalTime
+                        };
 
                         processedTime = processedTime.Add(sampleDuration);
                         transcribedAudioFiles.Add(transcribedAudioFile);
@@ -171,50 +178,41 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private TranscribedAudioFile CreateTranscribedAudioFile(WaveFileReader reader, TimeSpan start, TimeSpan end, Guid audioFileId)
+        private Task<(string filePath, TimeSpan totalTime)> TrimAudioFileAsync(WaveStream reader, TimeSpan startTime, TimeSpan endTime)
         {
-            var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
-
-            using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
+            return Task.Run(() =>
             {
-                var fileSegmentLength = reader.WaveFormat.AverageBytesPerSecond / 1000;
-
-                var startPosition = (int)start.TotalMilliseconds * fileSegmentLength;
-                startPosition = startPosition - startPosition % reader.WaveFormat.BlockAlign;
-
-                var endPosition = (int)end.TotalMilliseconds * fileSegmentLength;
-                endPosition = endPosition - endPosition % reader.WaveFormat.BlockAlign;
-
-                reader.Position = startPosition;
-                var buffer = new byte[1024];
-
-                while (reader.Position < endPosition)
+                var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
+                using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
                 {
-                    var currentSegmentLength = (int)(endPosition - reader.Position);
-                    if (currentSegmentLength > 0)
+                    var fileSegmentLength = reader.WaveFormat.AverageBytesPerSecond / 1000;
+
+                    var startPosition = (int)startTime.TotalMilliseconds * fileSegmentLength;
+                    startPosition = startPosition - startPosition % reader.WaveFormat.BlockAlign;
+
+                    var endPosition = (int)endTime.TotalMilliseconds * fileSegmentLength;
+                    endPosition = endPosition - endPosition % reader.WaveFormat.BlockAlign;
+
+                    reader.Position = startPosition;
+                    var buffer = new byte[1024];
+
+                    while (reader.Position < endPosition)
                     {
-                        var bytesToRead = Math.Min(currentSegmentLength, buffer.Length);
-                        var readBytes = reader.Read(buffer, 0, bytesToRead);
-                        if (readBytes > 0)
+                        var currentSegmentLength = (int)(endPosition - reader.Position);
+                        if (currentSegmentLength > 0)
                         {
-                            writer.Write(buffer, 0, readBytes);
+                            var bytesToRead = Math.Min(currentSegmentLength, buffer.Length);
+                            var readBytes = reader.Read(buffer, 0, bytesToRead);
+                            if (readBytes > 0)
+                            {
+                                writer.Write(buffer, 0, readBytes);
+                            }
                         }
                     }
+
+                    return (outputFileName, writer.TotalTime);
                 }
-
-                var wavPartialFile = new TranscribedAudioFile
-                {
-                    Id = Guid.NewGuid(),
-                    AudioFileId = audioFileId,
-                    Path = outputFileName,
-                    AudioChannels = reader.WaveFormat.Channels,
-                    StartTime = start,
-                    EndTime = end,
-                    TotalTime = writer.TotalTime
-                };
-
-                return wavPartialFile;
-            }
+            });
         }
     }
 }
