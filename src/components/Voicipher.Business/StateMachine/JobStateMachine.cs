@@ -37,6 +37,7 @@ namespace Voicipher.Business.StateMachine
         private readonly ISpeechRecognitionService _speechRecognitionService;
         private readonly IMessageCenterService _messageCenterService;
         private readonly IBlobStorage _blobStorage;
+        private readonly IFileAccessService _fileAccessService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -55,6 +56,7 @@ namespace Voicipher.Business.StateMachine
             ISpeechRecognitionService speechRecognitionService,
             IMessageCenterService messageCenterService,
             IBlobStorage blobStorage,
+            IFileAccessService fileAccessService,
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
             IUnitOfWork unitOfWork,
@@ -68,6 +70,7 @@ namespace Voicipher.Business.StateMachine
             _speechRecognitionService = speechRecognitionService;
             _messageCenterService = messageCenterService;
             _blobStorage = blobStorage;
+            _fileAccessService = fileAccessService;
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
             _unitOfWork = unitOfWork;
@@ -152,7 +155,7 @@ namespace Voicipher.Business.StateMachine
                 {
                     foreach (var transcribedAudioFile in transcribedAudioFiles)
                     {
-                        if (File.Exists(transcribedAudioFile.Path))
+                        if (_fileAccessService.Exists(transcribedAudioFile.Path))
                         {
                             _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
 
@@ -162,7 +165,7 @@ namespace Voicipher.Business.StateMachine
 
                             _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
 
-                            File.Delete(transcribedAudioFile.Path);
+                            _fileAccessService.Delete(transcribedAudioFile.Path);
                         }
                     }
 
@@ -223,8 +226,7 @@ namespace Voicipher.Business.StateMachine
             {
                 foreach (var transcribedAudioFile in transcribedAudioFiles)
                 {
-                    if (File.Exists(transcribedAudioFile.Path))
-                        File.Delete(transcribedAudioFile.Path);
+                    _fileAccessService.Delete(transcribedAudioFile.Path);
                 }
             }
         }
