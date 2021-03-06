@@ -57,6 +57,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
+                    throw new OperationErrorException(ErrorCode.EC600);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -107,14 +113,16 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC300);
             }
 
-            audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Language = parameter.Language;
+            audioFile.TranscriptionStartTime = parameter.StartTime;
+            audioFile.TranscriptionEndTime = parameter.EndTime;
+            audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
             await _audioFileRepository.SaveAsync(cancellationToken);
 
             _logger.Verbose($"[{userId}] Audio file {parameter.AudioFileId} has updated language to {parameter.Language}");
 
-            await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(userId, audioFile.Id, audioFile.FileName));
+            await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(audioFile));
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

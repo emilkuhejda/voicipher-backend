@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 using ValidationResult = Voicipher.Domain.Validation.ValidationResult;
@@ -16,9 +15,6 @@ namespace Voicipher.Domain.Payloads.Audio
 
         [Required]
         public int Order { get; init; }
-
-        [Required]
-        public StorageSetting StorageSetting { get; init; }
 
         [Required]
         public Guid ApplicationId { get; init; }

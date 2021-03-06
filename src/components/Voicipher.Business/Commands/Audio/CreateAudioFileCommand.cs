@@ -70,7 +70,6 @@ namespace Voicipher.Business.Commands.Audio
                 FileName = parameter.FileName,
                 Language = parameter.Language,
                 IsPhoneCall = parameter.IsPhoneCall,
-                Storage = StorageSetting.Azure,
                 DateCreated = parameter.DateCreated,
                 DateUpdatedUtc = DateTime.UtcNow
             };

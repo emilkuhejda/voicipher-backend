@@ -115,7 +115,6 @@ namespace Voicipher.Business.Services
                 ApplicationId = _appSettings.ApplicationId,
                 Alternatives = JsonConvert.SerializeObject(recognizedResult.Alternatives),
                 SourceFileName = transcribedAudioFile.SourceFileName,
-                Storage = StorageSetting.Azure,
                 StartTime = transcribedAudioFile.StartTime,
                 EndTime = transcribedAudioFile.EndTime,
                 TotalTime = transcribedAudioFile.TotalTime,
