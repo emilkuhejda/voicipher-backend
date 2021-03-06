@@ -57,9 +57,9 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC200);
                 }
 
-                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.EndTimeGreaterThanStartTime))
+                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
-                    _logger.Error($"[{userId}] Start time for transcription is greater than end time");
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
                     throw new OperationErrorException(ErrorCode.EC600);
                 }
 
