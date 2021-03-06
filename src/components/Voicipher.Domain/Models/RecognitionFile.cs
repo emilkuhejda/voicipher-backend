@@ -5,31 +5,38 @@ namespace Voicipher.Domain.Models
     public record RecognitionFile
     {
         public RecognitionFile()
-            : this(Guid.Empty, Guid.Empty, Guid.NewGuid(), string.Empty)
         {
+            JobId = Guid.Empty;
+            UserId = Guid.Empty;
+            AudioFileId = Guid.Empty;
+            FileName = String.Empty;
+            TranscriptionStartTime = TimeSpan.Zero;
+            TranscriptionEndTime = TimeSpan.Zero;
+            DateProcessedUtc = DateTime.MinValue;
         }
 
-        public RecognitionFile(Guid userId, Guid audioFileId, string fileName)
-            : this(userId, audioFileId, Guid.NewGuid(), fileName)
+        public RecognitionFile(AudioFile audioFile)
         {
-        }
-
-        public RecognitionFile(Guid userId, Guid audioFileId, Guid jobId, string fileName)
-        {
-            UserId = userId;
-            AudioFileId = audioFileId;
-            JobId = jobId;
-            FileName = fileName;
+            JobId = Guid.NewGuid();
+            UserId = audioFile.UserId;
+            AudioFileId = audioFile.Id;
+            FileName = audioFile.FileName;
+            TranscriptionStartTime = audioFile.TranscriptionStartTime;
+            TranscriptionEndTime = audioFile.TranscriptionEndTime;
             DateProcessedUtc = DateTime.UtcNow;
         }
+
+        public Guid JobId { get; init; }
 
         public Guid UserId { get; init; }
 
         public Guid AudioFileId { get; init; }
 
-        public Guid JobId { get; init; }
-
         public string FileName { get; init; }
+
+        public TimeSpan TranscriptionStartTime { get; init; }
+
+        public TimeSpan TranscriptionEndTime { get; init; }
 
         public DateTime DateProcessedUtc { get; init; }
     }

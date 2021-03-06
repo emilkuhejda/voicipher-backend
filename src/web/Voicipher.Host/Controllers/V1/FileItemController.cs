@@ -257,9 +257,9 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "TranscribeFileItem")]
-        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId, CancellationToken cancellationToken)
         {
-            var transcribePayload = new TranscribePayload(fileItemId, language, applicationId);
+            var transcribePayload = new TranscribePayload(fileItemId, language, startTimeSeconds, endTimeSeconds, applicationId);
             var commandResult = await _transcribeCommand.Value.ExecuteAsync(transcribePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);

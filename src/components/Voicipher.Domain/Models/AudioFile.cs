@@ -34,11 +34,13 @@ namespace Voicipher.Domain.Models
         // Converted wav file name
         public string SourceFileName { get; set; }
 
-        public StorageSetting Storage { get; set; }
-
         public UploadStatus UploadStatus { get; set; }
 
         public TimeSpan TotalTime { get; set; }
+
+        public TimeSpan TranscriptionStartTime { get; set; }
+
+        public TimeSpan TranscriptionEndTime { get; set; }
 
         public TimeSpan TranscribedTime { get; set; }
 

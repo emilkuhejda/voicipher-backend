@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 
@@ -8,16 +7,9 @@ namespace Voicipher.Domain.Payloads.Audio
 {
     public record SubmitFileChunkPayload : IValidatable
     {
-        public SubmitFileChunkPayload()
-        {
-            ChunksStorageSetting = StorageSetting.Azure;
-        }
-
         public Guid AudioFileId { get; init; }
 
         public int ChunksCount { get; init; }
-
-        public StorageSetting ChunksStorageSetting { get; }
 
         public Guid ApplicationId { get; init; }
 
