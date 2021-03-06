@@ -21,5 +21,7 @@ namespace Voicipher.Domain.Settings
         public string GoogleApiAuthUri { get; set; }
 
         public SpeechCredentials SpeechCredentials { get; set; }
+
+        public string[] AllowedHosts { get; set; }
     }
 }
