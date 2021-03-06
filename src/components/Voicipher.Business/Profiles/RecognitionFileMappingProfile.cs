@@ -25,6 +25,12 @@ namespace Voicipher.Business.Profiles
                     r => r.FileName,
                     opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.FileName, string.Empty)))
                 .ForMember(
+                    r => r.TranscriptionStartTime,
+                    opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.TranscriptionStartTime, TimeSpan.Zero)))
+                .ForMember(
+                    r => r.TranscriptionEndTime,
+                    opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.TranscriptionEndTime, TimeSpan.Zero)))
+                .ForMember(
                     r => r.DateProcessedUtc,
                     opt => opt.MapFrom(j => j.GetParameter(BackgroundJobParameter.DateUtc, DateTime.MinValue)));
         }

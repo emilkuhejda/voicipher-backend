@@ -53,8 +53,7 @@ namespace Voicipher.Business.BackgroundServices
 
                         _logger.Information($"Try to restart transcription operation for audio file {audioFile.Id}");
 
-                        var recognitionFile = new RecognitionFile(audioFile.UserId, audioFile.Id, audioFile.FileName);
-                        await _audioFileProcessingChannel.AddFileAsync(recognitionFile, stoppingToken);
+                        await _audioFileProcessingChannel.AddFileAsync(new RecognitionFile(audioFile), stoppingToken);
                     }
                 }
             }
