@@ -104,6 +104,9 @@ namespace Voicipher.Business.Tests.Commands
             modifySubscriptionTimeCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new CommandResult());
+            fileAccessServiceMock
+                .Setup(x => x.Exists(It.IsAny<string>()))
+                .Returns(true);
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(new[] { new TranscribedAudioFile() });

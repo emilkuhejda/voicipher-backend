@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Utils;
@@ -24,6 +23,7 @@ using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
+using Voicipher.Domain.State;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.StateMachine
@@ -44,9 +44,10 @@ namespace Voicipher.Business.StateMachine
         private readonly AppSettings _appSettings;
         private readonly ILogger _logger;
 
+        private readonly MachineState _machineState = new();
+
         private BackgroundJob _backgroundJob;
         private AudioFile _audioFile;
-        private Dictionary<BackgroundJobParameter, object> _backgroundJobParameter = new();
 
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
@@ -78,15 +79,16 @@ namespace Voicipher.Business.StateMachine
             _logger = logger.ForContext<JobStateMachine>();
         }
 
-        private JobState CurrentState => _backgroundJob.JobState;
+        private JobState CurrentState => _machineState.JobState;
 
         public void DoInit(BackgroundJob backgroundJob)
         {
+            _machineState.JobId = backgroundJob.Id;
+            _machineState.Attempt = backgroundJob.Attempt + 1;
+
             _backgroundJob = backgroundJob;
             _backgroundJob.Attempt += 1;
             _backgroundJob.JobState = JobState.Idle;
-
-            _backgroundJobParameter = JsonConvert.DeserializeObject<Dictionary<BackgroundJobParameter, object>>(backgroundJob.Parameters);
 
             TryChangeState(JobState.Initialized);
         }
@@ -118,9 +120,37 @@ namespace Voicipher.Business.StateMachine
             TryChangeState(JobState.Splitting);
 
             var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
-            _backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribedAudioFiles);
+            _machineState.TranscribedAudioFiles = transcribedAudioFiles;
 
             _logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
+
+            _logger.Verbose($"[{_audioFile.UserId}] Start deleting transcribed items {_audioFile.OriginalSourceFileName} from blob storage");
+            var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
+            await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
+            _logger.Verbose($"[{_audioFile.UserId}] Transcribed items {_audioFile.OriginalSourceFileName} was deleted from blob storage");
+
+            _logger.Verbose($"[{_audioFile.UserId}] {transcribedAudioFiles.Length} transcription items ready for upload");
+
+            if (transcribedAudioFiles.Any())
+            {
+                foreach (var transcribedAudioFile in transcribedAudioFiles)
+                {
+                    if (!_fileAccessService.Exists(transcribedAudioFile.Path))
+                        throw new FileNotFoundException($"[{_audioFile.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
+
+                    _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
+
+                    var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
+                    var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
+                    await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+
+                    _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
+
+                    _fileAccessService.Delete(transcribedAudioFile.Path);
+                }
+
+                _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+            }
 
             TryChangeState(JobState.Splitted);
         }
@@ -129,13 +159,8 @@ namespace Voicipher.Business.StateMachine
         {
             TryChangeState(JobState.Processing);
 
-            //var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
-            //_backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribedAudioFiles);
-
-            //_logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
-
-            var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
-            var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
+            var transcribedAudioFiles = _machineState.TranscribedAudioFiles.OrderByDescending(x => x.EndTime).ToArray();
+            var transcribedTime = transcribedAudioFiles.FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             _audioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
             _logger.Information($"[{_audioFile.UserId}] Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
@@ -154,39 +179,7 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
-                _logger.Verbose($"[{_audioFile.UserId}] Start deleting transcribed items {_audioFile.OriginalSourceFileName} from blob storage");
-
-                var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
-                await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
-
-                _logger.Verbose($"[{_audioFile.UserId}] Transcribed items {_audioFile.OriginalSourceFileName} was deleted from blob storage");
-
-                var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
-                _logger.Verbose($"[{_audioFile.UserId}] {transcribedAudioFiles?.Length ?? 0} transcription items ready for upload");
-
-                if (transcribedAudioFiles != null && transcribedAudioFiles.Any())
-                {
-                    foreach (var transcribedAudioFile in transcribedAudioFiles)
-                    {
-                        if (_fileAccessService.Exists(transcribedAudioFile.Path))
-                        {
-                            _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
-
-                            var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
-                            var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
-                            await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
-
-                            _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
-
-                            _fileAccessService.Delete(transcribedAudioFile.Path);
-                        }
-                    }
-
-                    _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
-                }
-
                 _backgroundJob.DateCompletedUtc = DateTime.UtcNow;
-                _backgroundJobParameter.Remove(BackgroundJobParameter.AudioFiles);
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
                 {
@@ -227,20 +220,14 @@ namespace Voicipher.Business.StateMachine
 
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
-            _backgroundJob.Parameters = JsonConvert.SerializeObject(_backgroundJobParameter);
-
             await _unitOfWork.SaveAsync(cancellationToken);
         }
 
         public void DoClean()
         {
-            var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
-            if (transcribedAudioFiles != null)
+            foreach (var transcribedAudioFile in _machineState.TranscribedAudioFiles)
             {
-                foreach (var transcribedAudioFile in transcribedAudioFiles)
-                {
-                    _fileAccessService.Delete(transcribedAudioFile.Path);
-                }
+                _fileAccessService.Delete(transcribedAudioFile.Path);
             }
         }
 
@@ -250,6 +237,7 @@ namespace Voicipher.Business.StateMachine
                 throw new InvalidOperationException($"Invalid transition operation from {CurrentState} to {jobState}");
 
             _backgroundJob.JobState = jobState;
+            _machineState.JobState = jobState;
         }
 
         private JobState CanTransition(JobState jobState)
