@@ -33,8 +33,8 @@ namespace Voicipher.Host.Extensions
 
                     context.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(FileChunk)}]");
 
-                    chunkStorage.RemoveTemporaryFolder();
-                    audioStorage.RemoveTemporaryFolder();
+                    chunkStorage.DeleteTemporaryFolder();
+                    audioStorage.DeleteTemporaryFolder();
 
                     logger.Information("Finish of the cleaning temporary data");
                 }

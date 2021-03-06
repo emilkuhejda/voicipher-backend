@@ -38,17 +38,6 @@ namespace Voicipher.Business.Services
             return filePath;
         }
 
-        public void RemoveRange(FileChunk[] fileChunks)
-        {
-            foreach (var fileChunk in fileChunks)
-            {
-                if (File.Exists(fileChunk.Path))
-                {
-                    File.Delete(fileChunk.Path);
-                }
-            }
-        }
-
         public async Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken)
         {
             var source = new List<byte>();
@@ -61,7 +50,18 @@ namespace Voicipher.Business.Services
             return source.ToArray();
         }
 
-        public void RemoveTemporaryFolder()
+        public void DeleteRange(FileChunk[] fileChunks)
+        {
+            foreach (var fileChunk in fileChunks)
+            {
+                if (File.Exists(fileChunk.Path))
+                {
+                    File.Delete(fileChunk.Path);
+                }
+            }
+        }
+
+        public void DeleteTemporaryFolder()
         {
             var rootPath = GetDirectoryPath();
             if (Directory.Exists(rootPath))

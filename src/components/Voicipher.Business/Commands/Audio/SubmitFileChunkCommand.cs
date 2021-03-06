@@ -157,7 +157,7 @@ namespace Voicipher.Business.Commands.Audio
                     _logger.Verbose($"[{userId}] Audio file was removed on destination: {tempFilePath}");
                 }
 
-                _diskStorage.RemoveRange(fileChunks);
+                _diskStorage.DeleteRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 
