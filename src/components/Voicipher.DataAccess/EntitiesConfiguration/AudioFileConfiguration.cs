@@ -21,8 +21,8 @@ namespace Voicipher.DataAccess.EntitiesConfiguration
             builder.Property(x => x.SourceFileName).HasMaxLength(100);
             builder.Property(x => x.UploadStatus).IsRequired();
             builder.Property(x => x.TotalTime).IsRequired();
-            builder.Property(x => x.TranscribedStartTime).IsRequired();
-            builder.Property(x => x.TranscribedEndTime).IsRequired();
+            builder.Property(x => x.TranscriptionStartTime).IsRequired();
+            builder.Property(x => x.TranscriptionEndTime).IsRequired();
             builder.Property(x => x.TranscribedTime).IsRequired();
             builder.Property(x => x.DateCreated).IsRequired();
             builder.Property(x => x.DateUpdatedUtc).IsRequired();

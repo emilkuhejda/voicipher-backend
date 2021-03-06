@@ -38,9 +38,9 @@ namespace Voicipher.Domain.Models
 
         public TimeSpan TotalTime { get; set; }
 
-        public TimeSpan TranscribedStartTime { get; set; }
+        public TimeSpan TranscriptionStartTime { get; set; }
 
-        public TimeSpan TranscribedEndTime { get; set; }
+        public TimeSpan TranscriptionEndTime { get; set; }
 
         public TimeSpan TranscribedTime { get; set; }
 
