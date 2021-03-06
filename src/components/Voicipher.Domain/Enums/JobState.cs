@@ -12,6 +12,7 @@
         Splitted = 7,
         Processing = 8,
         Processed = 9,
-        Completed = 10
+        Completing = 10,
+        Completed = 11
     }
 }

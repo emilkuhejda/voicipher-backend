@@ -179,6 +179,8 @@ namespace Voicipher.Business.StateMachine
         {
             try
             {
+                TryChangeState(JobState.Completing);
+
                 _machineState.DateCompletedUtc = DateTime.UtcNow;
 
                 var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
@@ -263,6 +265,8 @@ namespace Voicipher.Business.StateMachine
                 case JobState.Processing:
                     return JobState.Processed;
                 case JobState.Processed:
+                    return JobState.Completing;
+                case JobState.Completing:
                     return JobState.Completed;
                 default:
                     throw new InvalidEnumArgumentException(nameof(jobState));
