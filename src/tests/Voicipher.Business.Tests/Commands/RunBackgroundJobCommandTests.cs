@@ -74,6 +74,7 @@ namespace Voicipher.Business.Tests.Commands
         {
             var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
@@ -97,6 +98,7 @@ namespace Voicipher.Business.Tests.Commands
                 Mock.Of<ISpeechRecognitionService>(),
                 Mock.Of<IMessageCenterService>(),
                 Mock.Of<IBlobStorage>(),
+                fileAccessServiceMock.Object,
                 audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,
