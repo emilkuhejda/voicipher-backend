@@ -13,6 +13,8 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 
         Task DoConvertingAsync(CancellationToken cancellationToken);
 
+        Task DoSplitAsync(CancellationToken cancellationToken);
+
         Task DoProcessingAsync(CancellationToken cancellationToken);
 
         Task DoCompleteAsync(CancellationToken cancellationToken);

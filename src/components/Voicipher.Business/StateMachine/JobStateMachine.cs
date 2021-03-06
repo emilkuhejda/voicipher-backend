@@ -113,15 +113,28 @@ namespace Voicipher.Business.StateMachine
             TryChangeState(JobState.Converted);
         }
 
-        public async Task DoProcessingAsync(CancellationToken cancellationToken)
+        public async Task DoSplitAsync(CancellationToken cancellationToken)
         {
-            TryChangeState(JobState.Processing);
+            TryChangeState(JobState.Splitting);
 
             var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
             _backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribedAudioFiles);
 
             _logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
 
+            TryChangeState(JobState.Splitted);
+        }
+
+        public async Task DoProcessingAsync(CancellationToken cancellationToken)
+        {
+            TryChangeState(JobState.Processing);
+
+            //var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
+            //_backgroundJobParameter.AddOrUpdate(BackgroundJobParameter.AudioFiles, transcribedAudioFiles);
+
+            //_logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
+
+            var transcribedAudioFiles = _backgroundJobParameter.GetValue<TranscribedAudioFile[]>(BackgroundJobParameter.AudioFiles);
             var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             _audioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
@@ -254,6 +267,10 @@ namespace Voicipher.Business.StateMachine
                 case JobState.Converting:
                     return JobState.Converted;
                 case JobState.Converted:
+                    return JobState.Splitting;
+                case JobState.Splitting:
+                    return JobState.Splitted;
+                case JobState.Splitted:
                     return JobState.Processing;
                 case JobState.Processing:
                     return JobState.Processed;

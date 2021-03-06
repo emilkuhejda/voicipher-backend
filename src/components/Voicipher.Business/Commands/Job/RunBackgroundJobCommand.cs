@@ -66,6 +66,7 @@ namespace Voicipher.Business.Commands.Job
                     _jobStateMachine.DoInit(backgroundJob);
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
+                    await _jobStateMachine.DoSplitAsync(cancellationToken);
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
                     await _jobStateMachine.DoCompleteAsync(cancellationToken);
                 }
