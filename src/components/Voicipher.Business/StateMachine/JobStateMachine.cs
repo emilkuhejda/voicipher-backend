@@ -113,6 +113,10 @@ namespace Voicipher.Business.StateMachine
         public async Task DoConvertingAsync(CancellationToken cancellationToken)
         {
             await TryChangeStateAsync(JobState.Converting, cancellationToken);
+
+            _logger.Verbose($"[{_audioFile.Id}] Remove temporary folder for audio file {_audioFile.Id}");
+            _diskStorage.DeleteFolder(_audioFile.Id.ToString());
+
             await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
             await TryChangeStateAsync(JobState.Converted, cancellationToken);
         }
