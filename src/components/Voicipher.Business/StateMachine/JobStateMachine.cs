@@ -245,11 +245,18 @@ namespace Voicipher.Business.StateMachine
 
         public void DoClean()
         {
-            _logger.Information($"[{_machineState.AudioFileId}] Clean temporary data from disk storage");
+            try
+            {
+                _logger.Information($"[{_machineState.AudioFileId}] Clean temporary data from disk storage");
 
-            var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
-            _diskStorage.Delete(diskStorageSettings);
-            _diskStorage.DeleteFolder(_machineState.FolderName);
+                var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
+                _diskStorage.Delete(diskStorageSettings);
+                _diskStorage.DeleteFolder(_machineState.FolderName);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"[{_machineState.UserId}] Clean up failed");
+            }
         }
 
         private async Task TryChangeStateAsync(JobState jobState, CancellationToken cancellationToken)
