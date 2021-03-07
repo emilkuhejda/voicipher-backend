@@ -22,6 +22,13 @@ namespace Voicipher.Business.Services
             _appSettings = options.Value;
         }
 
+        public async Task<bool> Exists(GetBlobSettings blobSettings, CancellationToken cancellationToken)
+        {
+            var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
+            var client = container.GetBlobClient(blobSettings.FileName);
+            return await container.ExistsAsync(cancellationToken);
+        }
+
         public async Task<byte[]> GetAsync(GetBlobSettings blobSettings, CancellationToken cancellationToken)
         {
             var filePath = Path.Combine(blobSettings.AudioFileId, blobSettings.FileName ?? string.Empty);

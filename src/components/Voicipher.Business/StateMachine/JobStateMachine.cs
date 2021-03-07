@@ -150,14 +150,9 @@ namespace Voicipher.Business.StateMachine
                 var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
                 _machineState.TranscribedAudioFiles = transcribedAudioFiles;
                 await SaveStateAsync(cancellationToken);
+
+                _logger.Information($"[{_audioFile.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
             }
-
-            _logger.Information($"[{_audioFile.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
-
-            _logger.Verbose($"[{_audioFile.UserId}] Start deleting transcribed items {_audioFile.OriginalSourceFileName} from blob storage");
-            var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
-            await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
-            _logger.Verbose($"[{_audioFile.UserId}] Transcribed items {_audioFile.OriginalSourceFileName} was deleted from blob storage");
 
             _logger.Verbose($"[{_audioFile.UserId}] {_machineState.TranscribedAudioFiles.Length} transcription items ready for upload");
 
@@ -179,7 +174,6 @@ namespace Voicipher.Business.StateMachine
 
             var diskStorageSettings = new DiskStorageSettings(_machineState.FolderName, _machineState.WavSourceFileName);
             _diskStorage.Delete(diskStorageSettings);
-
             _logger.Verbose($"[{_machineState.AudioFileId}] Wav audio file {_machineState.WavSourceFileName} was deleted from temporary disk storage");
 
             await TryChangeStateAsync(JobState.Splitted, cancellationToken);
