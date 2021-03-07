@@ -39,9 +39,9 @@ namespace Voicipher.Business.StateMachine
         private readonly IWavFileService _wavFileService;
         private readonly ISpeechRecognitionService _speechRecognitionService;
         private readonly IMessageCenterService _messageCenterService;
+        private readonly IFileAccessService _fileAccessService;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
-        private readonly IFileAccessService _fileAccessService;
         private readonly IAudioFileRepository _audioFileRepository;
         private readonly ITranscribeItemRepository _transcribeItemRepository;
         private readonly IUnitOfWork _unitOfWork;
@@ -60,9 +60,9 @@ namespace Voicipher.Business.StateMachine
             IWavFileService wavFileService,
             ISpeechRecognitionService speechRecognitionService,
             IMessageCenterService messageCenterService,
+            IFileAccessService fileAccessService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IFileAccessService fileAccessService,
             IAudioFileRepository audioFileRepository,
             ITranscribeItemRepository transcribeItemRepository,
             IUnitOfWork unitOfWork,
@@ -75,9 +75,9 @@ namespace Voicipher.Business.StateMachine
             _wavFileService = wavFileService;
             _speechRecognitionService = speechRecognitionService;
             _messageCenterService = messageCenterService;
+            _fileAccessService = fileAccessService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Audio];
-            _fileAccessService = fileAccessService;
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
             _unitOfWork = unitOfWork;
