@@ -53,13 +53,13 @@ namespace Voicipher.Business.Services
             var tempFilePath = string.Empty;
             try
             {
-                _logger.Verbose($"[{audioFile.Id}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
+                _logger.Verbose($"[{audioFile.UserId}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
 
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(bloBytes, cancellationToken);
 
-                _logger.Verbose($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
+                _logger.Verbose($"[{audioFile.UserId}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
 
                 var wavFilePath = await ConvertToWavAsync(tempFilePath, audioFile);
 
@@ -83,6 +83,13 @@ namespace Voicipher.Business.Services
             var wavFilePath = Path.Combine(GetDirectoryPath(audioFile.Id), audioFile.SourceFileName ?? string.Empty);
             if (!_fileAccessService.Exists(wavFilePath))
                 throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
+
+            _logger.Verbose($"[{audioFile.UserId}] Clean partial temporary files");
+            var directory = GetDirectoryPath(audioFile.Id);
+            foreach (var path in _fileAccessService.GetFiles(directory).Where(x => !x.Equals(wavFilePath, StringComparison.OrdinalIgnoreCase)))
+            {
+                _fileAccessService.Delete(path);
+            }
 
             var remainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(audioFile.UserId, cancellationToken);
             if (remainingTime < TimeSpan.FromSeconds(1))

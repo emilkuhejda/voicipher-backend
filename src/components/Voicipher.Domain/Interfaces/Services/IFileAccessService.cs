@@ -9,6 +9,8 @@ namespace Voicipher.Domain.Interfaces.Services
 
         bool DirectoryExists(string path);
 
+        string[] GetFiles(string path);
+
         Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken);
 
         Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken);

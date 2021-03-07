@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Newtonsoft.Json;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
@@ -12,7 +11,7 @@ namespace Voicipher.Domain.State
         {
             JobState = JobState.Idle;
             DateCompletedUtc = DateTime.MinValue;
-            TranscribedAudioFiles = new TranscribedAudioFile[0];
+            TranscribedAudioFiles = Array.Empty<TranscribedAudioFile>();
         }
 
         public Guid JobId { get; set; }
@@ -38,6 +37,6 @@ namespace Voicipher.Domain.State
         [JsonIgnore]
         public string FolderName => AudioFileId.ToString();
 
-        public IEnumerable<TranscribedAudioFile> TranscribedAudioFiles { get; set; }
+        public TranscribedAudioFile[] TranscribedAudioFiles { get; set; }
     }
 }

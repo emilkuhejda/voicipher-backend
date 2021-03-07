@@ -1,4 +1,5 @@
-﻿using Voicipher.Domain.Enums;
+﻿using System;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.State;
 
@@ -25,6 +26,11 @@ namespace Voicipher.Business.Extensions
             machineState.DateCompletedUtc = stateToRestore.DateCompletedUtc;
             machineState.IsRestored = true;
             machineState.TranscribedAudioFiles = stateToRestore.TranscribedAudioFiles;
+        }
+
+        public static void ClearTranscribedAudioFiles(this MachineState machineState)
+        {
+            machineState.TranscribedAudioFiles = Array.Empty<TranscribedAudioFile>();
         }
     }
 }

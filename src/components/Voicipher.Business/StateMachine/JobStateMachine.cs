@@ -144,19 +144,24 @@ namespace Voicipher.Business.StateMachine
             if (CanSkip(JobState.Splitting))
                 return;
 
-            var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
-            _machineState.TranscribedAudioFiles = transcribedAudioFiles;
+            if (!_machineState.TranscribedAudioFiles.Any() || _machineState.TranscribedAudioFiles.Any(x => !_fileAccessService.Exists(x.Path)))
+            {
+                _machineState.ClearTranscribedAudioFiles();
+                var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
+                _machineState.TranscribedAudioFiles = transcribedAudioFiles;
+                await SaveStateAsync(cancellationToken);
+            }
 
-            _logger.Information($"[{_audioFile.UserId}] Audio file was split to {transcribedAudioFiles.Length} partial audio files");
+            _logger.Information($"[{_audioFile.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
 
             _logger.Verbose($"[{_audioFile.UserId}] Start deleting transcribed items {_audioFile.OriginalSourceFileName} from blob storage");
             var blobSettings = new DeleteBlobSettings(_audioFile.OriginalSourceFileName, _audioFile.UserId, _audioFile.Id);
             await _blobStorage.DeleteTranscribedFiles(blobSettings, cancellationToken);
             _logger.Verbose($"[{_audioFile.UserId}] Transcribed items {_audioFile.OriginalSourceFileName} was deleted from blob storage");
 
-            _logger.Verbose($"[{_audioFile.UserId}] {transcribedAudioFiles.Length} transcription items ready for upload");
+            _logger.Verbose($"[{_audioFile.UserId}] {_machineState.TranscribedAudioFiles.Length} transcription items ready for upload");
 
-            foreach (var transcribedAudioFile in transcribedAudioFiles)
+            foreach (var transcribedAudioFile in _machineState.TranscribedAudioFiles)
             {
                 if (!_fileAccessService.Exists(transcribedAudioFile.Path))
                     throw new FileNotFoundException($"[{_audioFile.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
@@ -170,7 +175,7 @@ namespace Voicipher.Business.StateMachine
                 _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
             }
 
-            _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage");
+            _logger.Information($"[{_audioFile.UserId}] Audio files ({_machineState.TranscribedAudioFiles.Length}) were uploaded to blob storage");
 
             var diskStorageSettings = new DiskStorageSettings(_machineState.FolderName, _machineState.WavSourceFileName);
             _diskStorage.Delete(diskStorageSettings);
@@ -270,9 +275,14 @@ namespace Voicipher.Business.StateMachine
 
             _machineState.JobState = jobState;
 
+            await SaveStateAsync(cancellationToken);
+        }
+
+        private Task SaveStateAsync(CancellationToken cancellationToken)
+        {
             var machineStateJson = JsonConvert.SerializeObject(_machineState);
             var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
-            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
+            return _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
         }
 
         private bool CanSkip(JobState jobState)
