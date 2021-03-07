@@ -31,3 +31,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Notifications.NotificationContent.CustomData")]
 [assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Payloads.Notifications.InformationMessagePayload.LanguageVersions")]
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Settings.AppSettings.AllowedHosts")]
+[assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.State.MachineState.TranscribedAudioFiles")]

@@ -24,7 +24,6 @@ namespace Voicipher.Host.Extensions
                 var context = serviceScope.ServiceProvider.GetRequiredService<DatabaseContext>();
                 var index = serviceScope.ServiceProvider.GetRequiredService<IIndex<StorageLocation, IDiskStorage>>();
                 var chunkStorage = index[StorageLocation.Chunk];
-                var audioStorage = index[StorageLocation.Audio];
                 var logger = serviceScope.ServiceProvider.GetRequiredService<ILogger>().ForContext<Startup>();
 
                 try
@@ -33,8 +32,7 @@ namespace Voicipher.Host.Extensions
 
                     context.Database.ExecuteSqlRaw($"TRUNCATE TABLE [{nameof(FileChunk)}]");
 
-                    chunkStorage.RemoveTemporaryFolder();
-                    audioStorage.RemoveTemporaryFolder();
+                    chunkStorage.DeleteFolder();
 
                     logger.Information("Finish of the cleaning temporary data");
                 }

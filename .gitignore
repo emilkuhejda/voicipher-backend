@@ -222,3 +222,4 @@ src/web/Voicipher.Host/Logs/
 
 src/web/Voicipher.Host/wwwroot/uploads/chunks/
 src/web/Voicipher.Host/wwwroot/uploads/audio/
+src/web/Voicipher.Host/wwwroot/uploads/state/
