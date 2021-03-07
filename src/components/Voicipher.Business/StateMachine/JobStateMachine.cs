@@ -201,35 +201,27 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoCompleteAsync(CancellationToken cancellationToken)
         {
-            try
+            await TryChangeStateAsync(JobState.Completing, cancellationToken);
+
+            _machineState.DateCompletedUtc = DateTime.UtcNow;
+
+            var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
             {
-                await TryChangeStateAsync(JobState.Completing, cancellationToken);
+                UserId = _audioFile.UserId,
+                ApplicationId = _appSettings.ApplicationId,
+                Time = _audioFile.TranscribedTime,
+                Operation = SubscriptionOperation.Remove
+            };
+            var modifySubscriptionCommandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, null, cancellationToken);
+            if (!modifySubscriptionCommandResult.IsSuccess)
+                throw new OperationErrorException(modifySubscriptionCommandResult.Error.ErrorCode);
 
-                _machineState.DateCompletedUtc = DateTime.UtcNow;
+            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
+            await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
-                var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
-                {
-                    UserId = _audioFile.UserId,
-                    ApplicationId = _appSettings.ApplicationId,
-                    Time = _audioFile.TranscribedTime,
-                    Operation = SubscriptionOperation.Remove
-                };
-                var modifySubscriptionCommandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, null, cancellationToken);
-                if (!modifySubscriptionCommandResult.IsSuccess)
-                    throw new OperationErrorException(modifySubscriptionCommandResult.Error.ErrorCode);
+            _audioFile.SourceFileName = string.Empty;
 
-                var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
-                await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
-
-                _audioFile.SourceFileName = string.Empty;
-
-                await TryChangeStateAsync(JobState.Completed, cancellationToken);
-            }
-            catch (RequestFailedException ex)
-            {
-                _logger.Error(ex, $"[{_audioFile.UserId}] Blob storage is unavailable");
-                throw;
-            }
+            await TryChangeStateAsync(JobState.Completed, cancellationToken);
         }
 
         public async Task DoErrorAsync(Exception exception, CancellationToken cancellationToken)

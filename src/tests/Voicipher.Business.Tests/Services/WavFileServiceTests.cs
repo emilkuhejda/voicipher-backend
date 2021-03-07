@@ -7,7 +7,6 @@ using Autofac.Features.Indexed;
 using Moq;
 using Serilog;
 using Voicipher.Business.Services;
-using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
@@ -24,12 +23,11 @@ namespace Voicipher.Business.Tests.Services
             // Arrange
             var subscriptionTime = TimeSpan.FromMinutes(5);
 
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
             var diskStorageMock = new Mock<IDiskStorage>();
             var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
-            var fileAccessServiceMock = new Mock<IFileAccessService>();
             var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
 
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
@@ -43,11 +41,10 @@ namespace Voicipher.Business.Tests.Services
             currentUserSubscriptionRepositoryMock.Setup(x => x.GetRemainingTimeAsync(It.IsAny<Guid>(), default)).ReturnsAsync(subscriptionTime);
 
             var wavFileService = new WavFileService(
+                fileAccessServiceMock.Object,
                 blobStorageMock.Object,
                 indexMock.Object,
-                fileAccessServiceMock.Object,
                 currentUserSubscriptionRepositoryMock.Object,
-                unitOfWorkMock.Object,
                 loggerMock.Object);
 
             // Act
@@ -67,12 +64,11 @@ namespace Voicipher.Business.Tests.Services
             // Arrange
             var subscriptionTime = TimeSpan.FromMinutes(3);
 
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
             var diskStorageMock = new Mock<IDiskStorage>();
             var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
-            var fileAccessServiceMock = new Mock<IFileAccessService>();
             var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
-            var unitOfWorkMock = new Mock<IUnitOfWork>();
             var loggerMock = new Mock<ILogger>();
 
             var directory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;
@@ -86,11 +82,10 @@ namespace Voicipher.Business.Tests.Services
             currentUserSubscriptionRepositoryMock.Setup(x => x.GetRemainingTimeAsync(It.IsAny<Guid>(), default)).ReturnsAsync(subscriptionTime);
 
             var wavFileService = new WavFileService(
+                fileAccessServiceMock.Object,
                 blobStorageMock.Object,
                 indexMock.Object,
-                fileAccessServiceMock.Object,
                 currentUserSubscriptionRepositoryMock.Object,
-                unitOfWorkMock.Object,
                 loggerMock.Object);
 
             // Act

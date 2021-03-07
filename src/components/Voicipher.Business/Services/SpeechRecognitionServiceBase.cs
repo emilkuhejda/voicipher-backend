@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -28,6 +29,7 @@ namespace Voicipher.Business.Services
     {
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IMessageCenterService _messageCenterService;
+        private readonly IFileAccessService _fileAccessService;
         private readonly IDiskStorage _diskStorage;
         private readonly AppSettings _appSettings;
 
@@ -37,12 +39,14 @@ namespace Voicipher.Business.Services
         protected SpeechRecognitionServiceBase(
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
+            IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _messageCenterService = messageCenterService;
+            _fileAccessService = fileAccessService;
             _diskStorage = index[StorageLocation.Audio];
             _appSettings = options.Value;
             Logger = logger.ForContext<SpeechRecognitionService>();
@@ -110,13 +114,25 @@ namespace Voicipher.Business.Services
 
             Logger.Verbose($"[{speechRecognizeConfig.UserId}] Start speech recognition for file {transcribedAudioFile.Path}");
 
-            var recognizedResult = await GetRecognizedResultAsync(speechClient, transcribedAudioFile, speechRecognizeConfig);
-
+            RecognizedResult recognizedResult;
             var fileName = $"{transcribedAudioFile.Id}.json";
-            var recognizedResultJson = JsonConvert.SerializeObject(recognizedResult);
-            var diskStorageSettings = new DiskStorageSettings(speechRecognizeConfig.AudioFileId.ToString(), fileName);
-            var filePath = await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(recognizedResultJson), diskStorageSettings, cancellationToken);
-            Logger.Information($"[{speechRecognizeConfig.UserId}] Store recognition result to disk in destination {filePath}");
+            var filePath = GetFilePath(fileName, speechRecognizeConfig.AudioFileId);
+            if (_fileAccessService.Exists(filePath))
+            {
+                var serializedRecognizedResult = await _fileAccessService.ReadAllTextAsync(filePath, cancellationToken);
+                recognizedResult = JsonConvert.DeserializeObject<RecognizedResult>(serializedRecognizedResult);
+
+                Logger.Verbose($"[{speechRecognizeConfig.UserId}] Recognition result restored from destination {filePath}");
+            }
+            else
+            {
+                recognizedResult = await GetRecognizedResultAsync(speechClient, transcribedAudioFile, speechRecognizeConfig);
+
+                var serializedRecognizedResult = JsonConvert.SerializeObject(recognizedResult);
+                var diskStorageSettings = new DiskStorageSettings(speechRecognizeConfig.AudioFileId.ToString(), fileName);
+                filePath = await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(serializedRecognizedResult), diskStorageSettings, cancellationToken);
+                Logger.Verbose($"[{speechRecognizeConfig.UserId}] Store recognition result to disk in destination {filePath}");
+            }
 
             var dateCreated = DateTime.UtcNow;
             var transcribeItem = new TranscribeItem
@@ -154,6 +170,11 @@ namespace Voicipher.Business.Services
             };
 
             return builder.Build();
+        }
+
+        private string GetFilePath(string fileName, Guid audioFileId)
+        {
+            return Path.Combine(_diskStorage.GetDirectoryPath(audioFileId.ToString()), fileName);
         }
     }
 }

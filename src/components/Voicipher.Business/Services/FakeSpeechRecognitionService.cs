@@ -25,10 +25,11 @@ namespace Voicipher.Business.Services
         public FakeSpeechRecognitionService(
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
+            IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(audioFileProcessingChannel, messageCenterService, index, options, logger)
+            : base(audioFileProcessingChannel, messageCenterService, fileAccessService, index, options, logger)
         {
         }
 

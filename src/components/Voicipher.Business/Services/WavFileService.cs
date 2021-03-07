@@ -19,22 +19,22 @@ namespace Voicipher.Business.Services
     {
         private const int FileLengthInSeconds = 58;
 
+        private readonly IFileAccessService _fileAccessService;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
-        private readonly IFileAccessService _fileAccessService;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
         private readonly ILogger _logger;
 
         public WavFileService(
+            IFileAccessService fileAccessService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IFileAccessService fileAccessService,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
             ILogger logger)
         {
+            _fileAccessService = fileAccessService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Audio];
-            _fileAccessService = fileAccessService;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
             _logger = logger.ForContext<WavFileService>();
         }
