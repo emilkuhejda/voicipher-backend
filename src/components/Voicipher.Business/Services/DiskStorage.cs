@@ -25,28 +25,17 @@ namespace Voicipher.Business.Services
 
         public Task<string> UploadAsync(byte[] bytes, CancellationToken cancellationToken)
         {
-            return UploadAsync(bytes, new UploadSettings(), cancellationToken);
+            return UploadAsync(bytes, new DiskStorageSettings(), cancellationToken);
         }
 
-        public async Task<string> UploadAsync(byte[] bytes, UploadSettings uploadSettings, CancellationToken cancellationToken)
+        public async Task<string> UploadAsync(byte[] bytes, DiskStorageSettings diskStorageSettings, CancellationToken cancellationToken)
         {
-            var fileName = string.IsNullOrWhiteSpace(uploadSettings.FileName) ? $"{Guid.NewGuid()}.tmp" : uploadSettings.FileName;
-            var rootPath = GetDirectoryPath(uploadSettings.FolderName ?? string.Empty);
+            var fileName = string.IsNullOrWhiteSpace(diskStorageSettings.FileName) ? $"{Guid.NewGuid()}.tmp" : diskStorageSettings.FileName;
+            var rootPath = GetDirectoryPath(diskStorageSettings.FolderName ?? string.Empty);
             var filePath = Path.Combine(rootPath, fileName);
             await File.WriteAllBytesAsync(filePath, bytes, cancellationToken);
 
             return filePath;
-        }
-
-        public void RemoveRange(FileChunk[] fileChunks)
-        {
-            foreach (var fileChunk in fileChunks)
-            {
-                if (File.Exists(fileChunk.Path))
-                {
-                    File.Delete(fileChunk.Path);
-                }
-            }
         }
 
         public async Task<byte[]> ReadAllBytesAsync(FileChunk[] fileChunks, CancellationToken cancellationToken)
@@ -61,9 +50,36 @@ namespace Voicipher.Business.Services
             return source.ToArray();
         }
 
-        public void RemoveTemporaryFolder()
+        public void Delete(DiskStorageSettings diskStorageSettings)
         {
-            var rootPath = GetDirectoryPath();
+            var rootPath = GetDirectoryPath(diskStorageSettings.FolderName);
+            var filePath = Path.Combine(rootPath, diskStorageSettings.FileName);
+
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+        }
+
+        public void DeleteRange(FileChunk[] fileChunks)
+        {
+            foreach (var fileChunk in fileChunks)
+            {
+                if (File.Exists(fileChunk.Path))
+                {
+                    File.Delete(fileChunk.Path);
+                }
+            }
+        }
+
+        public void DeleteFolder()
+        {
+            DeleteFolder(string.Empty);
+        }
+
+        public void DeleteFolder(string folderName)
+        {
+            var rootPath = GetDirectoryPath(folderName);
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, true);

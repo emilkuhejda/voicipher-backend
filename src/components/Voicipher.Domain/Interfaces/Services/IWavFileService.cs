@@ -6,7 +6,7 @@ namespace Voicipher.Domain.Interfaces.Services
 {
     public interface IWavFileService
     {
-        Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken);
+        Task<string> RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken);
 
         Task<TranscribedAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken);
     }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -92,6 +93,8 @@ namespace Voicipher.Business.Tests.Commands
             var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var modifySubscriptionTimeCommandMock = new Mock<IModifySubscriptionTimeCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -104,9 +107,15 @@ namespace Voicipher.Business.Tests.Commands
             modifySubscriptionTimeCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new CommandResult());
+            fileAccessServiceMock
+                .Setup(x => x.Exists(It.IsAny<string>()))
+                .Returns(true);
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(new[] { new TranscribedAudioFile() });
+            indexMock
+                .Setup(x => x[It.IsAny<StorageLocation>()])
+                .Returns(diskStorageMock.Object);
             audioFileRepositoryMock
                 .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new AudioFile());
@@ -120,8 +129,9 @@ namespace Voicipher.Business.Tests.Commands
                 wavFileServiceMock.Object,
                 Mock.Of<ISpeechRecognitionService>(),
                 Mock.Of<IMessageCenterService>(),
-                Mock.Of<IBlobStorage>(),
                 fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
                 audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 unitOfWorkMock.Object,

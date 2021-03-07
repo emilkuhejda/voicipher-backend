@@ -17,9 +17,19 @@ namespace Voicipher.Business.Services
             return Directory.Exists(path);
         }
 
+        public string[] GetFiles(string path)
+        {
+            return Directory.GetFiles(path);
+        }
+
         public Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
         {
             return File.ReadAllBytesAsync(path, cancellationToken);
+        }
+
+        public Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        {
+            return File.ReadAllTextAsync(path, cancellationToken);
         }
 
         public void Delete(string path)

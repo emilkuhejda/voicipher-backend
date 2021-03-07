@@ -8,7 +8,6 @@ using Autofac.Features.Indexed;
 using Azure;
 using NAudio.Wave;
 using Serilog;
-using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
@@ -19,58 +18,55 @@ namespace Voicipher.Business.Services
     public class WavFileService : IWavFileService
     {
         private const int FileLengthInSeconds = 58;
+        private const double ExtraSeconds = 0.5;
 
+        private readonly IFileAccessService _fileAccessService;
         private readonly IBlobStorage _blobStorage;
         private readonly IDiskStorage _diskStorage;
-        private readonly IFileAccessService _fileAccessService;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
         public WavFileService(
+            IFileAccessService fileAccessService,
             IBlobStorage blobStorage,
             IIndex<StorageLocation, IDiskStorage> index,
-            IFileAccessService fileAccessService,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
-            IUnitOfWork unitOfWork,
             ILogger logger)
         {
+            _fileAccessService = fileAccessService;
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Audio];
-            _fileAccessService = fileAccessService;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
-            _unitOfWork = unitOfWork;
             _logger = logger.ForContext<WavFileService>();
         }
 
-        public async Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
+        public async Task<string> RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
             _logger.Information($"[{audioFile.UserId}] Start conversion audio file {audioFile.Id} to wav format");
 
-            var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            var sourceFileNamePath = Path.Combine(GetDirectoryPath(audioFile.Id), audioFile.SourceFileName ?? string.Empty);
             if (_fileAccessService.Exists(sourceFileNamePath))
             {
                 _logger.Error($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
-                return;
+                return string.Empty;
             }
 
             var tempFilePath = string.Empty;
             try
             {
-                _logger.Verbose($"[{audioFile.Id}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
+                _logger.Verbose($"[{audioFile.UserId}] Start downloading audio file {audioFile.OriginalSourceFileName} from blob storage");
 
                 var getBlobSettings = new GetBlobSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id);
                 var bloBytes = await _blobStorage.GetAsync(getBlobSettings, cancellationToken);
                 tempFilePath = await _diskStorage.UploadAsync(bloBytes, cancellationToken);
 
-                _logger.Verbose($"[{audioFile.Id}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
+                _logger.Verbose($"[{audioFile.UserId}] Audio file {audioFile.OriginalSourceFileName} was downloaded from blob storage");
 
                 var wavFilePath = await ConvertToWavAsync(tempFilePath, audioFile);
 
-                audioFile.SourceFileName = Path.GetFileName(wavFilePath);
-                await _unitOfWork.SaveAsync(cancellationToken);
-
                 _logger.Information($"[{audioFile.UserId}] Conversion audio file {audioFile.Id} to wav format finished. New audio file was stored in destination {wavFilePath}");
+
+                return Path.GetFileName(wavFilePath);
             }
             catch (RequestFailedException ex)
             {
@@ -85,9 +81,16 @@ namespace Voicipher.Business.Services
 
         public async Task<TranscribedAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
-            var wavFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            var wavFilePath = Path.Combine(GetDirectoryPath(audioFile.Id), audioFile.SourceFileName ?? string.Empty);
             if (!_fileAccessService.Exists(wavFilePath))
                 throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
+
+            _logger.Verbose($"[{audioFile.UserId}] Clean partial temporary files");
+            var directory = GetDirectoryPath(audioFile.Id);
+            foreach (var path in _fileAccessService.GetFiles(directory).Where(x => !x.Equals(wavFilePath, StringComparison.OrdinalIgnoreCase)))
+            {
+                _fileAccessService.Delete(path);
+            }
 
             var remainingTime = await _currentUserSubscriptionRepository.GetRemainingTimeAsync(audioFile.UserId, cancellationToken);
             if (remainingTime < TimeSpan.FromSeconds(1))
@@ -95,8 +98,6 @@ namespace Voicipher.Business.Services
 
             var wavFileSource = await _fileAccessService.ReadAllBytesAsync(wavFilePath, cancellationToken);
             var transcribedAudioFiles = await SplitWavFileAsync(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId);
-
-            _fileAccessService.Delete(wavFilePath);
 
             return transcribedAudioFiles.ToArray();
         }
@@ -108,7 +109,8 @@ namespace Voicipher.Business.Services
             using (var reader = new MediaFoundationReader(inputFilePath))
             {
                 var endTime = Math.Min(audioFile.TranscriptionEndTime.Ticks, audioFile.TotalTime.Ticks);
-                var trimmedAudioFile = await TrimAudioFileAsync(reader, audioFile.TranscriptionStartTime, TimeSpan.FromTicks(endTime));
+                var destinationFileName = GetFilePath(audioFile.Id);
+                var trimmedAudioFile = await TrimAudioFileAsync(reader, audioFile.TranscriptionStartTime, TimeSpan.FromTicks(endTime), destinationFileName);
 
                 _logger.Verbose($"[{audioFile.UserId}] File {inputFilePath} was converted and stored in new destination {trimmedAudioFile.filePath}");
 
@@ -140,9 +142,10 @@ namespace Voicipher.Business.Services
                             ? remainingTimeSpan
                             : TimeSpan.FromSeconds(FileLengthInSeconds);
 
-                        var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
+                        var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(ExtraSeconds));
                         var endTime = requestedEndTime > audioTotalTime ? audioTotalTime : requestedEndTime;
-                        var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime);
+                        var destinationFileName = GetFilePath(audioFileId);
+                        var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime, destinationFileName);
 
                         var transcribedAudioFile = new TranscribedAudioFile
                         {
@@ -178,12 +181,11 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private Task<(string filePath, TimeSpan totalTime)> TrimAudioFileAsync(WaveStream reader, TimeSpan startTime, TimeSpan endTime)
+        private Task<(string filePath, TimeSpan totalTime)> TrimAudioFileAsync(WaveStream reader, TimeSpan startTime, TimeSpan endTime, string destinationFileName)
         {
             return Task.Run(() =>
             {
-                var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
-                using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
+                using (var writer = new WaveFileWriter(destinationFileName, reader.WaveFormat))
                 {
                     var fileSegmentLength = reader.WaveFormat.AverageBytesPerSecond / 1000;
 
@@ -210,9 +212,19 @@ namespace Voicipher.Business.Services
                         }
                     }
 
-                    return (outputFileName, writer.TotalTime);
+                    return (destinationFileName, writer.TotalTime);
                 }
             });
+        }
+
+        private string GetFilePath(Guid audioFileId)
+        {
+            return Path.Combine(GetDirectoryPath(audioFileId), $"{Guid.NewGuid()}.voc");
+        }
+
+        private string GetDirectoryPath(Guid audioFileId)
+        {
+            return _diskStorage.GetDirectoryPath(audioFileId.ToString());
         }
     }
 }

@@ -47,7 +47,7 @@ namespace Voicipher.Business.Commands.Audio
             {
                 var fileChunks = await _fileChunkRepository.GetByAudioFileIdAsync(parameter.AudioFileId);
 
-                _diskStorage.RemoveRange(fileChunks);
+                _diskStorage.DeleteRange(fileChunks);
                 _fileChunkRepository.RemoveRange(fileChunks);
                 await _fileChunkRepository.SaveAsync(cancellationToken);
 

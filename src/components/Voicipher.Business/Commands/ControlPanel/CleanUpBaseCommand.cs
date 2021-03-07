@@ -93,7 +93,7 @@ namespace Voicipher.Business.Commands.ControlPanel
                             var jsonSerializerSettings = new JsonSerializerSettings { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
                             var serializedAudioFile = JsonConvert.SerializeObject(audioFile, Formatting.None, jsonSerializerSettings);
                             var jsonBytes = Encoding.UTF8.GetBytes(serializedAudioFile);
-                            var jsonPath = await _diskStorage.UploadAsync(jsonBytes, new UploadSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
+                            var jsonPath = await _diskStorage.UploadAsync(jsonBytes, new DiskStorageSettings(folderPath, $"{audioFile.Id}.json"), cancellationToken);
                             Logger.Verbose($"Json for audio file {audioFile.Id} was created on destination {jsonPath}");
 
                             await BackupSourceAsync(new BackupSourceSettings(audioFile.OriginalSourceFileName, audioFile.UserId, audioFile.Id, folderPath), cancellationToken);
@@ -169,8 +169,8 @@ namespace Voicipher.Business.Commands.ControlPanel
                 var source = await BlobStorage.GetAsync(blobSettings, cancellationToken);
                 Logger.Verbose($"Audio source {settings.FileName} was downloaded");
 
-                var uploadSettings = new UploadSettings(settings.FolderName, settings.FileName);
-                var sourcePath = await _diskStorage.UploadAsync(source, uploadSettings, cancellationToken);
+                var diskStorageSettings = new DiskStorageSettings(settings.FolderName, settings.FileName);
+                var sourcePath = await _diskStorage.UploadAsync(source, diskStorageSettings, cancellationToken);
                 Logger.Verbose($"Audio source {settings.FileName} was uploaded to disk storage on destination {sourcePath}");
             }
             catch (BlobNotExistsException)

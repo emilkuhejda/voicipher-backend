@@ -6,6 +6,8 @@ namespace Voicipher.Domain.Interfaces.Services
 {
     public interface IBlobStorage
     {
+        Task<bool> Exists(GetBlobSettings blobSettings, CancellationToken cancellationToken);
+
         Task<byte[]> GetAsync(GetBlobSettings blobSettings, CancellationToken cancellationToken);
 
         Task<string> UploadAsync(UploadBlobSettings blobSettings, CancellationToken cancellationToken);

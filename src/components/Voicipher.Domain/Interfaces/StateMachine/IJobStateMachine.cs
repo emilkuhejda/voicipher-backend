@@ -7,11 +7,13 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 {
     public interface IJobStateMachine
     {
-        void DoInit(BackgroundJob backgroundJob);
+        Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken);
 
         Task DoValidationAsync(CancellationToken cancellationToken);
 
         Task DoConvertingAsync(CancellationToken cancellationToken);
+
+        Task DoSplitAsync(CancellationToken cancellationToken);
 
         Task DoProcessingAsync(CancellationToken cancellationToken);
 
