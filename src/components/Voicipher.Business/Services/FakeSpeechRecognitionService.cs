@@ -43,7 +43,7 @@ namespace Voicipher.Business.Services
                 var alternatives = speechRecognitionResults
                     .Select((result, index) => new
                     {
-                        Alternatives = result.Alternatives.Select(x => new RecognitionAlternative(index, x.Transcript, x.Confidence, x.Words.ToRecognitionWords()))
+                        Alternatives = result.Alternatives.Select(x => new RecognitionAlternative(index, $"{Guid.NewGuid()}: {x.Transcript}", x.Confidence, x.Words.ToRecognitionWords()))
                     })
                     .SelectMany(x => x.Alternatives);
 
