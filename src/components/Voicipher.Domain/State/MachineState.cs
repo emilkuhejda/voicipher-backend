@@ -10,6 +10,7 @@ namespace Voicipher.Domain.State
         public MachineState()
         {
             JobState = JobState.Idle;
+            StateFilePath = string.Empty;
             DateCompletedUtc = DateTime.MinValue;
             TranscribedAudioFiles = new TranscribedAudioFile[0];
         }
@@ -25,6 +26,10 @@ namespace Voicipher.Domain.State
         public int Attempt { get; set; }
 
         public string FileName { get; set; }
+
+        public string StateFilePath { get; set; }
+
+        public string StateFileName { get; set; }
 
         public DateTime DateCompletedUtc { get; set; }
 

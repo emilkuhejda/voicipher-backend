@@ -90,6 +90,7 @@ namespace Voicipher.Business.StateMachine
         public async Task DoInit(BackgroundJob backgroundJob, CancellationToken cancellationToken)
         {
             _backgroundJob = backgroundJob;
+            _machineState.StateFileName = $"{backgroundJob.AudioFileId}.json";
             _machineState.FromBackgroundJob(backgroundJob);
 
             await TryChangeStateAsync(JobState.Initialized, cancellationToken);
@@ -151,11 +152,9 @@ namespace Voicipher.Business.StateMachine
                     await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                     _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
-
-                    _fileAccessService.Delete(transcribedAudioFile.Path);
                 }
 
-                _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage and delete from temporary storage");
+                _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage");
             }
 
             await TryChangeStateAsync(JobState.Splitted, cancellationToken);
@@ -234,10 +233,10 @@ namespace Voicipher.Business.StateMachine
 
         public void DoClean()
         {
-            foreach (var transcribedAudioFile in _machineState.TranscribedAudioFiles)
-            {
-                _fileAccessService.Delete(transcribedAudioFile.Path);
-            }
+            _logger.Information($"[{_machineState.AudioFileId}] Clean temporary data from disk storage");
+
+            _fileAccessService.Delete(_machineState.StateFilePath);
+            _fileAccessService.DeleteDirectory(_machineState.AudioFileId.ToString());
         }
 
         private async Task TryChangeStateAsync(JobState jobState, CancellationToken cancellationToken)
@@ -247,10 +246,9 @@ namespace Voicipher.Business.StateMachine
 
             _machineState.JobState = jobState;
 
-            var fileName = $"{_machineState.AudioFileId}.json";
             var machineStateJson = JsonConvert.SerializeObject(_machineState);
-            var diskStorageSettings = new DiskStorageSettings(fileName);
-            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
+            var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
+            _machineState.StateFilePath = await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
         }
 
         private JobState CanTransition(JobState jobState)
