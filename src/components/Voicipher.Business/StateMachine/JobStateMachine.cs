@@ -235,8 +235,9 @@ namespace Voicipher.Business.StateMachine
         {
             _logger.Information($"[{_machineState.AudioFileId}] Clean temporary data from disk storage");
 
-            _fileAccessService.Delete(_machineState.StateFilePath);
-            _fileAccessService.DeleteDirectory(_machineState.AudioFileId.ToString());
+            var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
+            _diskStorage.Delete(diskStorageSettings);
+            _diskStorage.DeleteFolder(_machineState.AudioFileId.ToString());
         }
 
         private async Task TryChangeStateAsync(JobState jobState, CancellationToken cancellationToken)
@@ -248,7 +249,7 @@ namespace Voicipher.Business.StateMachine
 
             var machineStateJson = JsonConvert.SerializeObject(_machineState);
             var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
-            _machineState.StateFilePath = await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
+            await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
         }
 
         private JobState CanTransition(JobState jobState)
