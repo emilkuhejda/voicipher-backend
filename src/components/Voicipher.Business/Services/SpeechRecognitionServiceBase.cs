@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Speech.V1;
 using Grpc.Auth;
@@ -26,6 +28,7 @@ namespace Voicipher.Business.Services
     {
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IMessageCenterService _messageCenterService;
+        private readonly IDiskStorage _diskStorage;
         private readonly AppSettings _appSettings;
 
         private int _totalTasks;
@@ -34,11 +37,13 @@ namespace Voicipher.Business.Services
         protected SpeechRecognitionServiceBase(
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
+            IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
         {
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _messageCenterService = messageCenterService;
+            _diskStorage = index[StorageLocation.Audio];
             _appSettings = options.Value;
             Logger = logger.ForContext<SpeechRecognitionService>();
         }
@@ -67,7 +72,7 @@ namespace Voicipher.Business.Services
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
             foreach (var transcribeAudioFile in transcribedAudioFiles)
             {
-                updateMethods.Add(() => RecognizeSpeech(transcribeAudioFile, speechRecognizeConfig));
+                updateMethods.Add(() => RecognizeSpeech(transcribeAudioFile, speechRecognizeConfig, cancellationToken));
             }
 
             _totalTasks = updateMethods.Count;
@@ -99,13 +104,19 @@ namespace Voicipher.Business.Services
             await _messageCenterService.SendAsync(HubMethodsHelper.GetRecognitionProgressChangedMethod(userId), outputModel);
         }
 
-        private async Task<TranscribeItem> RecognizeSpeech(TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig)
+        private async Task<TranscribeItem> RecognizeSpeech(TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig, CancellationToken cancellationToken)
         {
             var speechClient = CreateSpeechClient();
 
             Logger.Verbose($"[{speechRecognizeConfig.UserId}] Start speech recognition for file {transcribedAudioFile.Path}");
 
             var recognizedResult = await GetRecognizedResultAsync(speechClient, transcribedAudioFile, speechRecognizeConfig);
+
+            var fileName = $"{transcribedAudioFile.Id}.json";
+            var recognizedResultJson = JsonConvert.SerializeObject(recognizedResult);
+            var diskStorageSettings = new DiskStorageSettings(speechRecognizeConfig.AudioFileId.ToString(), fileName);
+            var filePath = await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(recognizedResultJson), diskStorageSettings, cancellationToken);
+            Logger.Information($"[{speechRecognizeConfig.UserId}] Store recognition result to disk in destination {filePath}");
 
             var dateCreated = DateTime.UtcNow;
             var transcribeItem = new TranscribeItem

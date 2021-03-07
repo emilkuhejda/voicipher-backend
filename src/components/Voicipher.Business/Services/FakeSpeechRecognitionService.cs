@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac.Features.Indexed;
 using Google.Cloud.Speech.V1;
 using Google.Protobuf.Collections;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
+using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
@@ -23,9 +25,10 @@ namespace Voicipher.Business.Services
         public FakeSpeechRecognitionService(
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
+            IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(audioFileProcessingChannel, messageCenterService, options, logger)
+            : base(audioFileProcessingChannel, messageCenterService, index, options, logger)
         {
         }
 
