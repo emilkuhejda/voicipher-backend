@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
-using Azure;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
