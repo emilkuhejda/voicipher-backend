@@ -18,6 +18,7 @@ namespace Voicipher.Business.Services
     public class WavFileService : IWavFileService
     {
         private const int FileLengthInSeconds = 58;
+        private const double ExtraSeconds = 0.5;
 
         private readonly IFileAccessService _fileAccessService;
         private readonly IBlobStorage _blobStorage;
@@ -141,7 +142,7 @@ namespace Voicipher.Business.Services
                             ? remainingTimeSpan
                             : TimeSpan.FromSeconds(FileLengthInSeconds);
 
-                        var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
+                        var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(ExtraSeconds));
                         var endTime = requestedEndTime > audioTotalTime ? audioTotalTime : requestedEndTime;
                         var destinationFileName = GetFilePath(audioFileId);
                         var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime, destinationFileName);
