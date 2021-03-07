@@ -18,7 +18,7 @@ namespace Voicipher.Business.Services
     public class WavFileService : IWavFileService
     {
         private const int FileLengthInSeconds = 58;
-        private const double ExtraSeconds = 0.5;
+        private const float ExtraSeconds = 0.25f;
 
         private readonly IFileAccessService _fileAccessService;
         private readonly IBlobStorage _blobStorage;

@@ -17,6 +17,8 @@ namespace Voicipher.Business.Tests.Services
 {
     public class WavFileServiceTests
     {
+        private const float ExtraSeconds = 0.25f;
+
         [Fact]
         public async Task SplitAudioFileAsync_ReturnsAudioFiles()
         {
@@ -57,7 +59,7 @@ namespace Voicipher.Business.Tests.Services
             var totalTime = TimeSpan.FromTicks(transcribedAudioFiles.Select(x => x.TotalTime).Sum(x => x.Ticks));
             var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             Assert.Equal(6, transcribedAudioFiles.Length);
-            Assert.Equal(TimeSpan.FromSeconds(300 + (5 * 0.5)), totalTime);
+            Assert.Equal(TimeSpan.FromSeconds(300 + (5 * ExtraSeconds)), totalTime);
             Assert.Equal(TimeSpan.FromSeconds(300), transcribedTime);
         }
 
@@ -101,7 +103,7 @@ namespace Voicipher.Business.Tests.Services
             var totalTime = TimeSpan.FromTicks(transcribedAudioFiles.Select(x => x.TotalTime).Sum(x => x.Ticks));
             var transcribedTime = transcribedAudioFiles.OrderByDescending(x => x.EndTime).FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             Assert.Equal(4, transcribedAudioFiles.Length);
-            Assert.Equal(TimeSpan.FromSeconds(180 + (3 * 0.5)), totalTime);
+            Assert.Equal(TimeSpan.FromSeconds(180 + (3 * ExtraSeconds)), totalTime);
             Assert.Equal(TimeSpan.FromSeconds(180), transcribedTime);
         }
     }
