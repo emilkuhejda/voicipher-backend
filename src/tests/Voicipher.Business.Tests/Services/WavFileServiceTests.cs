@@ -35,10 +35,13 @@ namespace Voicipher.Business.Tests.Services
             var sampleBytes = await File.ReadAllBytesAsync(path);
 
             diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            diskStorageMock.Setup(x => x.GetDirectoryPath(It.IsAny<string>())).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
             fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
             fileAccessServiceMock.Setup(x => x.ReadAllBytesAsync(It.IsAny<string>(), default)).ReturnsAsync(sampleBytes);
+            fileAccessServiceMock.Setup(x => x.GetFiles(It.IsAny<string>())).Returns(Array.Empty<string>());
             currentUserSubscriptionRepositoryMock.Setup(x => x.GetRemainingTimeAsync(It.IsAny<Guid>(), default)).ReturnsAsync(subscriptionTime);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var wavFileService = new WavFileService(
                 fileAccessServiceMock.Object,
@@ -76,10 +79,13 @@ namespace Voicipher.Business.Tests.Services
             var sampleBytes = await File.ReadAllBytesAsync(path);
 
             diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            diskStorageMock.Setup(x => x.GetDirectoryPath(It.IsAny<string>())).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
             fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
             fileAccessServiceMock.Setup(x => x.ReadAllBytesAsync(It.IsAny<string>(), default)).ReturnsAsync(sampleBytes);
+            fileAccessServiceMock.Setup(x => x.GetFiles(It.IsAny<string>())).Returns(Array.Empty<string>());
             currentUserSubscriptionRepositoryMock.Setup(x => x.GetRemainingTimeAsync(It.IsAny<Guid>(), default)).ReturnsAsync(subscriptionTime);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var wavFileService = new WavFileService(
                 fileAccessServiceMock.Object,
