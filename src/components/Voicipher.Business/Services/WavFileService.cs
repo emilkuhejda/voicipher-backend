@@ -47,7 +47,7 @@ namespace Voicipher.Business.Services
         {
             _logger.Information($"[{audioFile.UserId}] Start conversion audio file {audioFile.Id} to wav format");
 
-            var sourceFileNamePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            var sourceFileNamePath = Path.Combine(GetDirectoryPath(audioFile.Id), audioFile.SourceFileName ?? string.Empty);
             if (_fileAccessService.Exists(sourceFileNamePath))
             {
                 _logger.Error($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
@@ -85,7 +85,7 @@ namespace Voicipher.Business.Services
 
         public async Task<TranscribedAudioFile[]> SplitAudioFileAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
-            var wavFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), audioFile.SourceFileName ?? string.Empty);
+            var wavFilePath = Path.Combine(GetDirectoryPath(audioFile.Id), audioFile.SourceFileName ?? string.Empty);
             if (!_fileAccessService.Exists(wavFilePath))
                 throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
 
@@ -108,7 +108,8 @@ namespace Voicipher.Business.Services
             using (var reader = new MediaFoundationReader(inputFilePath))
             {
                 var endTime = Math.Min(audioFile.TranscriptionEndTime.Ticks, audioFile.TotalTime.Ticks);
-                var trimmedAudioFile = await TrimAudioFileAsync(reader, audioFile.TranscriptionStartTime, TimeSpan.FromTicks(endTime));
+                var destinationFileName = GetFilePath(audioFile.Id);
+                var trimmedAudioFile = await TrimAudioFileAsync(reader, audioFile.TranscriptionStartTime, TimeSpan.FromTicks(endTime), destinationFileName);
 
                 _logger.Verbose($"[{audioFile.UserId}] File {inputFilePath} was converted and stored in new destination {trimmedAudioFile.filePath}");
 
@@ -142,7 +143,8 @@ namespace Voicipher.Business.Services
 
                         var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(0.5));
                         var endTime = requestedEndTime > audioTotalTime ? audioTotalTime : requestedEndTime;
-                        var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime);
+                        var destinationFileName = GetFilePath(audioFileId);
+                        var trimmedAudioFile = await TrimAudioFileAsync(reader, processedTime, endTime, destinationFileName);
 
                         var transcribedAudioFile = new TranscribedAudioFile
                         {
@@ -178,12 +180,11 @@ namespace Voicipher.Business.Services
             }
         }
 
-        private Task<(string filePath, TimeSpan totalTime)> TrimAudioFileAsync(WaveStream reader, TimeSpan startTime, TimeSpan endTime)
+        private Task<(string filePath, TimeSpan totalTime)> TrimAudioFileAsync(WaveStream reader, TimeSpan startTime, TimeSpan endTime, string destinationFileName)
         {
             return Task.Run(() =>
             {
-                var outputFileName = Path.Combine(_diskStorage.GetDirectoryPath(), $"{Guid.NewGuid()}.voc");
-                using (var writer = new WaveFileWriter(outputFileName, reader.WaveFormat))
+                using (var writer = new WaveFileWriter(destinationFileName, reader.WaveFormat))
                 {
                     var fileSegmentLength = reader.WaveFormat.AverageBytesPerSecond / 1000;
 
@@ -210,9 +211,19 @@ namespace Voicipher.Business.Services
                         }
                     }
 
-                    return (outputFileName, writer.TotalTime);
+                    return (destinationFileName, writer.TotalTime);
                 }
             });
+        }
+
+        private string GetFilePath(Guid audioFileId)
+        {
+            return Path.Combine(GetDirectoryPath(audioFileId), $"{Guid.NewGuid()}.voc");
+        }
+
+        private string GetDirectoryPath(Guid audioFileId)
+        {
+            return _diskStorage.GetDirectoryPath(audioFileId.ToString());
         }
     }
 }

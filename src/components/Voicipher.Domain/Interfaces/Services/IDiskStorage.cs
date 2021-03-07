@@ -16,7 +16,9 @@ namespace Voicipher.Domain.Interfaces.Services
 
         void DeleteRange(FileChunk[] fileChunks);
 
-        void DeleteTemporaryFolder();
+        void DeleteFolder();
+
+        void DeleteFolder(string folderName);
 
         string GetDirectoryPath();
 

@@ -72,9 +72,14 @@ namespace Voicipher.Business.Services
             }
         }
 
-        public void DeleteTemporaryFolder()
+        public void DeleteFolder()
         {
-            var rootPath = GetDirectoryPath();
+            DeleteFolder(string.Empty);
+        }
+
+        public void DeleteFolder(string folderName)
+        {
+            var rootPath = GetDirectoryPath(folderName);
             if (Directory.Exists(rootPath))
             {
                 Directory.Delete(rootPath, true);

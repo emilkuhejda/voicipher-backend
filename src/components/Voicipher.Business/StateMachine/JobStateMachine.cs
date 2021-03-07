@@ -76,7 +76,7 @@ namespace Voicipher.Business.StateMachine
             _speechRecognitionService = speechRecognitionService;
             _messageCenterService = messageCenterService;
             _blobStorage = blobStorage;
-            _diskStorage = index[StorageLocation.State];
+            _diskStorage = index[StorageLocation.Audio];
             _fileAccessService = fileAccessService;
             _audioFileRepository = audioFileRepository;
             _transcribeItemRepository = transcribeItemRepository;
