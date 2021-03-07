@@ -63,12 +63,13 @@ namespace Voicipher.Business.Commands.Job
                     if (backgroundJob == null)
                         throw new InvalidOperationException($"Background job {parameter.Id} not found");
 
-                    await _jobStateMachine.DoInit(backgroundJob, cancellationToken);
+                    await _jobStateMachine.DoInitAsync(backgroundJob, cancellationToken);
                     await _jobStateMachine.DoValidationAsync(cancellationToken);
                     await _jobStateMachine.DoConvertingAsync(cancellationToken);
                     await _jobStateMachine.DoSplitAsync(cancellationToken);
                     await _jobStateMachine.DoProcessingAsync(cancellationToken);
                     await _jobStateMachine.DoCompleteAsync(cancellationToken);
+                    _jobStateMachine.DoClean();
                 }
                 catch (Exception ex)
                 {
@@ -80,7 +81,6 @@ namespace Voicipher.Business.Commands.Job
                 {
                     await _jobStateMachine.SaveAsync(cancellationToken);
                     await transaction.CommitAsync(cancellationToken);
-                    _jobStateMachine.DoClean();
                 }
 
                 var queryResult = await _getInternalValueQuery.ExecuteAsync(InternalValues.IsProgressNotificationsEnabled, null, cancellationToken);

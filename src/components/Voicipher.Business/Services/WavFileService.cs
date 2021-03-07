@@ -8,7 +8,6 @@ using Autofac.Features.Indexed;
 using Azure;
 using NAudio.Wave;
 using Serilog;
-using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
@@ -24,7 +23,6 @@ namespace Voicipher.Business.Services
         private readonly IDiskStorage _diskStorage;
         private readonly IFileAccessService _fileAccessService;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
-        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
         public WavFileService(
@@ -32,18 +30,16 @@ namespace Voicipher.Business.Services
             IIndex<StorageLocation, IDiskStorage> index,
             IFileAccessService fileAccessService,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
-            IUnitOfWork unitOfWork,
             ILogger logger)
         {
             _blobStorage = blobStorage;
             _diskStorage = index[StorageLocation.Audio];
             _fileAccessService = fileAccessService;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
-            _unitOfWork = unitOfWork;
             _logger = logger.ForContext<WavFileService>();
         }
 
-        public async Task RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
+        public async Task<string> RunConversionToWavAsync(AudioFile audioFile, CancellationToken cancellationToken)
         {
             _logger.Information($"[{audioFile.UserId}] Start conversion audio file {audioFile.Id} to wav format");
 
@@ -51,7 +47,7 @@ namespace Voicipher.Business.Services
             if (_fileAccessService.Exists(sourceFileNamePath))
             {
                 _logger.Error($"[{audioFile.UserId}] Source wav file is already exists in destination in destination {sourceFileNamePath}");
-                return;
+                return string.Empty;
             }
 
             var tempFilePath = string.Empty;
@@ -67,10 +63,9 @@ namespace Voicipher.Business.Services
 
                 var wavFilePath = await ConvertToWavAsync(tempFilePath, audioFile);
 
-                audioFile.SourceFileName = Path.GetFileName(wavFilePath);
-                await _unitOfWork.SaveAsync(cancellationToken);
-
                 _logger.Information($"[{audioFile.UserId}] Conversion audio file {audioFile.Id} to wav format finished. New audio file was stored in destination {wavFilePath}");
+
+                return Path.GetFileName(wavFilePath);
             }
             catch (RequestFailedException ex)
             {
@@ -95,8 +90,6 @@ namespace Voicipher.Business.Services
 
             var wavFileSource = await _fileAccessService.ReadAllBytesAsync(wavFilePath, cancellationToken);
             var transcribedAudioFiles = await SplitWavFileAsync(wavFileSource, remainingTime, audioFile.Id, audioFile.UserId);
-
-            _fileAccessService.Delete(wavFilePath);
 
             return transcribedAudioFiles.ToArray();
         }

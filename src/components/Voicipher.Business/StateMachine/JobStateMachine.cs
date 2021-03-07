@@ -87,11 +87,19 @@ namespace Voicipher.Business.StateMachine
 
         private JobState CurrentState => _machineState.JobState;
 
-        public async Task DoInit(BackgroundJob backgroundJob, CancellationToken cancellationToken)
+        public async Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken)
         {
             _backgroundJob = backgroundJob;
             _machineState.StateFileName = $"{backgroundJob.AudioFileId}.json";
             _machineState.FromBackgroundJob(backgroundJob);
+
+            var stateFilePath = Path.Combine(_diskStorage.GetDirectoryPath(), _machineState.StateFileName);
+            if (_fileAccessService.Exists(stateFilePath))
+            {
+                var json = await _fileAccessService.ReadAllTextAsync(stateFilePath, cancellationToken);
+                var stateToRestore = JsonConvert.DeserializeObject<MachineState>(json);
+                _machineState.FromState(stateToRestore);
+            }
 
             await TryChangeStateAsync(JobState.Initialized, cancellationToken);
         }
@@ -114,17 +122,27 @@ namespace Voicipher.Business.StateMachine
         public async Task DoConvertingAsync(CancellationToken cancellationToken)
         {
             await TryChangeStateAsync(JobState.Converting, cancellationToken);
+            if (CanSkip(JobState.Converting))
+            {
+                _audioFile.SourceFileName = _machineState.WavSourceFileName;
+                return;
+            }
 
             _logger.Verbose($"[{_audioFile.Id}] Remove temporary folder for audio file {_audioFile.Id}");
             _diskStorage.DeleteFolder(_audioFile.Id.ToString());
 
-            await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
+            var sourceFileName = await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
+            _audioFile.SourceFileName = sourceFileName;
+            _machineState.WavSourceFileName = sourceFileName;
+
             await TryChangeStateAsync(JobState.Converted, cancellationToken);
         }
 
         public async Task DoSplitAsync(CancellationToken cancellationToken)
         {
             await TryChangeStateAsync(JobState.Splitting, cancellationToken);
+            if (CanSkip(JobState.Splitting))
+                return;
 
             var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
             _machineState.TranscribedAudioFiles = transcribedAudioFiles;
@@ -138,24 +156,26 @@ namespace Voicipher.Business.StateMachine
 
             _logger.Verbose($"[{_audioFile.UserId}] {transcribedAudioFiles.Length} transcription items ready for upload");
 
-            if (transcribedAudioFiles.Any())
+            foreach (var transcribedAudioFile in transcribedAudioFiles)
             {
-                foreach (var transcribedAudioFile in transcribedAudioFiles)
-                {
-                    if (!_fileAccessService.Exists(transcribedAudioFile.Path))
-                        throw new FileNotFoundException($"[{_audioFile.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
+                if (!_fileAccessService.Exists(transcribedAudioFile.Path))
+                    throw new FileNotFoundException($"[{_audioFile.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
 
-                    _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
+                _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
 
-                    var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
-                    var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
-                    await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
+                var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
+                var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
+                await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                    _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
-                }
-
-                _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage");
+                _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
             }
+
+            _logger.Information($"[{_audioFile.UserId}] Audio files ({transcribedAudioFiles.Length}) were uploaded to blob storage");
+
+            var diskStorageSettings = new DiskStorageSettings(_machineState.FolderName, _machineState.WavSourceFileName);
+            _diskStorage.Delete(diskStorageSettings);
+
+            _logger.Verbose($"[{_machineState.AudioFileId}] Wav audio file {_machineState.WavSourceFileName} was deleted from temporary disk storage");
 
             await TryChangeStateAsync(JobState.Splitted, cancellationToken);
         }
@@ -237,11 +257,14 @@ namespace Voicipher.Business.StateMachine
 
             var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
             _diskStorage.Delete(diskStorageSettings);
-            _diskStorage.DeleteFolder(_machineState.AudioFileId.ToString());
+            _diskStorage.DeleteFolder(_machineState.FolderName);
         }
 
         private async Task TryChangeStateAsync(JobState jobState, CancellationToken cancellationToken)
         {
+            if (_machineState.IsRestored && jobState <= CurrentState)
+                return;
+
             if (CanTransition(CurrentState) != jobState)
                 throw new InvalidOperationException($"Invalid transition operation from {CurrentState} to {jobState}");
 
@@ -250,6 +273,11 @@ namespace Voicipher.Business.StateMachine
             var machineStateJson = JsonConvert.SerializeObject(_machineState);
             var diskStorageSettings = new DiskStorageSettings(_machineState.StateFileName);
             await _diskStorage.UploadAsync(Encoding.UTF8.GetBytes(machineStateJson), diskStorageSettings, cancellationToken);
+        }
+
+        private bool CanSkip(JobState jobState)
+        {
+            return _machineState.IsRestored && jobState < CurrentState;
         }
 
         private JobState CanTransition(JobState jobState)

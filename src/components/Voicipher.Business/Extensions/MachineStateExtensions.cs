@@ -14,5 +14,17 @@ namespace Voicipher.Business.Extensions
             machineState.Attempt = backgroundJob.Attempt + 1;
             machineState.FileName = backgroundJob.GetParameterValue(BackgroundJobParameter.FileName, string.Empty);
         }
+
+        public static void FromState(this MachineState machineState, MachineState stateToRestore)
+        {
+            machineState.JobState = stateToRestore.JobState;
+            machineState.Attempt = stateToRestore.Attempt;
+            machineState.FileName = stateToRestore.FileName;
+            machineState.WavSourceFileName = stateToRestore.WavSourceFileName;
+            machineState.StateFileName = stateToRestore.StateFileName;
+            machineState.DateCompletedUtc = stateToRestore.DateCompletedUtc;
+            machineState.IsRestored = true;
+            machineState.TranscribedAudioFiles = stateToRestore.TranscribedAudioFiles;
+        }
     }
 }

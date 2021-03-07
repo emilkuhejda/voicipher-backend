@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Models;
 
@@ -26,9 +27,16 @@ namespace Voicipher.Domain.State
 
         public string FileName { get; set; }
 
+        public string WavSourceFileName { get; set; }
+
         public string StateFileName { get; set; }
 
         public DateTime DateCompletedUtc { get; set; }
+
+        public bool IsRestored { get; set; }
+
+        [JsonIgnore]
+        public string FolderName => AudioFileId.ToString();
 
         public IEnumerable<TranscribedAudioFile> TranscribedAudioFiles { get; set; }
     }

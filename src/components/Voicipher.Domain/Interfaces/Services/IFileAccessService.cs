@@ -11,6 +11,8 @@ namespace Voicipher.Domain.Interfaces.Services
 
         Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken);
 
+        Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken);
+
         void Delete(string path);
 
         void DeleteDirectory(string path);

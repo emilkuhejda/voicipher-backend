@@ -22,6 +22,11 @@ namespace Voicipher.Business.Services
             return File.ReadAllBytesAsync(path, cancellationToken);
         }
 
+        public Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        {
+            return File.ReadAllTextAsync(path, cancellationToken);
+        }
+
         public void Delete(string path)
         {
             if (Exists(path))
