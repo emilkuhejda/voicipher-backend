@@ -192,6 +192,7 @@ namespace Voicipher.Business.StateMachine
             var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribedAudioFiles, cancellationToken);
             _logger.Information($"[{_audioFile.UserId}] Speech recognition for audio file {_audioFile.Id} is finished");
 
+            _transcribeItemRepository.RemoveRange(_machineState.AudioFileId);
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
             await _transcribeItemRepository.SaveAsync(cancellationToken);
 
@@ -219,6 +220,7 @@ namespace Voicipher.Business.StateMachine
             await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
             _audioFile.SourceFileName = string.Empty;
+            _audioFile.DateProcessedUtc = DateTime.UtcNow;
 
             await TryChangeStateAsync(JobState.Completed, cancellationToken);
         }

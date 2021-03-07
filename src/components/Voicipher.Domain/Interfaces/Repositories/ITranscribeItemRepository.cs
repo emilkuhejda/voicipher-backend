@@ -9,6 +9,8 @@ namespace Voicipher.Domain.Interfaces.Repositories
     {
         Task AddRangeAsync(TranscribeItem[] transcribeItems, CancellationToken cancellationToken);
 
+        void RemoveRange(Guid audioFileId);
+
         Task<TranscribeItem[]> GetAllByAudioFileIdAsync(Guid audioFileId, CancellationToken cancellationToken);
 
         Task<TranscribeItem[]> GetAllAfterDateAsync(Guid userId, DateTime updatedAfter, Guid applicationId, CancellationToken cancellationToken);
