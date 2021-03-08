@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Interfaces.StateMachine;
 using Voicipher.Domain.Models;
-using Voicipher.Domain.State;
 
 namespace Voicipher.Business.Extensions
 {
@@ -14,7 +14,7 @@ namespace Voicipher.Business.Extensions
             return parameters.GetValue(backgroundJobParameter, defaultValue);
         }
 
-        public static void FromState(this BackgroundJob backgroundJob, MachineState machineState)
+        public static void FromState(this BackgroundJob backgroundJob, IMachineState machineState)
         {
             backgroundJob.JobState = machineState.JobState;
             backgroundJob.Attempt = machineState.Attempt;

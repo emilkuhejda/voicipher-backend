@@ -25,7 +25,6 @@ using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 using Voicipher.Domain.Payloads.Transcription;
 using Voicipher.Domain.Settings;
-using Voicipher.Domain.State;
 using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.StateMachine
@@ -84,6 +83,8 @@ namespace Voicipher.Business.StateMachine
             _logger = logger.ForContext<JobStateMachine>();
         }
 
+        public IMachineState MachineState => _machineState;
+
         private JobState CurrentState => _machineState.JobState;
 
         public async Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken)
@@ -96,7 +97,7 @@ namespace Voicipher.Business.StateMachine
             if (_fileAccessService.Exists(stateFilePath))
             {
                 var json = await _fileAccessService.ReadAllTextAsync(stateFilePath, cancellationToken);
-                var stateToRestore = JsonConvert.DeserializeObject<MachineState>(json);
+                var stateToRestore = JsonConvert.DeserializeObject<IMachineState>(json);
                 _machineState.FromState(stateToRestore);
             }
 
