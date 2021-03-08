@@ -27,9 +27,6 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 
         public bool IsRestored { get; }
 
-        [JsonIgnore]
-        public string FolderName => AudioFileId.ToString();
-
         public TranscribedAudioFile[] TranscribedAudioFiles { get; }
     }
 }
