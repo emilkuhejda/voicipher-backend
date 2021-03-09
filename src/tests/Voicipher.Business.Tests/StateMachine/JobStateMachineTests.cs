@@ -11,6 +11,7 @@ using Serilog;
 using Voicipher.Business.StateMachine;
 using Voicipher.DataAccess;
 using Voicipher.Domain.Enums;
+using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
 using Voicipher.Domain.Interfaces.Commands;
 using Voicipher.Domain.Interfaces.Commands.Transcription;
@@ -718,6 +719,128 @@ namespace Voicipher.Business.Tests.StateMachine
                     default), Times.Once);
             transcribeItemRepositoryMock.Verify(
                 x => x.AddRangeAsync(It.Is<TranscribeItem[]>(t => t.Length == transcribeItems.Length), default), Times.Once);
+        }
+
+        [Fact]
+        public async Task DoCompleteAsync_CompleteSuccess()
+        {
+            // Arrange
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var modifySubscriptionTimeCommand = new Mock<IModifySubscriptionTimeCommand>();
+            var updateRecognitionStateCommand = new Mock<IUpdateRecognitionStateCommand>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var transcribeItemRepositoryMock = new Mock<ITranscribeItemRepository>();
+            var optionsMock = new Mock<IOptions<AppSettings>>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFileId = new Guid(AudioFileId);
+            var audioFile = new AudioFile { Id = audioFileId };
+            var appSettings = new AppSettings();
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            modifySubscriptionTimeCommand
+                .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-processed.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            optionsMock.Setup(x => x.Value).Returns(appSettings);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                modifySubscriptionTimeCommand.Object,
+                updateRecognitionStateCommand.Object,
+                Mock.Of<IWavFileService>(),
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                transcribeItemRepositoryMock.Object,
+                Mock.Of<IUnitOfWork>(),
+                optionsMock.Object,
+                loggerMock.Object);
+
+            // Act
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await jobStateMachine.DoCompleteAsync(default);
+
+            // Assert
+            Assert.Equal(JobState.Completed, jobStateMachine.MachineState.JobState);
+            Assert.Empty(jobStateMachine.StateMachineContext.AudioFile.SourceFileName);
+            Assert.NotEqual(DateTime.MinValue, jobStateMachine.StateMachineContext.AudioFile.DateProcessedUtc);
+            Assert.NotEqual(DateTime.MinValue, jobStateMachine.MachineState.DateCompletedUtc);
+        }
+
+        [Fact]
+        public async Task DoCompleteAsync_ModifySubscriptionFailed_ThrowsException()
+        {
+            // Arrange
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var modifySubscriptionTimeCommand = new Mock<IModifySubscriptionTimeCommand>();
+            var updateRecognitionStateCommand = new Mock<IUpdateRecognitionStateCommand>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var transcribeItemRepositoryMock = new Mock<ITranscribeItemRepository>();
+            var optionsMock = new Mock<IOptions<AppSettings>>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFileId = new Guid(AudioFileId);
+            var audioFile = new AudioFile { Id = audioFileId };
+            var appSettings = new AppSettings();
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            modifySubscriptionTimeCommand
+                .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, default))
+                .ReturnsAsync(new CommandResult(new OperationError(string.Empty)));
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-processed.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            optionsMock.Setup(x => x.Value).Returns(appSettings);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                modifySubscriptionTimeCommand.Object,
+                updateRecognitionStateCommand.Object,
+                Mock.Of<IWavFileService>(),
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                transcribeItemRepositoryMock.Object,
+                Mock.Of<IUnitOfWork>(),
+                optionsMock.Object,
+                loggerMock.Object);
+
+            // Act & Assert
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await Assert.ThrowsAsync<OperationErrorException>(async () => await jobStateMachine.DoCompleteAsync(default));
         }
 
         private BackgroundJob CreateBackgroundJob()

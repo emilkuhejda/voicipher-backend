@@ -49,7 +49,6 @@ namespace Voicipher.Business.StateMachine
         private readonly MachineState _machineState = new();
 
         private BackgroundJob _backgroundJob;
-        private AudioFile _audioFile;
 
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
@@ -212,20 +211,20 @@ namespace Voicipher.Business.StateMachine
 
             var modifySubscriptionTimePayload = new ModifySubscriptionTimePayload
             {
-                UserId = _audioFile.UserId,
+                UserId = _machineState.UserId,
                 ApplicationId = _appSettings.ApplicationId,
-                Time = _audioFile.TranscribedTime,
+                Time = StateMachineContext.AudioFile.TranscribedTime,
                 Operation = SubscriptionOperation.Remove
             };
             var modifySubscriptionCommandResult = await _modifySubscriptionTimeCommand.ExecuteAsync(modifySubscriptionTimePayload, null, cancellationToken);
             if (!modifySubscriptionCommandResult.IsSuccess)
                 throw new OperationErrorException(modifySubscriptionCommandResult.Error.ErrorCode);
 
-            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_audioFile.Id, _audioFile.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
+            var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_machineState.AudioFileId, _machineState.UserId, _appSettings.ApplicationId, RecognitionState.Completed);
             await _updateRecognitionStateCommand.ExecuteAsync(updateRecognitionStatePayload, null, cancellationToken);
 
-            _audioFile.SourceFileName = string.Empty;
-            _audioFile.DateProcessedUtc = DateTime.UtcNow;
+            StateMachineContext.AudioFile.SourceFileName = string.Empty;
+            StateMachineContext.AudioFile.DateProcessedUtc = DateTime.UtcNow;
 
             await TryChangeStateAsync(JobState.Completed, cancellationToken);
         }
