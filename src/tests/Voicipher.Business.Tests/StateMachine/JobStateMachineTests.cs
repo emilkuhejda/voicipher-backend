@@ -26,6 +26,8 @@ namespace Voicipher.Business.Tests.StateMachine
 {
     public class JobStateMachineTests
     {
+        private const string AudioFileId = "884b0bf3-ca58-45ae-951b-b1fae46b0395";
+
         [Fact]
         public async Task DoInitAsync_InitializesMachineState()
         {
@@ -256,7 +258,7 @@ namespace Voicipher.Business.Tests.StateMachine
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var loggerMock = new Mock<ILogger>();
 
-            var audioFile = new AudioFile { Id = new Guid("884b0bf3-ca58-45ae-951b-b1fae46b0395") };
+            var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
 
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
@@ -305,7 +307,7 @@ namespace Voicipher.Business.Tests.StateMachine
         }
 
         [Fact]
-        public async Task DoConvertingAsync_SkipConverting_SourceFileNameInitialized()
+        public async Task DoSplitAsync_SkipConverting_SourceFileNameInitialized()
         {
             // Arrange
             const string expectedSourceFileName = "file.voc";
@@ -318,7 +320,7 @@ namespace Voicipher.Business.Tests.StateMachine
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var loggerMock = new Mock<ILogger>();
 
-            var audioFile = new AudioFile { Id = new Guid("884b0bf3-ca58-45ae-951b-b1fae46b0395") };
+            var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
 
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
@@ -366,6 +368,75 @@ namespace Voicipher.Business.Tests.StateMachine
             Assert.Equal(JobState.Converted, jobStateMachine.MachineState.JobState);
         }
 
+        [Fact]
+        public async Task DoSplitAsync_SplitsSuccess()
+        {
+            // Arrange
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var wavFileServiceMock = new Mock<IWavFileService>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var blobStorageMock = new Mock<IBlobStorage>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFileId = new Guid(AudioFileId);
+            var audioFile = new AudioFile { Id = audioFileId };
+            var transcribedAudioFiles = new TranscribedAudioFile[]
+            {
+                new() {Id = Guid.NewGuid()},
+                new() {Id = Guid.NewGuid()}
+            };
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            wavFileServiceMock
+                .Setup(x => x.SplitAudioFileAsync(It.Is<AudioFile>(a => a.Id == audioFileId), default))
+                .ReturnsAsync(transcribedAudioFiles);
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-converted.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
+                wavFileServiceMock.Object,
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                blobStorageMock.Object,
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                Mock.Of<ITranscribeItemRepository>(),
+                Mock.Of<IUnitOfWork>(),
+                Mock.Of<IOptions<AppSettings>>(),
+                loggerMock.Object);
+
+            // Act
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await jobStateMachine.DoSplitAsync(default);
+
+            // Assert
+            Assert.Collection(
+                jobStateMachine.MachineState.TranscribedAudioFiles,
+                item => Assert.Equal(transcribedAudioFiles[0].Id, item.Id),
+                item => Assert.Equal(transcribedAudioFiles[1].Id, item.Id));
+            Assert.Equal(JobState.Splitted, jobStateMachine.MachineState.JobState);
+
+            blobStorageMock.Verify(x => x.UploadAsync(It.IsAny<UploadBlobSettings>(), default), Times.Exactly(2));
+            diskStorageMock.Verify(x => x.Delete(It.Is<DiskStorageSettings>(d => d == new DiskStorageSettings(audioFile.Id.ToString(), "file.voc"))));
+        }
+
         private BackgroundJob CreateBackgroundJob()
         {
             return CreateBackgroundJob(string.Empty);
@@ -381,7 +452,7 @@ namespace Voicipher.Business.Tests.StateMachine
             return new BackgroundJob
             {
                 Id = new Guid("53e772e7-5615-4947-aaf6-272ec06f466a"),
-                AudioFileId = new Guid("884b0bf3-ca58-45ae-951b-b1fae46b0395"),
+                AudioFileId = new Guid(AudioFileId),
                 UserId = new Guid("50c26d76-087e-48c3-9f46-4a9f506845b8"),
                 JobState = JobState.Idle,
                 DateCreatedUtc = DateTime.UtcNow,
