@@ -83,9 +83,11 @@ namespace Voicipher.Business.StateMachine
             _logger = logger.ForContext<JobStateMachine>();
         }
 
+        private JobState CurrentState => _machineState.JobState;
+
         public IMachineState MachineState => _machineState;
 
-        private JobState CurrentState => _machineState.JobState;
+        public IStateMachineContext StateMachineContext { get; private set; }
 
         public async Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken)
         {
@@ -101,6 +103,9 @@ namespace Voicipher.Business.StateMachine
                 _machineState.FromState(stateToRestore);
             }
 
+            var audioFile = await _audioFileRepository.GetAsync(_machineState.UserId, _machineState.AudioFileId, cancellationToken);
+            StateMachineContext = new StateMachineContext(audioFile, backgroundJob);
+
             await TryChangeStateAsync(JobState.Initialized, cancellationToken);
         }
 
@@ -108,8 +113,7 @@ namespace Voicipher.Business.StateMachine
         {
             await TryChangeStateAsync(JobState.Validating, cancellationToken);
 
-            _audioFile = await _audioFileRepository.GetAsync(_machineState.UserId, _machineState.AudioFileId, cancellationToken);
-            if (_audioFile == null)
+            if (StateMachineContext.AudioFile == null)
                 throw new FileNotFoundException($"Audio file {_machineState.AudioFileId} not found");
 
             var canRunRecognitionResult = await _canRunRecognitionCommand.ExecuteAsync(new CanRunRecognitionPayload(_machineState.UserId), null, cancellationToken);
@@ -124,15 +128,15 @@ namespace Voicipher.Business.StateMachine
             await TryChangeStateAsync(JobState.Converting, cancellationToken);
             if (CanSkip(JobState.Converting))
             {
-                _audioFile.SourceFileName = _machineState.WavSourceFileName;
+                StateMachineContext.AudioFile.SourceFileName = _machineState.WavSourceFileName;
                 return;
             }
 
-            _logger.Verbose($"[{_audioFile.Id}] Remove temporary folder for audio file {_audioFile.Id}");
-            _diskStorage.DeleteFolder(_audioFile.Id.ToString());
+            _logger.Verbose($"[{_machineState.UserId}] Remove temporary folder for audio file {_machineState.AudioFileId}");
+            _diskStorage.DeleteFolder(_machineState.AudioFileId.ToString());
 
-            var sourceFileName = await _wavFileService.RunConversionToWavAsync(_audioFile, cancellationToken);
-            _audioFile.SourceFileName = sourceFileName;
+            var sourceFileName = await _wavFileService.RunConversionToWavAsync(StateMachineContext.AudioFile, cancellationToken);
+            StateMachineContext.AudioFile.SourceFileName = sourceFileName;
             _machineState.WavSourceFileName = sourceFileName;
 
             await TryChangeStateAsync(JobState.Converted, cancellationToken);

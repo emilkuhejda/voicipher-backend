@@ -34,10 +34,16 @@ namespace Voicipher.Business.Tests.StateMachine
 
             var diskStorageMock = new Mock<IDiskStorage>();
             var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var loggerMock = new Mock<ILogger>();
+
+            var audioFile = new AudioFile { Id = Guid.NewGuid() };
 
             diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
@@ -50,7 +56,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 Mock.Of<IFileAccessService>(),
                 Mock.Of<IBlobStorage>(),
                 indexMock.Object,
-                Mock.Of<IAudioFileRepository>(),
+                audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 Mock.Of<IUnitOfWork>(),
                 Mock.Of<IOptions<AppSettings>>(),
@@ -73,6 +79,9 @@ namespace Voicipher.Business.Tests.StateMachine
             Assert.Equal(DateTime.MinValue, jobStateMachine.MachineState.DateCompletedUtc);
             Assert.Empty(jobStateMachine.MachineState.TranscribedAudioFiles);
             Assert.False(jobStateMachine.MachineState.IsRestored);
+
+            Assert.Equal(audioFile.Id, jobStateMachine.StateMachineContext.AudioFile.Id);
+            Assert.Equal(backgroundJob.Id, jobStateMachine.StateMachineContext.BackgroundJob.Id);
         }
 
         [Fact]
@@ -84,7 +93,10 @@ namespace Voicipher.Business.Tests.StateMachine
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var diskStorageMock = new Mock<IDiskStorage>();
             var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var loggerMock = new Mock<ILogger>();
+
+            var audioFile = new AudioFile { Id = Guid.NewGuid() };
 
             fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
             fileAccessServiceMock
@@ -92,6 +104,9 @@ namespace Voicipher.Business.Tests.StateMachine
                 .ReturnsAsync(await GetJsonAsync("machine-state-validating.json"));
             diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
             indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
@@ -104,7 +119,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 fileAccessServiceMock.Object,
                 Mock.Of<IBlobStorage>(),
                 indexMock.Object,
-                Mock.Of<IAudioFileRepository>(),
+                audioFileRepositoryMock.Object,
                 Mock.Of<ITranscribeItemRepository>(),
                 Mock.Of<IUnitOfWork>(),
                 Mock.Of<IOptions<AppSettings>>(),
@@ -127,6 +142,9 @@ namespace Voicipher.Business.Tests.StateMachine
             Assert.Equal(DateTime.MinValue, jobStateMachine.MachineState.DateCompletedUtc);
             Assert.Empty(jobStateMachine.MachineState.TranscribedAudioFiles);
             Assert.True(jobStateMachine.MachineState.IsRestored);
+
+            Assert.Equal(audioFile.Id, jobStateMachine.StateMachineContext.AudioFile.Id);
+            Assert.Equal(backgroundJob.Id, jobStateMachine.StateMachineContext.BackgroundJob.Id);
         }
 
         [Fact]
@@ -238,7 +256,7 @@ namespace Voicipher.Business.Tests.StateMachine
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var loggerMock = new Mock<ILogger>();
 
-            var audioFile = new AudioFile();
+            var audioFile = new AudioFile { Id = new Guid("884b0bf3-ca58-45ae-951b-b1fae46b0395") };
 
             canRunRecognitionCommandMock
                 .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
@@ -275,10 +293,12 @@ namespace Voicipher.Business.Tests.StateMachine
 
             // Act
             await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
-            await jobStateMachine.DoValidationAsync(default);
             await jobStateMachine.DoConvertingAsync(default);
 
             // Assert
+            diskStorageMock.Verify(x => x.DeleteFolder(It.Is<string>(p => p == audioFile.Id.ToString())));
+            wavFileServiceMock.Verify(x => x.RunConversionToWavAsync(It.Is<AudioFile>(a => a.Id == audioFile.Id), default));
+
             Assert.Equal(expectedSourceFileName, audioFile.SourceFileName);
             Assert.Equal(expectedSourceFileName, jobStateMachine.MachineState.WavSourceFileName);
             Assert.Equal(JobState.Converted, jobStateMachine.MachineState.JobState);
