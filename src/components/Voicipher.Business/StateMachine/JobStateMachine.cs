@@ -151,30 +151,30 @@ namespace Voicipher.Business.StateMachine
             if (!_machineState.TranscribedAudioFiles.Any() || _machineState.TranscribedAudioFiles.Any(x => !_fileAccessService.Exists(x.Path)))
             {
                 _machineState.ClearTranscribedAudioFiles();
-                var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(_audioFile, cancellationToken);
+                var transcribedAudioFiles = await _wavFileService.SplitAudioFileAsync(StateMachineContext.AudioFile, cancellationToken);
                 _machineState.TranscribedAudioFiles = transcribedAudioFiles;
                 await SaveStateAsync(cancellationToken);
 
-                _logger.Information($"[{_audioFile.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
+                _logger.Information($"[{_machineState.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
             }
 
-            _logger.Verbose($"[{_audioFile.UserId}] {_machineState.TranscribedAudioFiles.Length} transcription items ready for upload");
+            _logger.Verbose($"[{_machineState.UserId}] {_machineState.TranscribedAudioFiles.Length} transcription items ready for upload");
 
             foreach (var transcribedAudioFile in _machineState.TranscribedAudioFiles)
             {
                 if (!_fileAccessService.Exists(transcribedAudioFile.Path))
-                    throw new FileNotFoundException($"[{_audioFile.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
+                    throw new FileNotFoundException($"[{_machineState.UserId}] Transcribed audio file {transcribedAudioFile.Path} is not found");
 
-                _logger.Verbose($"[{_audioFile.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
+                _logger.Verbose($"[{_machineState.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
 
                 var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
-                var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _audioFile.UserId, _audioFile.Id, transcribedAudioFile.SourceFileName, metadata);
+                var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _machineState.UserId, _machineState.AudioFileId, transcribedAudioFile.SourceFileName, metadata);
                 await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                _logger.Verbose($"[{_audioFile.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
+                _logger.Verbose($"[{_machineState.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");
             }
 
-            _logger.Information($"[{_audioFile.UserId}] Audio files ({_machineState.TranscribedAudioFiles.Length}) were uploaded to blob storage");
+            _logger.Information($"[{_machineState.UserId}] Audio files ({_machineState.TranscribedAudioFiles.Length}) were uploaded to blob storage");
 
             var diskStorageSettings = new DiskStorageSettings(_machineState.FolderName, _machineState.WavSourceFileName);
             _diskStorage.Delete(diskStorageSettings);
