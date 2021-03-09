@@ -251,7 +251,6 @@ namespace Voicipher.Business.Tests.StateMachine
             // Arrange
             const string expectedSourceFileName = "file.voc";
 
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var diskStorageMock = new Mock<IDiskStorage>();
@@ -261,9 +260,6 @@ namespace Voicipher.Business.Tests.StateMachine
 
             var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.RunConversionToWavAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(expectedSourceFileName);
@@ -279,7 +275,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -313,7 +309,6 @@ namespace Voicipher.Business.Tests.StateMachine
             // Arrange
             const string expectedSourceFileName = "file.voc";
 
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var diskStorageMock = new Mock<IDiskStorage>();
@@ -323,9 +318,6 @@ namespace Voicipher.Business.Tests.StateMachine
 
             var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.RunConversionToWavAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(expectedSourceFileName);
@@ -341,7 +333,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -373,7 +365,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoSplitAsync_SplitsSuccess()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
@@ -390,9 +381,6 @@ namespace Voicipher.Business.Tests.StateMachine
                 new() {Id = Guid.NewGuid(), Path = "path-to-file-2"}
             };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.Is<AudioFile>(a => a.Id == audioFileId), default))
                 .ReturnsAsync(transcribedAudioFiles);
@@ -408,7 +396,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -443,7 +431,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoSplitAsync_PartialFilesExist_SplitsSuccess()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
@@ -460,9 +447,6 @@ namespace Voicipher.Business.Tests.StateMachine
                 new() {Id = new Guid("9fcd315e-dd0d-46bf-a490-c6e9a8d182e3"), Path = "path-to-file-2"}
             };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
             fileAccessServiceMock
                 .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
@@ -475,7 +459,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -510,7 +494,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoSplitAsync_OnlyOnePartialFileExist_SplitsSuccess()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
@@ -527,9 +510,6 @@ namespace Voicipher.Business.Tests.StateMachine
                 new() {Id = new Guid("9fcd315e-dd0d-46bf-a490-c6e9a8d182e3"), Path = "path-to-file"}
             };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.Is<AudioFile>(a => a.Id == audioFileId), default))
                 .ReturnsAsync(transcribedAudioFiles);
@@ -548,7 +528,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -583,7 +563,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoSplitAsync_FileNotExists_ThrowsException()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var wavFileServiceMock = new Mock<IWavFileService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var blobStorageMock = new Mock<IBlobStorage>();
@@ -600,9 +579,6 @@ namespace Voicipher.Business.Tests.StateMachine
                 new() {Id = new Guid("9fcd315e-dd0d-46bf-a490-c6e9a8d182e3"), Path = "path-to-file-2"}
             };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.Is<AudioFile>(a => a.Id == audioFileId), default))
                 .ReturnsAsync(transcribedAudioFiles);
@@ -621,7 +597,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 wavFileServiceMock.Object,
@@ -645,7 +621,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoProcessingAsync_ProcessingSuccess()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var speechRecognitionServiceMock = new Mock<ISpeechRecognitionService>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
             var diskStorageMock = new Mock<IDiskStorage>();
@@ -668,9 +643,6 @@ namespace Voicipher.Business.Tests.StateMachine
                 new() {Id = Guid.NewGuid()}
             };
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             speechRecognitionServiceMock
                 .Setup(x => x.RecognizeAsync(
                     It.Is<AudioFile>(a => a.Id == audioFileId),
@@ -689,7 +661,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 Mock.Of<IModifySubscriptionTimeCommand>(),
                 Mock.Of<IUpdateRecognitionStateCommand>(),
                 Mock.Of<IWavFileService>(),
@@ -725,7 +697,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoCompleteAsync_CompleteSuccess()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var modifySubscriptionTimeCommand = new Mock<IModifySubscriptionTimeCommand>();
             var updateRecognitionStateCommand = new Mock<IUpdateRecognitionStateCommand>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
@@ -740,9 +711,6 @@ namespace Voicipher.Business.Tests.StateMachine
             var audioFile = new AudioFile { Id = audioFileId };
             var appSettings = new AppSettings();
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             modifySubscriptionTimeCommand
                 .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, default))
                 .ReturnsAsync(new CommandResult());
@@ -759,7 +727,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 modifySubscriptionTimeCommand.Object,
                 updateRecognitionStateCommand.Object,
                 Mock.Of<IWavFileService>(),
@@ -789,7 +757,6 @@ namespace Voicipher.Business.Tests.StateMachine
         public async Task DoCompleteAsync_ModifySubscriptionFailed_ThrowsException()
         {
             // Arrange
-            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
             var modifySubscriptionTimeCommand = new Mock<IModifySubscriptionTimeCommand>();
             var updateRecognitionStateCommand = new Mock<IUpdateRecognitionStateCommand>();
             var fileAccessServiceMock = new Mock<IFileAccessService>();
@@ -804,9 +771,6 @@ namespace Voicipher.Business.Tests.StateMachine
             var audioFile = new AudioFile { Id = audioFileId };
             var appSettings = new AppSettings();
 
-            canRunRecognitionCommandMock
-                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
-                .ReturnsAsync(new CommandResult());
             modifySubscriptionTimeCommand
                 .Setup(x => x.ExecuteAsync(It.IsAny<ModifySubscriptionTimePayload>(), null, default))
                 .ReturnsAsync(new CommandResult(new OperationError(string.Empty)));
@@ -823,7 +787,7 @@ namespace Voicipher.Business.Tests.StateMachine
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
-                canRunRecognitionCommandMock.Object,
+                Mock.Of<ICanRunRecognitionCommand>(),
                 modifySubscriptionTimeCommand.Object,
                 updateRecognitionStateCommand.Object,
                 Mock.Of<IWavFileService>(),
