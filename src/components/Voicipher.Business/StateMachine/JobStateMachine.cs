@@ -97,7 +97,7 @@ namespace Voicipher.Business.StateMachine
             if (_fileAccessService.Exists(stateFilePath))
             {
                 var json = await _fileAccessService.ReadAllTextAsync(stateFilePath, cancellationToken);
-                var stateToRestore = JsonConvert.DeserializeObject<IMachineState>(json);
+                var stateToRestore = JsonConvert.DeserializeObject<MachineState>(json);
                 _machineState.FromState(stateToRestore);
             }
 
