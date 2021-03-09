@@ -48,8 +48,6 @@ namespace Voicipher.Business.StateMachine
 
         private readonly MachineState _machineState = new();
 
-        private BackgroundJob _backgroundJob;
-
         public JobStateMachine(
             ICanRunRecognitionCommand canRunRecognitionCommand,
             IModifySubscriptionTimeCommand modifySubscriptionTimeCommand,
@@ -90,7 +88,6 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken)
         {
-            _backgroundJob = backgroundJob;
             _machineState.StateFileName = $"{backgroundJob.AudioFileId}.json";
             _machineState.FromBackgroundJob(backgroundJob);
 
@@ -231,7 +228,7 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoErrorAsync(Exception exception, CancellationToken cancellationToken)
         {
-            _backgroundJob.Exception = ExceptionFormatter.FormatException(exception);
+            StateMachineContext.BackgroundJob.Exception = ExceptionFormatter.FormatException(exception);
             await _unitOfWork.SaveAsync(cancellationToken);
 
             var updateRecognitionStatePayload = new UpdateRecognitionStatePayload(_machineState.AudioFileId, _machineState.UserId, _appSettings.ApplicationId, RecognitionState.None);
@@ -242,7 +239,7 @@ namespace Voicipher.Business.StateMachine
 
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
-            _backgroundJob.FromState(_machineState);
+            StateMachineContext.BackgroundJob.FromState(_machineState);
 
             await _unitOfWork.SaveAsync(cancellationToken);
         }
