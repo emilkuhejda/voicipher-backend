@@ -9,7 +9,7 @@
         Converting = 4,
         Converted = 5,
         Splitting = 6,
-        Splitted = 7,
+        Split = 7,
         Processing = 8,
         Processed = 9,
         Completing = 10,

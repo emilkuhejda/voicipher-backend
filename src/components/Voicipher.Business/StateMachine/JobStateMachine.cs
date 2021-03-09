@@ -180,7 +180,7 @@ namespace Voicipher.Business.StateMachine
             _diskStorage.Delete(diskStorageSettings);
             _logger.Verbose($"[{_machineState.AudioFileId}] Wav audio file {_machineState.WavSourceFileName} was deleted from temporary disk storage");
 
-            await TryChangeStateAsync(JobState.Splitted, cancellationToken);
+            await TryChangeStateAsync(JobState.Split, cancellationToken);
         }
 
         public async Task DoProcessingAsync(CancellationToken cancellationToken)
@@ -306,8 +306,8 @@ namespace Voicipher.Business.StateMachine
                 case JobState.Converted:
                     return JobState.Splitting;
                 case JobState.Splitting:
-                    return JobState.Splitted;
-                case JobState.Splitted:
+                    return JobState.Split;
+                case JobState.Split:
                     return JobState.Processing;
                 case JobState.Processing:
                     return JobState.Processed;
