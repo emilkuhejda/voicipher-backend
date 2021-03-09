@@ -304,6 +304,68 @@ namespace Voicipher.Business.Tests.StateMachine
             Assert.Equal(JobState.Converted, jobStateMachine.MachineState.JobState);
         }
 
+        [Fact]
+        public async Task DoConvertingAsync_SkipConverting_SourceFileNameInitialized()
+        {
+            // Arrange
+            const string expectedSourceFileName = "file.voc";
+
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var wavFileServiceMock = new Mock<IWavFileService>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFile = new AudioFile { Id = new Guid("884b0bf3-ca58-45ae-951b-b1fae46b0395") };
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            wavFileServiceMock
+                .Setup(x => x.RunConversionToWavAsync(It.IsAny<AudioFile>(), default))
+                .ReturnsAsync(expectedSourceFileName);
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-converted.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
+                wavFileServiceMock.Object,
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                Mock.Of<ITranscribeItemRepository>(),
+                Mock.Of<IUnitOfWork>(),
+                Mock.Of<IOptions<AppSettings>>(),
+                loggerMock.Object);
+
+            // Act
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await jobStateMachine.DoConvertingAsync(default);
+
+            // Assert
+            diskStorageMock.Verify(x => x.DeleteFolder(It.IsAny<string>()), Times.Never);
+            wavFileServiceMock.Verify(x => x.RunConversionToWavAsync(It.IsAny<AudioFile>(), default), Times.Never);
+
+            Assert.Equal(expectedSourceFileName, audioFile.SourceFileName);
+            Assert.Equal(expectedSourceFileName, jobStateMachine.MachineState.WavSourceFileName);
+            Assert.Equal(JobState.Converted, jobStateMachine.MachineState.JobState);
+        }
+
         private BackgroundJob CreateBackgroundJob()
         {
             return CreateBackgroundJob(string.Empty);
