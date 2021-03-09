@@ -29,6 +29,9 @@
     <None Update="JsonData\alternatives.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="JsonData\machine-state-validated.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="JsonData\machine-state-validating.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

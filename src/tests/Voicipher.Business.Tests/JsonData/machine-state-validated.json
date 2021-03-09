@@ -2,7 +2,7 @@
   "JobId": "53e772e7-5615-4947-aaf6-272ec06f466a",
   "UserId": "50c26d76-087e-48c3-9f46-4a9f506845b8",
   "AudioFileId": "884b0bf3-ca58-45ae-951b-b1fae46b0395",
-  "JobState": 1,
+  "JobState": 3,
   "Attempt": 1,
   "FileName": "file-name.wav",
   "WavSourceFileName": null,
