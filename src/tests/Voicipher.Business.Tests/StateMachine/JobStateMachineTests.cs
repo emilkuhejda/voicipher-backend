@@ -923,52 +923,56 @@ namespace Voicipher.Business.Tests.StateMachine
             unitOfWork.Verify(x => x.SaveAsync(default), Times.Once);
         }
 
-        //[Fact]
-        //public async Task DoErrorAsync_SaveException()
-        //{
-        //    // Arrange
-        //    var fileAccessServiceMock = new Mock<IFileAccessService>();
-        //    var diskStorageMock = new Mock<IDiskStorage>();
-        //    var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
-        //    var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
-        //    var loggerMock = new Mock<ILogger>();
+        [Fact]
+        public async Task DoClean_CleanSuccess()
+        {
+            // Arrange
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var loggerMock = new Mock<ILogger>();
 
-        //    var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
+            var audioFile = new AudioFile { Id = new Guid(AudioFileId) };
 
-        //    fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
-        //    fileAccessServiceMock
-        //        .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
-        //        .ReturnsAsync(await GetJsonAsync("machine-state-processed.json"));
-        //    diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
-        //    indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
-        //    audioFileRepositoryMock
-        //        .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
-        //        .ReturnsAsync(audioFile);
-        //    loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-completed.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
-        //    var jobStateMachine = new JobStateMachine(
-        //        Mock.Of<ICanRunRecognitionCommand>(),
-        //        Mock.Of<IModifySubscriptionTimeCommand>(),
-        //        Mock.Of<IUpdateRecognitionStateCommand>(),
-        //        Mock.Of<IWavFileService>(),
-        //        Mock.Of<ISpeechRecognitionService>(),
-        //        Mock.Of<IMessageCenterService>(),
-        //        fileAccessServiceMock.Object,
-        //        Mock.Of<IBlobStorage>(),
-        //        indexMock.Object,
-        //        audioFileRepositoryMock.Object,
-        //        Mock.Of<ITranscribeItemRepository>(),
-        //        Mock.Of<IUnitOfWork>(),
-        //        Mock.Of<IOptions<AppSettings>>(),
-        //        loggerMock.Object);
+            var jobStateMachine = new JobStateMachine(
+                Mock.Of<ICanRunRecognitionCommand>(),
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
+                Mock.Of<IWavFileService>(),
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                Mock.Of<ITranscribeItemRepository>(),
+                Mock.Of<IUnitOfWork>(),
+                Mock.Of<IOptions<AppSettings>>(),
+                loggerMock.Object);
 
-        //    // Act
-        //    await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
-        //    await jobStateMachine.DoErrorAsync(new AggregateException(), default);
+            // Act
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            jobStateMachine.DoClean();
 
-        //    // Assert
-        //    Assert.Equal(JobState.Processed, jobStateMachine.MachineState.JobState);
-        //}
+            // Assert
+            Assert.Equal(JobState.Completed, jobStateMachine.MachineState.JobState);
+
+            diskStorageMock.Verify(
+                x => x.Delete(It.Is<DiskStorageSettings>(d => d == new DiskStorageSettings($"{AudioFileId}.json"))), Times.Once);
+            diskStorageMock.Verify(x => x.DeleteFolder(It.Is<string>(s => s == AudioFileId)), Times.Once);
+        }
 
         private BackgroundJob CreateBackgroundJob()
         {
