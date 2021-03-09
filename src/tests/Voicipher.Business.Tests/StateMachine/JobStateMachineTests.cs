@@ -640,6 +640,86 @@ namespace Voicipher.Business.Tests.StateMachine
             await Assert.ThrowsAsync<FileNotFoundException>(async () => await jobStateMachine.DoSplitAsync(default));
         }
 
+        [Fact]
+        public async Task DoProcessingAsync_ProcessingSuccess()
+        {
+            // Arrange
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var speechRecognitionServiceMock = new Mock<ISpeechRecognitionService>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var transcribeItemRepositoryMock = new Mock<ITranscribeItemRepository>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFileId = new Guid(AudioFileId);
+            var audioFile = new AudioFile { Id = audioFileId };
+            var transcribedAudioFiles = new TranscribedAudioFile[]
+            {
+                new() {Id = new Guid("14a37bfe-44bb-42ea-9b90-a91f3d5d3adb"), Path = "path-to-file",TotalTime = TimeSpan.FromMinutes(1),EndTime = TimeSpan.FromMinutes(1)},
+                new() {Id = new Guid("9fcd315e-dd0d-46bf-a490-c6e9a8d182e3"), Path = "path-to-file", TotalTime = TimeSpan.FromMinutes(1),EndTime = TimeSpan.FromMinutes(2)}
+            };
+
+            var transcribeItems = new TranscribeItem[]
+            {
+                new() {Id = Guid.NewGuid()},
+                new() {Id = Guid.NewGuid()}
+            };
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            speechRecognitionServiceMock
+                .Setup(x => x.RecognizeAsync(
+                    It.Is<AudioFile>(a => a.Id == audioFileId),
+                    It.IsAny<TranscribedAudioFile[]>(),
+                    default))
+                .ReturnsAsync(transcribeItems);
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-split.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
+                Mock.Of<IWavFileService>(),
+                speechRecognitionServiceMock.Object,
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                Mock.Of<IBlobStorage>(),
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                transcribeItemRepositoryMock.Object,
+                Mock.Of<IUnitOfWork>(),
+                Mock.Of<IOptions<AppSettings>>(),
+                loggerMock.Object);
+
+            // Act
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await jobStateMachine.DoProcessingAsync(default);
+
+            // Assert
+            Assert.Equal(JobState.Processed, jobStateMachine.MachineState.JobState);
+            Assert.Equal(transcribedAudioFiles[1].EndTime, jobStateMachine.StateMachineContext.AudioFile.TranscribedTime);
+
+            speechRecognitionServiceMock.Verify(
+                x => x.RecognizeAsync(
+                    It.Is<AudioFile>(a => a.Id == audioFileId),
+                    It.Is<TranscribedAudioFile[]>(t => t.Length == transcribedAudioFiles.Length),
+                    default), Times.Once);
+            transcribeItemRepositoryMock.Verify(
+                x => x.AddRangeAsync(It.Is<TranscribeItem[]>(t => t.Length == transcribeItems.Length), default), Times.Once);
+        }
+
         private BackgroundJob CreateBackgroundJob()
         {
             return CreateBackgroundJob(string.Empty);

@@ -189,13 +189,13 @@ namespace Voicipher.Business.StateMachine
 
             var transcribedAudioFiles = _machineState.TranscribedAudioFiles.OrderByDescending(x => x.EndTime).ToArray();
             var transcribedTime = transcribedAudioFiles.FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
-            _audioFile.TranscribedTime = transcribedTime;
+            StateMachineContext.AudioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
-            _logger.Information($"[{_audioFile.UserId}] Transcribed time audio file {_audioFile.Id} was updated to {transcribedTime}");
+            _logger.Information($"[{_machineState.UserId}] Transcribed time audio file {_machineState.AudioFileId} was updated to {transcribedTime}");
 
-            _logger.Information($"[{_audioFile.UserId}] Start speech recognition for audio file {_audioFile.Id}");
-            var transcribeItems = await _speechRecognitionService.RecognizeAsync(_audioFile, transcribedAudioFiles, cancellationToken);
-            _logger.Information($"[{_audioFile.UserId}] Speech recognition for audio file {_audioFile.Id} is finished");
+            _logger.Information($"[{_machineState.UserId}] Start speech recognition for audio file {_machineState.AudioFileId}");
+            var transcribeItems = await _speechRecognitionService.RecognizeAsync(StateMachineContext.AudioFile, transcribedAudioFiles, cancellationToken);
+            _logger.Information($"[{_machineState.UserId}] Speech recognition for audio file {MachineState.AudioFileId} is finished");
 
             _transcribeItemRepository.RemoveRange(_machineState.AudioFileId);
             await _transcribeItemRepository.AddRangeAsync(transcribeItems, cancellationToken);
