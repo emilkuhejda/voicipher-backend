@@ -578,6 +578,68 @@ namespace Voicipher.Business.Tests.StateMachine
             diskStorageMock.Verify(x => x.Delete(It.Is<DiskStorageSettings>(d => d == new DiskStorageSettings(audioFile.Id.ToString(), "file.voc"))));
         }
 
+        [Fact]
+        public async Task DoSplitAsync_FileNotExists_ThrowsException()
+        {
+            // Arrange
+            var canRunRecognitionCommandMock = new Mock<ICanRunRecognitionCommand>();
+            var wavFileServiceMock = new Mock<IWavFileService>();
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var blobStorageMock = new Mock<IBlobStorage>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFileId = new Guid(AudioFileId);
+            var audioFile = new AudioFile { Id = audioFileId };
+            var transcribedAudioFiles = new TranscribedAudioFile[]
+            {
+                new() {Id = new Guid("14a37bfe-44bb-42ea-9b90-a91f3d5d3adb"), Path = "path-to-file-1"},
+                new() {Id = new Guid("9fcd315e-dd0d-46bf-a490-c6e9a8d182e3"), Path = "path-to-file-2"}
+            };
+
+            canRunRecognitionCommandMock
+                .Setup(x => x.ExecuteAsync(It.IsAny<CanRunRecognitionPayload>(), null, default))
+                .ReturnsAsync(new CommandResult());
+            wavFileServiceMock
+                .Setup(x => x.SplitAudioFileAsync(It.Is<AudioFile>(a => a.Id == audioFileId), default))
+                .ReturnsAsync(transcribedAudioFiles);
+            fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.Exists(It.Is<string>(p => p == transcribedAudioFiles[0].Path)))
+                .Returns(false);
+            fileAccessServiceMock
+                .Setup(x => x.ReadAllTextAsync(It.IsAny<string>(), default))
+                .ReturnsAsync(await GetJsonAsync("machine-state-splitting.json"));
+            diskStorageMock.Setup(x => x.GetDirectoryPath()).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            audioFileRepositoryMock
+                .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
+                .ReturnsAsync(audioFile);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var jobStateMachine = new JobStateMachine(
+                canRunRecognitionCommandMock.Object,
+                Mock.Of<IModifySubscriptionTimeCommand>(),
+                Mock.Of<IUpdateRecognitionStateCommand>(),
+                wavFileServiceMock.Object,
+                Mock.Of<ISpeechRecognitionService>(),
+                Mock.Of<IMessageCenterService>(),
+                fileAccessServiceMock.Object,
+                blobStorageMock.Object,
+                indexMock.Object,
+                audioFileRepositoryMock.Object,
+                Mock.Of<ITranscribeItemRepository>(),
+                Mock.Of<IUnitOfWork>(),
+                Mock.Of<IOptions<AppSettings>>(),
+                loggerMock.Object);
+
+            // Act & Assert
+            await jobStateMachine.DoInitAsync(CreateBackgroundJob(), default);
+            await Assert.ThrowsAsync<FileNotFoundException>(async () => await jobStateMachine.DoSplitAsync(default));
+        }
+
         private BackgroundJob CreateBackgroundJob()
         {
             return CreateBackgroundJob(string.Empty);
