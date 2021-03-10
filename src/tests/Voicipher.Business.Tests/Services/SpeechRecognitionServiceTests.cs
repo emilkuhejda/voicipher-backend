@@ -50,18 +50,8 @@ namespace Voicipher.Business.Tests.Services
 
             // Assert
             Assert.Collection(transcribeItems,
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[0].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                },
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[1].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                });
+                item => AssertTranscribeItem(transcribedAudioFiles[0], item, audioFile),
+                item => AssertTranscribeItem(transcribedAudioFiles[1], item, audioFile));
 
             fileAccessServiceMock.Verify(x => x.ReadAllTextAsync(It.IsAny<string>(), default), Times.Never);
             diskStorageMock.Verify(x => x.UploadAsync(It.IsAny<byte[]>(), It.IsAny<DiskStorageSettings>(), default), Times.Exactly(2));
@@ -106,18 +96,8 @@ namespace Voicipher.Business.Tests.Services
 
             // Assert
             Assert.Collection(transcribeItems,
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[0].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                },
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[1].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                });
+                item => AssertTranscribeItem(transcribedAudioFiles[0], item, audioFile),
+                item => AssertTranscribeItem(transcribedAudioFiles[1], item, audioFile));
 
             fileAccessServiceMock.Verify(x => x.ReadAllTextAsync(It.IsAny<string>(), default), Times.Exactly(2));
             diskStorageMock.Verify(x => x.UploadAsync(It.IsAny<byte[]>(), It.IsAny<DiskStorageSettings>(), default), Times.Never);
@@ -164,20 +144,8 @@ namespace Voicipher.Business.Tests.Services
 
             // Assert
             Assert.Collection(transcribeItems,
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[0].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                    Assert.False(item.IsIncomplete);
-                },
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[1].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                    Assert.False(item.IsIncomplete);
-                });
+                item => AssertTranscribeItem(transcribedAudioFiles[0], item, audioFile),
+                item => AssertTranscribeItem(transcribedAudioFiles[1], item, audioFile));
 
             fileAccessServiceMock.Verify(
                 x => x.ReadAllTextAsync(It.Is<string>(p => p == diskPath), default), Times.Exactly(1));
@@ -229,20 +197,8 @@ namespace Voicipher.Business.Tests.Services
 
             // Assert
             Assert.Collection(transcribeItems,
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[0].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                    Assert.False(item.IsIncomplete);
-                },
-                item =>
-                {
-                    Assert.Equal(audioFile.Id, item.AudioFileId);
-                    Assert.Equal(transcribedAudioFiles[1].Id, item.Id);
-                    Assert.True(!string.IsNullOrWhiteSpace(item.Alternatives));
-                    Assert.True(item.IsIncomplete);
-                });
+                item => AssertTranscribeItem(transcribedAudioFiles[0], item, audioFile),
+                item => AssertTranscribeItem(transcribedAudioFiles[1], item, audioFile, true));
 
             fileAccessServiceMock.Verify(
                 x => x.ReadAllTextAsync(It.Is<string>(p => p == diskPath), default), Times.Exactly(1));
@@ -291,6 +247,22 @@ namespace Voicipher.Business.Tests.Services
             // Assert
             fileAccessServiceMock.Verify(x => x.ReadAllTextAsync(It.IsAny<string>(), default), Times.Exactly(2));
             diskStorageMock.Verify(x => x.UploadAsync(It.IsAny<byte[]>(), It.IsAny<DiskStorageSettings>(), default), Times.Never);
+        }
+
+        private void AssertTranscribeItem(TranscribedAudioFile transcribedAudioFile, TranscribeItem transcribeItem, AudioFile audioFile, bool isIncomplete = false)
+        {
+            Assert.Equal(audioFile.Id, transcribeItem.AudioFileId);
+            Assert.Equal(transcribedAudioFile.Id, transcribeItem.Id);
+            Assert.True(!string.IsNullOrWhiteSpace(transcribeItem.Alternatives));
+
+            if (isIncomplete)
+            {
+                Assert.True(transcribeItem.IsIncomplete);
+            }
+            else
+            {
+                Assert.False(transcribeItem.IsIncomplete);
+            }
         }
 
         private (AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles) GenerateMockData()
