@@ -21,13 +21,14 @@ namespace Voicipher.Business.Services
     public class SpeechRecognitionService : SpeechRecognitionServiceBase
     {
         public SpeechRecognitionService(
+            ISpeechClientFactory speechClientFactory,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
             IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
             IOptions<AppSettings> options,
             ILogger logger)
-            : base(audioFileProcessingChannel, messageCenterService, fileAccessService, index, options, logger)
+            : base(speechClientFactory, audioFileProcessingChannel, messageCenterService, fileAccessService, index, options, logger)
         {
         }
 
