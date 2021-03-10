@@ -26,7 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="JsonData\alternatives.json">
+    <None Update="JsonData\recognized-result-incomplete.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="JsonData\recognized-result-complete.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="JsonData\machine-state-completed.json">
