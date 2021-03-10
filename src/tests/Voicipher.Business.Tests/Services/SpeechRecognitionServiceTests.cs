@@ -251,8 +251,9 @@ namespace Voicipher.Business.Tests.Services
 
         private void AssertTranscribeItem(TranscribedAudioFile transcribedAudioFile, TranscribeItem transcribeItem, AudioFile audioFile, bool isIncomplete = false)
         {
+            var expectedTranscribedAudioFile = transcribedAudioFile;
             Assert.Equal(audioFile.Id, transcribeItem.AudioFileId);
-            Assert.Equal(transcribedAudioFile.Id, transcribeItem.Id);
+            Assert.Equal(expectedTranscribedAudioFile.Id, transcribeItem.Id);
             Assert.True(!string.IsNullOrWhiteSpace(transcribeItem.Alternatives));
 
             if (isIncomplete)
