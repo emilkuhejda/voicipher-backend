@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Google.Cloud.Speech.V1;
 using Google.Protobuf.Collections;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -12,7 +11,6 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
-using Voicipher.Domain.Settings;
 using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
@@ -28,9 +26,8 @@ namespace Voicipher.Business.Services
             IMessageCenterService messageCenterService,
             IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
-            IOptions<AppSettings> options,
             ILogger logger)
-            : base(speechClientFactory, audioFileProcessingChannel, messageCenterService, fileAccessService, index, options, logger)
+            : base(speechClientFactory, audioFileProcessingChannel, messageCenterService, fileAccessService, index, logger)
         {
         }
 

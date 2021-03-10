@@ -5,14 +5,12 @@ using Autofac.Features.Indexed;
 using Google.Api.Gax;
 using Google.Api.Gax.Grpc;
 using Google.Cloud.Speech.V1;
-using Microsoft.Extensions.Options;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
-using Voicipher.Domain.Settings;
 using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
@@ -26,9 +24,8 @@ namespace Voicipher.Business.Services
             IMessageCenterService messageCenterService,
             IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
-            IOptions<AppSettings> options,
             ILogger logger)
-            : base(speechClientFactory, audioFileProcessingChannel, messageCenterService, fileAccessService, index, options, logger)
+            : base(speechClientFactory, audioFileProcessingChannel, messageCenterService, fileAccessService, index, logger)
         {
         }
 

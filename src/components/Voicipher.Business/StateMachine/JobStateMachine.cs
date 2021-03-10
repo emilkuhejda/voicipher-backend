@@ -190,7 +190,7 @@ namespace Voicipher.Business.StateMachine
             _logger.Information($"[{_machineState.UserId}] Transcribed time audio file {_machineState.AudioFileId} was updated to {transcribedTime}");
 
             _logger.Information($"[{_machineState.UserId}] Start speech recognition for audio file {_machineState.AudioFileId}");
-            var transcribeItems = await _speechRecognitionService.RecognizeAsync(StateMachineContext.AudioFile, transcribedAudioFiles, cancellationToken);
+            var transcribeItems = await _speechRecognitionService.RecognizeAsync(StateMachineContext.AudioFile, transcribedAudioFiles, _appSettings.ApplicationId, cancellationToken);
             _logger.Information($"[{_machineState.UserId}] Speech recognition for audio file {MachineState.AudioFileId} is finished");
 
             _transcribeItemRepository.RemoveRange(_machineState.AudioFileId);

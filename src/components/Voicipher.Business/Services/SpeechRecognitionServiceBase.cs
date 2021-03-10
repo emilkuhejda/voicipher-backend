@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
 using Google.Cloud.Speech.V1;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -17,7 +16,6 @@ using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
-using Voicipher.Domain.Settings;
 using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
@@ -30,7 +28,6 @@ namespace Voicipher.Business.Services
         private readonly IMessageCenterService _messageCenterService;
         private readonly IFileAccessService _fileAccessService;
         private readonly IDiskStorage _diskStorage;
-        private readonly AppSettings _appSettings;
 
         private int _totalTasks;
         private int _tasksDone;
@@ -41,7 +38,6 @@ namespace Voicipher.Business.Services
             IMessageCenterService messageCenterService,
             IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
-            IOptions<AppSettings> options,
             ILogger logger)
         {
             _speechClientFactory = speechClientFactory;
@@ -49,7 +45,6 @@ namespace Voicipher.Business.Services
             _messageCenterService = messageCenterService;
             _fileAccessService = fileAccessService;
             _diskStorage = index[StorageLocation.Audio];
-            _appSettings = options.Value;
             Logger = logger.ForContext<SpeechRecognitionService>();
         }
 
@@ -70,9 +65,9 @@ namespace Voicipher.Business.Services
             return false;
         }
 
-        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken)
+        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, Guid applicationId, CancellationToken cancellationToken)
         {
-            var speechRecognizeConfig = new SpeechRecognizeConfig(audioFile);
+            var speechRecognizeConfig = new SpeechRecognizeConfig(audioFile, applicationId);
 
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
             foreach (var transcribeAudioFile in transcribedAudioFiles)
@@ -140,7 +135,7 @@ namespace Voicipher.Business.Services
             {
                 Id = transcribedAudioFile.Id,
                 AudioFileId = transcribedAudioFile.AudioFileId,
-                ApplicationId = _appSettings.ApplicationId,
+                ApplicationId = speechRecognizeConfig.ApplicationId,
                 Alternatives = JsonConvert.SerializeObject(recognizedResult.Alternatives),
                 SourceFileName = transcribedAudioFile.SourceFileName,
                 StartTime = transcribedAudioFile.StartTime,

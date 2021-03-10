@@ -629,6 +629,7 @@ namespace Voicipher.Business.Tests.StateMachine
             var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
             var audioFileRepositoryMock = new Mock<IAudioFileRepository>();
             var transcribeItemRepositoryMock = new Mock<ITranscribeItemRepository>();
+            var optionsMock = new Mock<IOptions<AppSettings>>();
             var loggerMock = new Mock<ILogger>();
 
             var audioFileId = new Guid(AudioFileId);
@@ -649,6 +650,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 .Setup(x => x.RecognizeAsync(
                     It.Is<AudioFile>(a => a.Id == audioFileId),
                     It.IsAny<TranscribedAudioFile[]>(),
+                    It.IsAny<Guid>(),
                     default))
                 .ReturnsAsync(transcribeItems);
             fileAccessServiceMock.Setup(x => x.Exists(It.IsAny<string>())).Returns(true);
@@ -660,6 +662,7 @@ namespace Voicipher.Business.Tests.StateMachine
             audioFileRepositoryMock
                 .Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), default))
                 .ReturnsAsync(audioFile);
+            optionsMock.Setup(x => x.Value).Returns(new AppSettings());
             loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
 
             var jobStateMachine = new JobStateMachine(
@@ -675,7 +678,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 audioFileRepositoryMock.Object,
                 transcribeItemRepositoryMock.Object,
                 Mock.Of<IUnitOfWork>(),
-                Mock.Of<IOptions<AppSettings>>(),
+                optionsMock.Object,
                 loggerMock.Object);
 
             // Act
@@ -690,6 +693,7 @@ namespace Voicipher.Business.Tests.StateMachine
                 x => x.RecognizeAsync(
                     It.Is<AudioFile>(a => a.Id == audioFileId),
                     It.Is<TranscribedAudioFile[]>(t => t.Length == transcribedAudioFiles.Length),
+                    It.IsAny<Guid>(),
                     default), Times.Once);
             transcribeItemRepositoryMock.Verify(
                 x => x.AddRangeAsync(It.Is<TranscribeItem[]>(t => t.Length == transcribeItems.Length), default), Times.Once);
