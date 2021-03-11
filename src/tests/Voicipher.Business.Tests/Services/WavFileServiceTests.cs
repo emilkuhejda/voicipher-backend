@@ -107,110 +107,6 @@ namespace Voicipher.Business.Tests.Services
         }
 
         [Fact]
-        public async Task RunConversionToWavAsync_ConversionSuccess()
-        {
-            var diskStorageMock = new DiskStorageStub();
-
-            try
-            {
-                // Arrange
-                var fileAccessServiceMock = new Mock<IFileAccessService>();
-                var blobStorageMock = new Mock<IBlobStorage>();
-                var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
-                var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
-                var loggerMock = new Mock<ILogger>();
-
-                var sampleBytes = await GetSampleBytes();
-
-                var audioFile = new AudioFile
-                {
-                    Id = Guid.NewGuid(),
-                    SourceFileName = "file-name.voc",
-                    TotalTime = TimeSpan.FromMinutes(5),
-                    TranscriptionStartTime = TimeSpan.Zero,
-                    TranscriptionEndTime = TimeSpan.FromMinutes(5)
-                };
-
-                blobStorageMock
-                    .Setup(x => x.GetAsync(It.IsAny<GetBlobSettings>(), default))
-                    .ReturnsAsync(sampleBytes);
-                indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock);
-                fileAccessServiceMock.Setup(x => x.Exists(It.Is<string>(n => n == audioFile.SourceFileName))).Returns(false);
-                loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
-
-                var wavFileService = new WavFileService(
-                    fileAccessServiceMock.Object,
-                    blobStorageMock.Object,
-                    indexMock.Object,
-                    currentUserSubscriptionRepositoryMock.Object,
-                    loggerMock.Object);
-
-                // Act
-                var fileName = await wavFileService.RunConversionToWavAsync(audioFile, default);
-
-                // Assert
-                var filePath = Path.Combine(diskStorageMock.GetDirectoryPath(), fileName);
-                Assert.Equal(audioFile.TotalTime, GetAudioFileTotalTime(filePath));
-            }
-            finally
-            {
-                diskStorageMock.Clean();
-            }
-        }
-
-        [Fact]
-        public async Task RunConversionToWavAsync_ConvertTwoMinutes_ConversionSuccess()
-        {
-            var diskStorageMock = new DiskStorageStub();
-
-            try
-            {
-                // Arrange
-                var fileAccessServiceMock = new Mock<IFileAccessService>();
-                var blobStorageMock = new Mock<IBlobStorage>();
-                var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
-                var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
-                var loggerMock = new Mock<ILogger>();
-
-                var sampleBytes = await GetSampleBytes();
-
-                var audioFile = new AudioFile
-                {
-                    Id = Guid.NewGuid(),
-                    SourceFileName = "file-name.voc",
-                    TotalTime = TimeSpan.FromMinutes(5),
-                    TranscriptionStartTime = TimeSpan.FromMinutes(1),
-                    TranscriptionEndTime = TimeSpan.FromMinutes(3)
-                };
-
-                blobStorageMock
-                    .Setup(x => x.GetAsync(It.IsAny<GetBlobSettings>(), default))
-                    .ReturnsAsync(sampleBytes);
-                indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock);
-                fileAccessServiceMock.Setup(x => x.Exists(It.Is<string>(n => n == audioFile.SourceFileName))).Returns(false);
-                loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
-
-                var wavFileService = new WavFileService(
-                    fileAccessServiceMock.Object,
-                    blobStorageMock.Object,
-                    indexMock.Object,
-                    currentUserSubscriptionRepositoryMock.Object,
-                    loggerMock.Object);
-
-                // Act
-                var fileName = await wavFileService.RunConversionToWavAsync(audioFile, default);
-
-                // Assert
-                var filePath = Path.Combine(diskStorageMock.GetDirectoryPath(), fileName);
-                Assert.Equal(TimeSpan.FromMinutes(2), GetAudioFileTotalTime(filePath));
-            }
-            finally
-            {
-                diskStorageMock.Clean();
-            }
-        }
-
-        [Fact]
         public async Task RunConversionToWavAsync_BlobStorageThrowsException_DeleteData()
         {
             // Arrange
@@ -249,6 +145,60 @@ namespace Voicipher.Business.Tests.Services
             await Assert.ThrowsAsync<RequestFailedException>(async () => await wavFileService.RunConversionToWavAsync(audioFile, default));
 
             fileAccessServiceMock.Verify(x => x.Delete(It.Is<string>(p => string.IsNullOrEmpty(p))));
+        }
+
+        [Theory]
+        [InlineData(0, 5, 5)]
+        [InlineData(1, 3, 2)]
+        public async Task RunConversionToWavAsync_ConversionSuccess(int startTime, int endTime, int totalTime)
+        {
+            var diskStorageMock = new DiskStorageStub();
+
+            try
+            {
+                // Arrange
+                var fileAccessServiceMock = new Mock<IFileAccessService>();
+                var blobStorageMock = new Mock<IBlobStorage>();
+                var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+                var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
+                var loggerMock = new Mock<ILogger>();
+
+                var sampleBytes = await GetSampleBytes();
+
+                var audioFile = new AudioFile
+                {
+                    Id = Guid.NewGuid(),
+                    SourceFileName = "file-name.voc",
+                    TotalTime = TimeSpan.FromMinutes(5),
+                    TranscriptionStartTime = TimeSpan.FromMinutes(startTime),
+                    TranscriptionEndTime = TimeSpan.FromMinutes(endTime)
+                };
+
+                blobStorageMock
+                    .Setup(x => x.GetAsync(It.IsAny<GetBlobSettings>(), default))
+                    .ReturnsAsync(sampleBytes);
+                indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock);
+                fileAccessServiceMock.Setup(x => x.Exists(It.Is<string>(n => n == audioFile.SourceFileName))).Returns(false);
+                loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+                var wavFileService = new WavFileService(
+                    fileAccessServiceMock.Object,
+                    blobStorageMock.Object,
+                    indexMock.Object,
+                    currentUserSubscriptionRepositoryMock.Object,
+                    loggerMock.Object);
+
+                // Act
+                var fileName = await wavFileService.RunConversionToWavAsync(audioFile, default);
+
+                // Assert
+                var filePath = Path.Combine(diskStorageMock.GetDirectoryPath(), fileName);
+                Assert.Equal(TimeSpan.FromMinutes(totalTime), GetAudioFileTotalTime(filePath));
+            }
+            finally
+            {
+                diskStorageMock.Clean();
+            }
         }
 
         private Task<byte[]> GetSampleBytes()
