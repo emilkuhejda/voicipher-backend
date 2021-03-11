@@ -97,6 +97,8 @@ namespace Voicipher.Business.StateMachine
                 var json = await _fileAccessService.ReadAllTextAsync(stateFilePath, cancellationToken);
                 var stateToRestore = JsonConvert.DeserializeObject<MachineState>(json);
                 _machineState.FromState(stateToRestore);
+
+                _logger.Verbose($"[{_machineState.UserId}] Machine state for audio file {_machineState.AudioFileId} was loaded from stored state");
             }
 
             var audioFile = await _audioFileRepository.GetAsync(_machineState.UserId, _machineState.AudioFileId, cancellationToken);
@@ -124,6 +126,8 @@ namespace Voicipher.Business.StateMachine
             await TryChangeStateAsync(JobState.Converting, cancellationToken);
             if (CanSkip(JobState.Converting))
             {
+                _logger.Verbose($"[{_machineState.UserId}] Skip converting stage for audio file {_machineState.AudioFileId}");
+
                 StateMachineContext.AudioFile.SourceFileName = _machineState.WavSourceFileName;
                 return;
             }
@@ -142,7 +146,11 @@ namespace Voicipher.Business.StateMachine
         {
             await TryChangeStateAsync(JobState.Splitting, cancellationToken);
             if (CanSkip(JobState.Splitting))
+            {
+                _logger.Verbose($"[{_machineState.UserId}] Skip split stage for audio file {_machineState.AudioFileId}");
+
                 return;
+            }
 
             if (!_machineState.TranscribedAudioFiles.Any() || _machineState.TranscribedAudioFiles.Any(x => !_fileAccessService.Exists(x.Path)))
             {
@@ -152,6 +160,10 @@ namespace Voicipher.Business.StateMachine
                 await SaveStateAsync(cancellationToken);
 
                 _logger.Information($"[{_machineState.UserId}] Audio file was split to {_machineState.TranscribedAudioFiles.Length} partial audio files");
+            }
+            else
+            {
+                _logger.Verbose($"[{_machineState.UserId}] Transcribed audio files was loaded for audio file {_machineState.AudioFileId} from disk storage");
             }
 
             _logger.Verbose($"[{_machineState.UserId}] {_machineState.TranscribedAudioFiles.Length} transcription items ready for upload");
@@ -183,11 +195,13 @@ namespace Voicipher.Business.StateMachine
         {
             await TryChangeStateAsync(JobState.Processing, cancellationToken);
 
+            _logger.Verbose($"[{_machineState.UserId}] Start processing stage for audio file {_machineState.AudioFileId}");
+
             var transcribedAudioFiles = _machineState.TranscribedAudioFiles.OrderByDescending(x => x.EndTime).ToArray();
             var transcribedTime = transcribedAudioFiles.FirstOrDefault()?.EndTime ?? TimeSpan.Zero;
             StateMachineContext.AudioFile.TranscribedTime = transcribedTime;
             await _unitOfWork.SaveAsync(cancellationToken);
-            _logger.Information($"[{_machineState.UserId}] Transcribed time audio file {_machineState.AudioFileId} was updated to {transcribedTime}");
+            _logger.Information($"[{_machineState.UserId}] Transcribed time for audio file {_machineState.AudioFileId} was updated to {transcribedTime}");
 
             _logger.Information($"[{_machineState.UserId}] Start speech recognition for audio file {_machineState.AudioFileId}");
             var transcribeItems = await _speechRecognitionService.RecognizeAsync(StateMachineContext.AudioFile, transcribedAudioFiles, _appSettings.ApplicationId, cancellationToken);
@@ -203,6 +217,8 @@ namespace Voicipher.Business.StateMachine
         public async Task DoCompleteAsync(CancellationToken cancellationToken)
         {
             await TryChangeStateAsync(JobState.Completing, cancellationToken);
+
+            _logger.Verbose($"[{_machineState.UserId}] Start completing stage for audio file {_machineState.AudioFileId}");
 
             _machineState.DateCompletedUtc = DateTime.UtcNow;
 
@@ -228,6 +244,8 @@ namespace Voicipher.Business.StateMachine
 
         public async Task DoErrorAsync(Exception exception, CancellationToken cancellationToken)
         {
+            _logger.Verbose($"[{_machineState.UserId}] Handle error form background job {StateMachineContext.BackgroundJob.Id}");
+
             StateMachineContext.BackgroundJob.Exception = ExceptionFormatter.FormatException(exception);
             await _unitOfWork.SaveAsync(cancellationToken);
 
@@ -239,6 +257,8 @@ namespace Voicipher.Business.StateMachine
 
         public async Task SaveAsync(CancellationToken cancellationToken)
         {
+            _logger.Verbose($"[{_machineState.UserId}] Save background job {StateMachineContext.BackgroundJob.Id}");
+
             StateMachineContext.BackgroundJob.FromState(_machineState);
 
             await _unitOfWork.SaveAsync(cancellationToken);
