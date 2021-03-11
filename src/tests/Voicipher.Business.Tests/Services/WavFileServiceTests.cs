@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
+using Azure;
 using Moq;
 using NAudio.Wave;
 using Serilog;
@@ -207,6 +208,47 @@ namespace Voicipher.Business.Tests.Services
             {
                 diskStorageMock.Clean();
             }
+        }
+
+        [Fact]
+        public async Task RunConversionToWavAsync_BlobStorageThrowsException_DeleteData()
+        {
+            // Arrange
+            var fileAccessServiceMock = new Mock<IFileAccessService>();
+            var diskStorageMock = new Mock<IDiskStorage>();
+            var blobStorageMock = new Mock<IBlobStorage>();
+            var indexMock = new Mock<IIndex<StorageLocation, IDiskStorage>>();
+            var currentUserSubscriptionRepositoryMock = new Mock<ICurrentUserSubscriptionRepository>();
+            var loggerMock = new Mock<ILogger>();
+
+            var audioFile = new AudioFile
+            {
+                Id = Guid.NewGuid(),
+                SourceFileName = "file-name.voc",
+                TotalTime = TimeSpan.FromMinutes(5),
+                TranscriptionStartTime = TimeSpan.Zero,
+                TranscriptionEndTime = TimeSpan.FromMinutes(5)
+            };
+
+            blobStorageMock
+                .Setup(x => x.GetAsync(It.IsAny<GetBlobSettings>(), default))
+                .Throws(new RequestFailedException(string.Empty));
+            diskStorageMock.Setup(x => x.GetDirectoryPath(It.IsAny<string>())).Returns(string.Empty);
+            indexMock.Setup(x => x[It.IsAny<StorageLocation>()]).Returns(diskStorageMock.Object);
+            fileAccessServiceMock.Setup(x => x.Exists(It.Is<string>(n => n == audioFile.SourceFileName))).Returns(false);
+            loggerMock.Setup(x => x.ForContext<It.IsAnyType>()).Returns(Mock.Of<ILogger>());
+
+            var wavFileService = new WavFileService(
+                fileAccessServiceMock.Object,
+                blobStorageMock.Object,
+                indexMock.Object,
+                currentUserSubscriptionRepositoryMock.Object,
+                loggerMock.Object);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<RequestFailedException>(async () => await wavFileService.RunConversionToWavAsync(audioFile, default));
+
+            fileAccessServiceMock.Verify(x => x.Delete(It.Is<string>(p => string.IsNullOrEmpty(p))));
         }
 
         private Task<byte[]> GetSampleBytes()
