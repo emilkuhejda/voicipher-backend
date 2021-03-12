@@ -7,6 +7,10 @@ namespace Voicipher.Domain.Interfaces.StateMachine
 {
     public interface IJobStateMachine
     {
+        public IMachineState MachineState { get; }
+
+        IStateMachineContext StateMachineContext { get; }
+
         Task DoInitAsync(BackgroundJob backgroundJob, CancellationToken cancellationToken);
 
         Task DoValidationAsync(CancellationToken cancellationToken);

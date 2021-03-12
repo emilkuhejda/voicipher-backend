@@ -85,7 +85,7 @@ namespace Voicipher.Business.Services
             if (!_fileAccessService.Exists(wavFilePath))
                 throw new FileNotFoundException($"Wav file {wavFilePath} does not exist");
 
-            _logger.Verbose($"[{audioFile.UserId}] Clean partial temporary files");
+            _logger.Verbose($"[{audioFile.UserId}] Clean temporary partial files");
             var directory = GetDirectoryPath(audioFile.Id);
             foreach (var path in _fileAccessService.GetFiles(directory).Where(x => !x.Equals(wavFilePath, StringComparison.OrdinalIgnoreCase)))
             {

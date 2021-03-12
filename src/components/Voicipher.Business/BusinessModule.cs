@@ -56,6 +56,8 @@ namespace Voicipher.Business
             builder.RegisterType<BackupStorage>().Keyed<IDiskStorage>(StorageLocation.Backup);
             builder.RegisterType<BlobStorage>().As<IBlobStorage>();
 
+            builder.RegisterType<SpeechClientFactory>().As<ISpeechClientFactory>();
+
             builder.RegisterType<JobStateMachine>().As<IJobStateMachine>();
 
             builder.RegisterType<MailProcessingChannel>().As<IMailProcessingChannel>().SingleInstance();

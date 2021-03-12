@@ -1,0 +1,458 @@
+{
+  "IsIncomplete": false,
+  "Alternatives": [
+    {
+      "ResultNumber": 0,
+      "Transcript": "4535d0fd-c5d9-44e3-96f4-a4a6ec779b22: Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur, vel illum qui dolorem eum fugiat quo voluptas nulla pariatur?",
+      "Confidence": 0.8126546,
+      "Words": [
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:00",
+          "EndTime": "00:00:08.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:08.7000000",
+          "EndTime": "00:00:10.6000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:10.6000000",
+          "EndTime": "00:00:10.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:10.9000000",
+          "EndTime": "00:00:13.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:13.1000000",
+          "EndTime": "00:00:13.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:13.2000000",
+          "EndTime": "00:00:14",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:14",
+          "EndTime": "00:00:15",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:15",
+          "EndTime": "00:00:15.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:15.3000000",
+          "EndTime": "00:00:15.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:15.5000000",
+          "EndTime": "00:00:16.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:16.2000000",
+          "EndTime": "00:00:16.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:16.7000000",
+          "EndTime": "00:00:17",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:17",
+          "EndTime": "00:00:17.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:17.1000000",
+          "EndTime": "00:00:17.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:17.3000000",
+          "EndTime": "00:00:17.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:17.5000000",
+          "EndTime": "00:00:17.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:17.9000000",
+          "EndTime": "00:00:19.6000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:19.6000000",
+          "EndTime": "00:00:20",
+          "SpeakerTag": 0
+        }
+      ]
+    },
+    {
+      "ResultNumber": 1,
+      "Transcript": "9477d442-20da-4a95-b7ac-ae475c56b381: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "Confidence": 0.78882,
+      "Words": [
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:21.3000000",
+          "EndTime": "00:00:22",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:22",
+          "EndTime": "00:00:22.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:22.2000000",
+          "EndTime": "00:00:22.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:22.9000000",
+          "EndTime": "00:00:24.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:24.2000000",
+          "EndTime": "00:00:26",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:26",
+          "EndTime": "00:00:27.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:27.2000000",
+          "EndTime": "00:00:27.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:27.4000000",
+          "EndTime": "00:00:28.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:28.1000000",
+          "EndTime": "00:00:28.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:28.5000000",
+          "EndTime": "00:00:29.6000000",
+          "SpeakerTag": 0
+        }
+      ]
+    },
+    {
+      "ResultNumber": 2,
+      "Transcript": "c914769d-15be-41ad-89cc-a8288ce8e5d1: At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi, id est laborum et dolorum fuga.",
+      "Confidence": 0.90468484,
+      "Words": [
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:31.4000000",
+          "EndTime": "00:00:34.6000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:34.6000000",
+          "EndTime": "00:00:35.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:35.2000000",
+          "EndTime": "00:00:35.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:35.5000000",
+          "EndTime": "00:00:35.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:35.7000000",
+          "EndTime": "00:00:36.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:36.2000000",
+          "EndTime": "00:00:38.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:38.1000000",
+          "EndTime": "00:00:39.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:39.1000000",
+          "EndTime": "00:00:39.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:39.7000000",
+          "EndTime": "00:00:39.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:39.9000000",
+          "EndTime": "00:00:40.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:40.7000000",
+          "EndTime": "00:00:42.8000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:42.8000000",
+          "EndTime": "00:00:42.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:42.9000000",
+          "EndTime": "00:00:43.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:43.4000000",
+          "EndTime": "00:00:44.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:44.1000000",
+          "EndTime": "00:00:44.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:44.5000000",
+          "EndTime": "00:00:44.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:44.7000000",
+          "EndTime": "00:00:46.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:46.3000000",
+          "EndTime": "00:00:46.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:46.4000000",
+          "EndTime": "00:00:46.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:46.9000000",
+          "EndTime": "00:00:47.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:47.3000000",
+          "EndTime": "00:00:47.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:47.5000000",
+          "EndTime": "00:00:47.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:47.7000000",
+          "EndTime": "00:00:48.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:48.4000000",
+          "EndTime": "00:00:48.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:48.7000000",
+          "EndTime": "00:00:49.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:49.1000000",
+          "EndTime": "00:00:50.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:50.3000000",
+          "EndTime": "00:00:50.8000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:50.8000000",
+          "EndTime": "00:00:51",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:51",
+          "EndTime": "00:00:51.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:51.2000000",
+          "EndTime": "00:00:51.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:51.7000000",
+          "EndTime": "00:00:51.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:51.9000000",
+          "EndTime": "00:00:52.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:52.7000000",
+          "EndTime": "00:00:53.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:53.1000000",
+          "EndTime": "00:00:53.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:53.4000000",
+          "EndTime": "00:00:53.7000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:53.7000000",
+          "EndTime": "00:00:53.9000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:53.9000000",
+          "EndTime": "00:00:56",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:56",
+          "EndTime": "00:00:56.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:56.1000000",
+          "EndTime": "00:00:56.4000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:56.4000000",
+          "EndTime": "00:00:56.5000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:56.5000000",
+          "EndTime": "00:00:57.1000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:57.1000000",
+          "EndTime": "00:00:57.2000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:57.2000000",
+          "EndTime": "00:00:57.3000000",
+          "SpeakerTag": 0
+        },
+        {
+          "Word": "Lorem ipsum",
+          "StartTime": "00:00:57.3000000",
+          "EndTime": "00:00:58",
+          "SpeakerTag": 0
+        }
+      ]
+    }
+  ]
+}
