@@ -1,0 +1,34 @@
+{
+  "JobId": "53e772e7-5615-4947-aaf6-272ec06f466a",
+  "UserId": "50c26d76-087e-48c3-9f46-4a9f506845b8",
+  "AudioFileId": "884b0bf3-ca58-45ae-951b-b1fae46b0395",
+  "JobState": 7,
+  "Attempt": 1,
+  "FileName": "file-name.wav",
+  "WavSourceFileName": "file.voc",
+  "StateFileName": "884b0bf3-ca58-45ae-951b-b1fae46b0395.json",
+  "DateCompletedUtc": "0001-01-01T00:00:00",
+  "IsRestored": true,
+  "TranscribedAudioFiles": [
+    {
+      "Id": "14a37bfe-44bb-42ea-9b90-a91f3d5d3adb",
+      "AudioFileId": "884b0bf3-ca58-45ae-951b-b1fae46b0395",
+      "Path": "path-to-file-1",
+      "SourceFileName": "path-to-file-1",
+      "AudioChannels": 1,
+      "StartTime": "00:00:00",
+      "EndTime": "00:01:00",
+      "TotalTime": "00:01:00"
+    },
+    {
+      "Id": "9fcd315e-dd0d-46bf-a490-c6e9a8d182e3",
+      "AudioFileId": "884b0bf3-ca58-45ae-951b-b1fae46b0395",
+      "Path": "path-to-file-2",
+      "SourceFileName": "path-to-file-2",
+      "AudioChannels": 1,
+      "StartTime": "00:01:00",
+      "EndTime": "00:02:00",
+      "TotalTime": "00:01:00"
+    }
+  ]
+}

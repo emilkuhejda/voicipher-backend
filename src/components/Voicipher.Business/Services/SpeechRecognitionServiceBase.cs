@@ -6,10 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
-using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Speech.V1;
-using Grpc.Auth;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Serilog;
 using Voicipher.Business.Extensions;
@@ -19,7 +16,6 @@ using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.OutputModels;
-using Voicipher.Domain.Settings;
 using Voicipher.Domain.Transcription;
 using Voicipher.Domain.Utils;
 
@@ -27,28 +23,28 @@ namespace Voicipher.Business.Services
 {
     public abstract class SpeechRecognitionServiceBase : ISpeechRecognitionService
     {
+        private readonly ISpeechClientFactory _speechClientFactory;
         private readonly IAudioFileProcessingChannel _audioFileProcessingChannel;
         private readonly IMessageCenterService _messageCenterService;
         private readonly IFileAccessService _fileAccessService;
         private readonly IDiskStorage _diskStorage;
-        private readonly AppSettings _appSettings;
 
         private int _totalTasks;
         private int _tasksDone;
 
         protected SpeechRecognitionServiceBase(
+            ISpeechClientFactory speechClientFactory,
             IAudioFileProcessingChannel audioFileProcessingChannel,
             IMessageCenterService messageCenterService,
             IFileAccessService fileAccessService,
             IIndex<StorageLocation, IDiskStorage> index,
-            IOptions<AppSettings> options,
             ILogger logger)
         {
+            _speechClientFactory = speechClientFactory;
             _audioFileProcessingChannel = audioFileProcessingChannel;
             _messageCenterService = messageCenterService;
             _fileAccessService = fileAccessService;
             _diskStorage = index[StorageLocation.Audio];
-            _appSettings = options.Value;
             Logger = logger.ForContext<SpeechRecognitionService>();
         }
 
@@ -58,7 +54,7 @@ namespace Voicipher.Business.Services
         {
             try
             {
-                var speechClient = CreateSpeechClient();
+                var speechClient = _speechClientFactory.CreateClient();
                 return speechClient != null;
             }
             catch (Exception ex)
@@ -69,9 +65,9 @@ namespace Voicipher.Business.Services
             return false;
         }
 
-        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken)
+        public async Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, Guid applicationId, CancellationToken cancellationToken)
         {
-            var speechRecognizeConfig = new SpeechRecognizeConfig(audioFile);
+            var speechRecognizeConfig = new SpeechRecognizeConfig(audioFile, applicationId);
 
             var updateMethods = new List<Func<Task<TranscribeItem>>>();
             foreach (var transcribeAudioFile in transcribedAudioFiles)
@@ -110,7 +106,7 @@ namespace Voicipher.Business.Services
 
         private async Task<TranscribeItem> RecognizeSpeech(TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig, CancellationToken cancellationToken)
         {
-            var speechClient = CreateSpeechClient();
+            var speechClient = _speechClientFactory.CreateClient();
 
             Logger.Verbose($"[{speechRecognizeConfig.UserId}] Start speech recognition for file {transcribedAudioFile.Path}");
 
@@ -139,7 +135,7 @@ namespace Voicipher.Business.Services
             {
                 Id = transcribedAudioFile.Id,
                 AudioFileId = transcribedAudioFile.AudioFileId,
-                ApplicationId = _appSettings.ApplicationId,
+                ApplicationId = speechRecognizeConfig.ApplicationId,
                 Alternatives = JsonConvert.SerializeObject(recognizedResult.Alternatives),
                 SourceFileName = transcribedAudioFile.SourceFileName,
                 StartTime = transcribedAudioFile.StartTime,
@@ -156,21 +152,6 @@ namespace Voicipher.Business.Services
         }
 
         protected abstract Task<RecognizedResult> GetRecognizedResultAsync(SpeechClient speechClient, TranscribedAudioFile transcribedAudioFile, SpeechRecognizeConfig speechRecognizeConfig);
-
-        private SpeechClient CreateSpeechClient()
-        {
-            var serializedCredentials = JsonConvert.SerializeObject(_appSettings.SpeechCredentials);
-            var credentials = GoogleCredential
-                .FromJson(serializedCredentials)
-                .CreateScoped(_appSettings.GoogleApiAuthUri);
-
-            var builder = new SpeechClientBuilder
-            {
-                ChannelCredentials = credentials.ToChannelCredentials()
-            };
-
-            return builder.Build();
-        }
 
         private string GetFilePath(string fileName, Guid audioFileId)
         {

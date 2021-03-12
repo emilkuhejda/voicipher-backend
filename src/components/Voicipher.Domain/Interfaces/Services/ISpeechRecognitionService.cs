@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Voicipher.Domain.Models;
 
@@ -8,6 +9,6 @@ namespace Voicipher.Domain.Interfaces.Services
     {
         bool CanCreateSpeechClientAsync();
 
-        Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, CancellationToken cancellationToken);
+        Task<TranscribeItem[]> RecognizeAsync(AudioFile audioFile, TranscribedAudioFile[] transcribedAudioFiles, Guid applicationId, CancellationToken cancellationToken);
     }
 }

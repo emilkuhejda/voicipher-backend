@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac.Features.Indexed;
@@ -84,6 +85,7 @@ namespace Voicipher.Business.Tests.Commands
 
             // Assert
             Assert.True(commandResult.IsSuccess);
+            Assert.Equal(JobState.Completed, jobStateMachineMock.MachineState.JobState);
 
             dbContextTransaction.Verify(x => x.CommitAsync(It.IsAny<CancellationToken>()));
         }
@@ -110,9 +112,15 @@ namespace Voicipher.Business.Tests.Commands
             fileAccessServiceMock
                 .Setup(x => x.Exists(It.IsAny<string>()))
                 .Returns(true);
+            fileAccessServiceMock
+                .Setup(x => x.Exists(It.Is<string>(s => s == Path.Combine(String.Empty, $"{Guid.Empty}.json"))))
+                .Returns(false);
             wavFileServiceMock
                 .Setup(x => x.SplitAudioFileAsync(It.IsAny<AudioFile>(), default))
                 .ReturnsAsync(new[] { new TranscribedAudioFile() });
+            diskStorageMock
+                .Setup(x => x.GetDirectoryPath())
+                .Returns(string.Empty);
             indexMock
                 .Setup(x => x[It.IsAny<StorageLocation>()])
                 .Returns(diskStorageMock.Object);

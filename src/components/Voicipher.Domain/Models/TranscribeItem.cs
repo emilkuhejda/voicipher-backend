@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
 
