@@ -4,6 +4,10 @@ namespace Voicipher.Domain.Settings
 {
     public class AppSettings
     {
+        public string ApiUrl { get; set; }
+
+        public Version ApiVersion { get; set; }
+
         public Guid ApplicationId { get; set; }
 
         public string SecretKey { get; set; }
