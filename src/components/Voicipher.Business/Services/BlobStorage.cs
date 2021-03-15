@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Interfaces.Services;
@@ -49,7 +50,7 @@ namespace Voicipher.Business.Services
 
         public async Task<string> UploadAsync(UploadBlobSettings blobSettings, CancellationToken cancellationToken)
         {
-            var fileName = string.IsNullOrWhiteSpace(blobSettings.FileName) ? $"{Guid.NewGuid()}.voc" : blobSettings.FileName;
+            var fileName = string.IsNullOrWhiteSpace(blobSettings.FileName) ? $"{Guid.NewGuid()}{MimeTypes.VocExtension}" : blobSettings.FileName;
             var filePath = Path.Combine(blobSettings.AudioFileId, fileName);
             var container = await GetContainerClient(blobSettings.ContainerName, cancellationToken);
             var client = container.GetBlobClient(filePath);
@@ -58,6 +59,7 @@ namespace Voicipher.Business.Services
             {
                 await client.UploadAsync(
                     fileStream,
+                    httpHeaders: new BlobHttpHeaders { ContentType = blobSettings.ContentType },
                     metadata: blobSettings.Metadata,
                     cancellationToken: cancellationToken);
             }

@@ -110,7 +110,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 _logger.Verbose($"[{userId}] Start uploading audio file to blob storage");
 
-                var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId);
+                var contentType = parameter.File.ContentType;
+                var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId, contentType);
                 sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                 _logger.Verbose($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
