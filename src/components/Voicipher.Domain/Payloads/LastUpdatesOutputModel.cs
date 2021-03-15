@@ -19,5 +19,11 @@ namespace Voicipher.Domain.Payloads
 
         [Required]
         public DateTime InformationMessageUtc { get; init; }
+
+        [Required]
+        public string ApiUrl { get; set; }
+
+        [Required]
+        public Version ApiVersion { get; set; }
     }
 }
