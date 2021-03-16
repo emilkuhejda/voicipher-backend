@@ -176,7 +176,8 @@ namespace Voicipher.Business.StateMachine
                 _logger.Verbose($"[{_machineState.UserId}] Start uploading transcription audio file {transcribedAudioFile.SourceFileName} to blob storage");
 
                 var metadata = new Dictionary<string, string> { { BlobMetadata.TranscribedAudioFile, true.ToString() } };
-                var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _machineState.UserId, _machineState.AudioFileId, transcribedAudioFile.SourceFileName, metadata);
+                var contentType = ContentTypeHelper.GetContentType(transcribedAudioFile.Path);
+                var uploadBlobSettings = new UploadBlobSettings(transcribedAudioFile.Path, _machineState.UserId, _machineState.AudioFileId, transcribedAudioFile.SourceFileName, contentType, metadata);
                 await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                 _logger.Verbose($"[{_machineState.UserId}] Transcription audio file {transcribedAudioFile.SourceFileName} was uploaded to blob storage");

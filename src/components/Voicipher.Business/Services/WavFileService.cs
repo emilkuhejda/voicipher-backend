@@ -12,6 +12,7 @@ using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Domain.Models;
+using Voicipher.Domain.Utils;
 
 namespace Voicipher.Business.Services
 {
@@ -219,7 +220,7 @@ namespace Voicipher.Business.Services
 
         private string GetFilePath(Guid audioFileId)
         {
-            return Path.Combine(GetDirectoryPath(audioFileId), $"{Guid.NewGuid()}.voc");
+            return Path.Combine(GetDirectoryPath(audioFileId), $"{Guid.NewGuid()}{MimeTypes.VocExtension}");
         }
 
         private string GetDirectoryPath(Guid audioFileId)
