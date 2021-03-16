@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Voicipher.Business.Extensions;
 using Voicipher.Business.Infrastructure;
+using Voicipher.Business.Utils;
 using Voicipher.Domain.Enums;
 using Voicipher.Domain.Exceptions;
 using Voicipher.Domain.Infrastructure;
@@ -103,7 +104,8 @@ namespace Voicipher.Business.Commands.Audio
 
                 _logger.Verbose($"[{userId}] Start uploading audio file to blob storage");
 
-                var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, parameter.AudioFileId);
+                var contentType = ContentTypeHelper.GetContentType(audioFile.FileName);
+                var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, parameter.AudioFileId, contentType);
                 sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
                 _logger.Verbose($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFile.Id}");
