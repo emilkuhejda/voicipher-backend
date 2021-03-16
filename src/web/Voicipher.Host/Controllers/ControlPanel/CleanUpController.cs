@@ -14,6 +14,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [ApiVersion("1")]
     [Produces("application/json")]
     [Route("api/v{version:apiVersion}/control-panel/clean-up")]
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Policy = nameof(VoicipherPolicy.Admin))]
     [ApiController]
     public class CleanUpController : ControllerBase
