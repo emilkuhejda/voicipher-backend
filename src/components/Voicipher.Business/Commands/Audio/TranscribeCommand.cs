@@ -51,6 +51,12 @@ namespace Voicipher.Business.Commands.Audio
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
+                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguageModel))
+                {
+                    _logger.Error($"[{userId}] Language phone call model is not supported");
+                    throw new OperationErrorException(ErrorCode.EC203);
+                }
+
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
                     _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
@@ -114,6 +120,7 @@ namespace Voicipher.Business.Commands.Audio
             }
 
             audioFile.Language = parameter.Language;
+            audioFile.IsPhoneCall = parameter.IsPhoneCall;
             audioFile.TranscriptionStartTime = parameter.StartTime;
             audioFile.TranscriptionEndTime = parameter.EndTime == TimeSpan.Zero ? audioFile.TotalTime : parameter.EndTime;
             audioFile.ApplicationId = parameter.ApplicationId;
