@@ -66,7 +66,7 @@ namespace Voicipher.Business.Commands.Audio
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
                     _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
-                    throw new OperationErrorException(ErrorCode.EC600);
+                    throw new OperationErrorException(ErrorCode.EC204);
                 }
 
                 _logger.Error($"[{userId}] Invalid input data");
@@ -97,6 +97,12 @@ namespace Voicipher.Business.Commands.Audio
             {
                 _logger.Error($"[{userId}] Language phone call model is not supported");
                 throw new OperationErrorException(ErrorCode.EC203);
+            }
+
+            if (audioFile.TotalTime < parameter.EndTime)
+            {
+                _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
+                throw new OperationErrorException(ErrorCode.EC205);
             }
 
             if (audioFile.UploadStatus != UploadStatus.Completed)

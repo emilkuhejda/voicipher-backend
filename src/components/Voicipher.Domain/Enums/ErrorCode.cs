@@ -41,9 +41,13 @@ namespace Voicipher.Domain.Enums
 
         // Phone call model not supported
         EC203 = 203,
-        
+
+        // Start time greater or equal than end time
         EC204 = 204,
+
+        // End time greater than total time
         EC205 = 205,
+
         EC206 = 206,
         EC207 = 207,
         EC208 = 208,

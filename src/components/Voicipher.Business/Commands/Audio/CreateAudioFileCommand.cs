@@ -60,7 +60,7 @@ namespace Voicipher.Business.Commands.Audio
                 if (validationResult.Errors.ContainsError(nameof(CreateAudioFilePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
                     _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
-                    throw new OperationErrorException(ErrorCode.EC600);
+                    throw new OperationErrorException(ErrorCode.EC204);
                 }
 
                 _logger.Error($"[{userId}] Invalid input data");
