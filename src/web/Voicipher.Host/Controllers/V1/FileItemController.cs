@@ -126,7 +126,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateFileItem")]
-        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, bool isPhoneCall, , uint startTimeSeconds, uint endTimeSeconds, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
         {
             var createAudioFilePayload = new CreateAudioFilePayload
             {
