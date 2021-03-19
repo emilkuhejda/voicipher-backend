@@ -57,6 +57,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC203);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(CreateAudioFilePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
+                    throw new OperationErrorException(ErrorCode.EC600);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -70,6 +76,8 @@ namespace Voicipher.Business.Commands.Audio
                 FileName = parameter.FileName,
                 Language = parameter.Language,
                 IsPhoneCall = parameter.IsPhoneCall,
+                TranscriptionStartTime = parameter.StartTime,
+                TranscriptionEndTime = parameter.EndTime,
                 DateCreated = parameter.DateCreated,
                 DateUpdatedUtc = DateTime.UtcNow
             };

@@ -34,6 +34,12 @@ namespace Voicipher.Business.Profiles
                     f => f.TotalTimeTicks,
                     opt => opt.MapFrom(a => a.TotalTime.Ticks))
                 .ForMember(
+                    f => f.TranscriptionStartTimeTicks,
+                    opt => opt.MapFrom(a => a.TranscriptionStartTime.Ticks))
+                .ForMember(
+                    f => f.TranscriptionEndTimeTicks,
+                    opt => opt.MapFrom(a => a.TranscriptionEndTime.Ticks))
+                .ForMember(
                     f => f.TranscribedTimeTicks,
                     opt => opt.MapFrom(a => a.TranscribedTime.Ticks))
                 .ForMember(
