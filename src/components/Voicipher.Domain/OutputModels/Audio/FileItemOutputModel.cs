@@ -31,6 +31,12 @@ namespace Voicipher.Domain.OutputModels.Audio
         public long TotalTimeTicks { get; init; }
 
         [Required]
+        public long TranscriptionStartTimeTicks { get; init; }
+
+        [Required]
+        public long TranscriptionEndTimeTicks { get; init; }
+
+        [Required]
         public long TranscribedTimeTicks { get; init; }
 
         [Required]

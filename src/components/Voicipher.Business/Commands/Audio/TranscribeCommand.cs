@@ -51,6 +51,12 @@ namespace Voicipher.Business.Commands.Audio
             var validationResult = parameter.Validate();
             if (!validationResult.IsValid)
             {
+                if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguageModel))
+                {
+                    _logger.Error($"[{userId}] Language phone call model is not supported");
+                    throw new OperationErrorException(ErrorCode.EC203);
+                }
+
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.Language), ValidationErrorCodes.NotSupportedLanguage))
                 {
                     _logger.Error($"[{userId}] Language {parameter.Language} is not supported");
@@ -60,7 +66,7 @@ namespace Voicipher.Business.Commands.Audio
                 if (validationResult.Errors.ContainsError(nameof(TranscribePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
                     _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
-                    throw new OperationErrorException(ErrorCode.EC600);
+                    throw new OperationErrorException(ErrorCode.EC204);
                 }
 
                 _logger.Error($"[{userId}] Invalid input data");
@@ -93,6 +99,12 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC203);
             }
 
+            if (audioFile.TotalTime < parameter.EndTime)
+            {
+                _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
+                throw new OperationErrorException(ErrorCode.EC205);
+            }
+
             if (audioFile.UploadStatus != UploadStatus.Completed)
             {
                 _logger.Error($"[{userId}] Audio file source {parameter.AudioFileId} is not uploaded. Uploaded state is {audioFile.UploadStatus}");
@@ -114,6 +126,7 @@ namespace Voicipher.Business.Commands.Audio
             }
 
             audioFile.Language = parameter.Language;
+            audioFile.IsPhoneCall = parameter.IsPhoneCall;
             audioFile.TranscriptionStartTime = parameter.StartTime;
             audioFile.TranscriptionEndTime = parameter.EndTime == TimeSpan.Zero ? audioFile.TotalTime : parameter.EndTime;
             audioFile.ApplicationId = parameter.ApplicationId;

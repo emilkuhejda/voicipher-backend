@@ -7,10 +7,11 @@ namespace Voicipher.Domain.Payloads.Audio
 {
     public record TranscribePayload : IValidatable
     {
-        public TranscribePayload(Guid audioFileId, string language, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId)
+        public TranscribePayload(Guid audioFileId, string language, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId)
         {
             AudioFileId = audioFileId;
             Language = language;
+            IsPhoneCall = isPhoneCall;
             StartTime = TimeSpan.FromSeconds(startTimeSeconds);
             EndTime = TimeSpan.FromSeconds(endTimeSeconds);
             ApplicationId = applicationId;
@@ -19,6 +20,8 @@ namespace Voicipher.Domain.Payloads.Audio
         public Guid AudioFileId { get; }
 
         public string Language { get; }
+
+        public bool IsPhoneCall { get; }
 
         public TimeSpan StartTime { get; }
 
@@ -33,6 +36,7 @@ namespace Voicipher.Domain.Payloads.Audio
             errors.ValidateGuid(AudioFileId, nameof(AudioFileId));
             errors.ValidateRequired(Language, nameof(Language));
             errors.ValidateLanguage(Language, nameof(Language));
+            errors.ValidateLanguageModel(Language, IsPhoneCall, nameof(Language));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
             errors.ValidateTimeRange(EndTime, nameof(EndTime), StartTime);
 

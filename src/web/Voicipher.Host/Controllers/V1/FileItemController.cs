@@ -126,7 +126,7 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "CreateFileItem")]
-        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, bool isPhoneCall, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> CreateFileItem(string name, string language, string fileName, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, DateTime dateCreated, Guid applicationId, CancellationToken cancellationToken)
         {
             var createAudioFilePayload = new CreateAudioFilePayload
             {
@@ -134,6 +134,8 @@ namespace Voicipher.Host.Controllers.V1
                 Language = language,
                 FileName = fileName,
                 IsPhoneCall = isPhoneCall,
+                StartTime = TimeSpan.FromSeconds(startTimeSeconds),
+                EndTime = TimeSpan.FromSeconds(endTimeSeconds),
                 DateCreated = dateCreated,
                 ApplicationId = applicationId
             };
@@ -257,9 +259,9 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "TranscribeFileItem")]
-        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId, CancellationToken cancellationToken)
+        public async Task<IActionResult> Transcribe(Guid fileItemId, string language, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId, CancellationToken cancellationToken)
         {
-            var transcribePayload = new TranscribePayload(fileItemId, language, startTimeSeconds, endTimeSeconds, applicationId);
+            var transcribePayload = new TranscribePayload(fileItemId, language, isPhoneCall, startTimeSeconds, endTimeSeconds, applicationId);
             var commandResult = await _transcribeCommand.Value.ExecuteAsync(transcribePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
