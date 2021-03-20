@@ -82,7 +82,7 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
-                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.TranscriptionEndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
                     _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
                     throw new OperationErrorException(ErrorCode.EC204);
@@ -112,7 +112,7 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
-                if (audioFileTime < parameter.EndTime)
+                if (audioFileTime < parameter.TranscriptionEndTime)
                 {
                     _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
                     throw new OperationErrorException(ErrorCode.EC205);
@@ -142,8 +142,8 @@ namespace Voicipher.Business.Commands.Audio
                     OriginalSourceFileName = sourceName,
                     UploadStatus = UploadStatus.Completed,
                     TotalTime = audioFileTime.Value,
-                    TranscriptionStartTime = parameter.StartTime,
-                    TranscriptionEndTime = parameter.EndTime,
+                    TranscriptionStartTime = parameter.TranscriptionStartTime,
+                    TranscriptionEndTime = parameter.TranscriptionEndTime,
                     DateCreated = parameter.DateCreated,
                     DateUpdatedUtc = DateTime.UtcNow
                 };

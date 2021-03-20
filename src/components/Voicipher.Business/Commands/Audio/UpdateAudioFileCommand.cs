@@ -56,7 +56,7 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC203);
                 }
 
-                if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.TranscriptionEndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
                 {
                     _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
                     throw new OperationErrorException(ErrorCode.EC204);
@@ -73,7 +73,7 @@ namespace Voicipher.Business.Commands.Audio
                 throw new OperationErrorException(ErrorCode.EC101);
             }
 
-            if (audioFile.TotalTime < parameter.EndTime)
+            if (audioFile.TotalTime < parameter.TranscriptionEndTime)
             {
                 _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
                 throw new OperationErrorException(ErrorCode.EC205);
@@ -83,8 +83,8 @@ namespace Voicipher.Business.Commands.Audio
             audioFile.Name = parameter.Name;
             audioFile.Language = parameter.Language;
             audioFile.IsPhoneCall = parameter.IsPhoneCall;
-            audioFile.TranscriptionStartTime = parameter.StartTime;
-            audioFile.TranscriptionEndTime = parameter.EndTime;
+            audioFile.TranscriptionStartTime = parameter.TranscriptionStartTime;
+            audioFile.TranscriptionEndTime = parameter.TranscriptionEndTime;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
             await _audioFileRepository.SaveAsync(cancellationToken);

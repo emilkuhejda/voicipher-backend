@@ -134,8 +134,8 @@ namespace Voicipher.Host.Controllers.V1
                 Language = language,
                 FileName = fileName,
                 IsPhoneCall = isPhoneCall,
-                StartTime = TimeSpan.FromSeconds(startTimeSeconds),
-                EndTime = TimeSpan.FromSeconds(endTimeSeconds),
+                TranscriptionStartTime = TimeSpan.FromSeconds(startTimeSeconds),
+                TranscriptionEndTime = TimeSpan.FromSeconds(endTimeSeconds),
                 DateCreated = dateCreated,
                 ApplicationId = applicationId
             };
@@ -166,8 +166,8 @@ namespace Voicipher.Host.Controllers.V1
                 Language = language,
                 FileName = fileName,
                 IsPhoneCall = isPhoneCall,
-                StartTime = TimeSpan.FromSeconds(startTimeSeconds),
-                EndTime = TimeSpan.FromSeconds(endTimeSeconds),
+                TranscriptionStartTime = TimeSpan.FromSeconds(startTimeSeconds),
+                TranscriptionEndTime = TimeSpan.FromSeconds(endTimeSeconds),
                 DateCreated = dateCreated,
                 ApplicationId = applicationId,
                 File = file

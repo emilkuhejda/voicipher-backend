@@ -16,9 +16,9 @@ namespace Voicipher.Domain.Payloads.Audio
 
         public bool IsPhoneCall { get; init; }
 
-        public TimeSpan StartTime { get; init; }
+        public TimeSpan TranscriptionStartTime { get; init; }
 
-        public TimeSpan EndTime { get; init; }
+        public TimeSpan TranscriptionEndTime { get; init; }
 
         public DateTime DateCreated { get; init; }
 
@@ -34,7 +34,7 @@ namespace Voicipher.Domain.Payloads.Audio
             errors.ValidateRequired(Language, nameof(Language));
             errors.ValidateLanguage(Language, nameof(Language));
             errors.ValidateLanguageModel(Language, IsPhoneCall, nameof(Language));
-            errors.ValidateTimeRange(EndTime, nameof(EndTime), StartTime);
+            errors.ValidateTimeRange(TranscriptionEndTime, nameof(TranscriptionEndTime), TranscriptionStartTime);
             errors.ValidateRequired(FileName, nameof(FileName));
             errors.ValidateDateTime(DateCreated, nameof(DateCreated));
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
