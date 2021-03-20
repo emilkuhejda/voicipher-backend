@@ -134,8 +134,8 @@ namespace Voicipher.Host.Controllers.V1
                 Language = language,
                 FileName = fileName,
                 IsPhoneCall = isPhoneCall,
-                StartTime = TimeSpan.FromSeconds(startTimeSeconds),
-                EndTime = TimeSpan.FromSeconds(endTimeSeconds),
+                TranscriptionStartTime = TimeSpan.FromSeconds(startTimeSeconds),
+                TranscriptionEndTime = TimeSpan.FromSeconds(endTimeSeconds),
                 DateCreated = dateCreated,
                 ApplicationId = applicationId
             };
@@ -158,20 +158,22 @@ namespace Voicipher.Host.Controllers.V1
         [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
         [RequestSizeLimit(int.MaxValue)]
         [ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> Upload(string name, string language, string fileName, bool isPhoneCall, DateTime dateCreated, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
+        public async Task<IActionResult> Upload(string name, string language, string fileName, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, DateTime dateCreated, Guid applicationId, IFormFile file, CancellationToken cancellationToken)
         {
-            var createAudioFilePayload = new UploadAudioFilePayload
+            var uploadAudioFilePayload = new UploadAudioFilePayload
             {
                 Name = name,
                 Language = language,
                 FileName = fileName,
                 IsPhoneCall = isPhoneCall,
+                TranscriptionStartTime = TimeSpan.FromSeconds(startTimeSeconds),
+                TranscriptionEndTime = TimeSpan.FromSeconds(endTimeSeconds),
                 DateCreated = dateCreated,
                 ApplicationId = applicationId,
                 File = file
             };
 
-            var commandResult = await _uploadAudioFileCommand.Value.ExecuteAsync(createAudioFilePayload, HttpContext.User, cancellationToken);
+            var commandResult = await _uploadAudioFileCommand.Value.ExecuteAsync(uploadAudioFilePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
                 throw new OperationErrorException(ErrorCode.EC601);
 

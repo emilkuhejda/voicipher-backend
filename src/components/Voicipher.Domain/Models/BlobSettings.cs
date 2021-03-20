@@ -21,6 +21,11 @@ namespace Voicipher.Domain.Models
         {
         }
 
+        public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId, string fileName, string contentType)
+            : this(filePath, userId, audioFileId, fileName, contentType, new Dictionary<string, string>())
+        {
+        }
+
         public UploadBlobSettings(string filePath, Guid userId, Guid audioFileId, string fileName, string contentType, Dictionary<string, string> metadata)
             : base(audioFileId, userId)
         {

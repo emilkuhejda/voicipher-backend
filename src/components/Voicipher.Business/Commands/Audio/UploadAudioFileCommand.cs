@@ -82,6 +82,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.TranscriptionEndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
+                    throw new OperationErrorException(ErrorCode.EC204);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -106,6 +112,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
+                if (audioFileTime < parameter.TranscriptionEndTime)
+                {
+                    _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
+                    throw new OperationErrorException(ErrorCode.EC205);
+                }
+
                 cancellationToken.ThrowIfCancellationRequested();
 
                 _logger.Verbose($"[{userId}] Start uploading audio file to blob storage");
@@ -114,7 +126,7 @@ namespace Voicipher.Business.Commands.Audio
                 var uploadBlobSettings = new UploadBlobSettings(tempFilePath, userId, audioFileId, contentType);
                 sourceName = await _blobStorage.UploadAsync(uploadBlobSettings, cancellationToken);
 
-                _logger.Verbose($"[{userId}] Audio file {sourceName} was uploaded to blob storage. Audio file ID = {audioFileId}");
+                _logger.Verbose($"[{userId}] Audio file source {sourceName} was uploaded to blob storage for audio file {audioFileId}");
 
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -130,6 +142,8 @@ namespace Voicipher.Business.Commands.Audio
                     OriginalSourceFileName = sourceName,
                     UploadStatus = UploadStatus.Completed,
                     TotalTime = audioFileTime.Value,
+                    TranscriptionStartTime = parameter.TranscriptionStartTime,
+                    TranscriptionEndTime = parameter.TranscriptionEndTime,
                     DateCreated = parameter.DateCreated,
                     DateUpdatedUtc = DateTime.UtcNow
                 };
