@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Voicipher.Domain.Interfaces.Validation;
 using Voicipher.Domain.Validation;
@@ -36,6 +37,10 @@ namespace Voicipher.Domain.InputModels.Audio
         [Required]
         public Guid ApplicationId { get; init; }
 
+        public string FileName { get; init; }
+
+        public IFormFile File { get; set; }
+
         public ValidationResult Validate()
         {
             IList<ValidationError> errors = new List<ValidationError>();
@@ -47,6 +52,12 @@ namespace Voicipher.Domain.InputModels.Audio
             errors.ValidateLanguageModel(Language, IsPhoneCall, nameof(Language));
             errors.ValidateTimeRange(TranscriptionEndTime, nameof(TranscriptionEndTime), TranscriptionStartTime);
             errors.ValidateGuid(ApplicationId, nameof(ApplicationId));
+
+            if (File != null)
+            {
+                errors.ValidateRequired(FileName, nameof(FileName));
+                errors.ValidateFileContentType(File, nameof(File));
+            }
 
             return new ValidationResult(errors);
         }
