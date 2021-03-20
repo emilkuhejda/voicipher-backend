@@ -56,6 +56,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC203);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(UpdateAudioFileInputModel.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
+                    throw new OperationErrorException(ErrorCode.EC204);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -64,14 +70,21 @@ namespace Voicipher.Business.Commands.Audio
             if (audioFile == null)
             {
                 _logger.Error($"[{userId}] Audio file {parameter.AudioFileId} was not found");
-
                 throw new OperationErrorException(ErrorCode.EC101);
+            }
+
+            if (audioFile.TotalTime < parameter.EndTime)
+            {
+                _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
+                throw new OperationErrorException(ErrorCode.EC205);
             }
 
             audioFile.ApplicationId = parameter.ApplicationId;
             audioFile.Name = parameter.Name;
             audioFile.Language = parameter.Language;
             audioFile.IsPhoneCall = parameter.IsPhoneCall;
+            audioFile.TranscriptionStartTime = parameter.StartTime;
+            audioFile.TranscriptionEndTime = parameter.EndTime;
             audioFile.DateUpdatedUtc = DateTime.UtcNow;
 
             await _audioFileRepository.SaveAsync(cancellationToken);
