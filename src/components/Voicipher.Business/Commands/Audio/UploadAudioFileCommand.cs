@@ -82,6 +82,12 @@ namespace Voicipher.Business.Commands.Audio
                     throw new OperationErrorException(ErrorCode.EC201);
                 }
 
+                if (validationResult.Errors.ContainsError(nameof(UploadAudioFilePayload.EndTime), ValidationErrorCodes.StartTimeGreaterOrEqualThanEndTime))
+                {
+                    _logger.Error($"[{userId}] Start time for transcription is greater or equal than end time");
+                    throw new OperationErrorException(ErrorCode.EC204);
+                }
+
                 _logger.Error($"[{userId}] Invalid input data");
                 throw new OperationErrorException(ErrorCode.EC600);
             }
@@ -104,6 +110,12 @@ namespace Voicipher.Business.Commands.Audio
                 {
                     _logger.Error($"[{userId}] Audio file content type {parameter.File.ContentType} is not supported");
                     throw new OperationErrorException(ErrorCode.EC201);
+                }
+
+                if (audioFileTime < parameter.EndTime)
+                {
+                    _logger.Error($"[{userId}] Transcription end time greater than total time of the audio file");
+                    throw new OperationErrorException(ErrorCode.EC205);
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -130,6 +142,8 @@ namespace Voicipher.Business.Commands.Audio
                     OriginalSourceFileName = sourceName,
                     UploadStatus = UploadStatus.Completed,
                     TotalTime = audioFileTime.Value,
+                    TranscriptionStartTime = parameter.StartTime,
+                    TranscriptionEndTime = parameter.EndTime,
                     DateCreated = parameter.DateCreated,
                     DateUpdatedUtc = DateTime.UtcNow
                 };
