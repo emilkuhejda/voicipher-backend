@@ -48,6 +48,27 @@ namespace Voicipher.Business.Commands.EndUser
 
                 _logger.Information($"[{userId}] Language {lang} was updated for installation ID = {userDevice.InstallationId}");
             }
+            else
+            {
+                _logger.Verbose($"[{userId}] Try to find last installation");
+
+                userDevice = await _userDeviceRepository.GetLastInstallationAsync(userId, cancellationToken);
+                if (userDevice != null)
+                {
+                    var lastInstallationId = userDevice.InstallationId;
+                    var lang = (Language)parameter.Language;
+                    userDevice.InstallationId = parameter.InstallationId;
+                    userDevice.Language = lang;
+
+                    await _userDeviceRepository.SaveAsync(cancellationToken);
+
+                    _logger.Information($"[{userId}] Language {lang} was updated and installation ID was changed from {lastInstallationId} to {userDevice.InstallationId}");
+                }
+                else
+                {
+                    _logger.Information($"[{userId}] Device installation not found");
+                }
+            }
 
             return new CommandResult<OkOutputModel>(new OkOutputModel());
         }

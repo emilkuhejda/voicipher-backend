@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Voicipher.Domain.Enums;
 using Voicipher.Domain.Interfaces.Repositories;
 using Voicipher.Domain.Models;
 
@@ -37,16 +36,9 @@ namespace Voicipher.DataAccess.Repositories
             return Context.UserDevices.SingleOrDefaultAsync(x => x.UserId == userId && x.InstallationId == installationId, cancellationToken);
         }
 
-        public Task<Guid[]> GetPlatformSpecificInstallationIdsAsync(RuntimePlatform runtimePlatform, Language language, Guid? userId, CancellationToken cancellationToken)
+        public Task<UserDevice> GetLastInstallationAsync(Guid userId, CancellationToken cancellationToken)
         {
-            var query = Context.UserDevices
-                .AsNoTracking()
-                .Where(x => x.RuntimePlatform == runtimePlatform && x.Language == language);
-
-            if (userId.HasValue)
-                query = query.Where(x => x.UserId == userId);
-
-            return query.Select(x => x.InstallationId).ToArrayAsync(cancellationToken);
+            return Context.UserDevices.OrderByDescending(x => x.DateRegisteredUtc).FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
         }
     }
 }
