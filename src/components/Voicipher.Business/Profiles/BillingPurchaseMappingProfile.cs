@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using AutoMapper;
 using Voicipher.Domain.Models;
 using Voicipher.Domain.Payloads;
 
@@ -28,9 +30,6 @@ namespace Voicipher.Business.Profiles
                     c => c.PurchaseToken,
                     opt => opt.MapFrom(x => x.PurchaseToken))
                 .ForMember(
-                    c => c.PurchaseState,
-                    opt => opt.MapFrom(x => x.PurchaseState))
-                .ForMember(
                     c => c.ConsumptionState,
                     opt => opt.MapFrom(x => x.ConsumptionState))
                 .ForMember(
@@ -38,7 +37,20 @@ namespace Voicipher.Business.Profiles
                     opt => opt.MapFrom(x => x.Platform))
                 .ForMember(
                     c => c.TransactionDateUtc,
-                    opt => opt.MapFrom(x => x.TransactionDateUtc));
+                    opt => opt.MapFrom(x => x.TransactionDateUtc))
+                .ForMember(
+                    c => c.PurchaseStateTransactions,
+                    opt => opt.MapFrom(x => new List<PurchaseStateTransaction>
+                    {
+                        new()
+                        {
+                            Id = Guid.NewGuid(),
+                            BillingPurchaseId = x.Id,
+                            PreviousPurchaseState = string.Empty,
+                            PurchaseState = x.PurchaseState,
+                            TransactionDateUtc = DateTime.UtcNow
+                        }
+                    }));
         }
     }
 }

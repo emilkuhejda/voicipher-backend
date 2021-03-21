@@ -34,3 +34,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Interfaces.StateMachine.IMachineState.TranscribedAudioFiles")] 
 [assembly: SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Settings.AppSettings.ApiUrl")] 
 [assembly: SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Payloads.LastUpdatesOutputModel.ApiUrl")]
+[assembly: SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "It is appropriate.", Scope = "member", Target = "~P:Voicipher.Domain.Models.BillingPurchase.PurchaseStateTransactions")]

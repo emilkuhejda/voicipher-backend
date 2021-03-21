@@ -16,7 +16,6 @@ namespace Voicipher.DataAccess.EntitiesConfiguration
             builder.Property(x => x.ProductId).IsRequired().HasMaxLength(250);
             builder.Property(x => x.AutoRenewing).IsRequired();
             builder.Property(x => x.PurchaseToken).IsRequired();
-            builder.Property(x => x.PurchaseState).IsRequired().HasMaxLength(250);
             builder.Property(x => x.ConsumptionState).IsRequired().HasMaxLength(250);
             builder.Property(x => x.Platform).IsRequired().HasMaxLength(250);
             builder.Property(x => x.TransactionDateUtc).IsRequired();
