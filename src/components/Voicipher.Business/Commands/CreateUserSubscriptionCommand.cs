@@ -77,6 +77,8 @@ namespace Voicipher.Business.Commands
                     var purchase = await _billingPurchaseRepository.GetByPurchaseIdAsync(parameter.PurchaseId, cancellationToken);
                     if (purchase != null)
                     {
+                        _logger.Information($"[{userId}] Update billing purchase {purchase.Id} with purchase state {purchase.PurchaseState}");
+
                         var previousPurchaseState = purchase.PurchaseState.ToString();
                         foreach (var purchaseStateTransaction in billingPurchase.PurchaseStateTransactions.OrderBy(x => x.TransactionDateUtc))
                         {
@@ -87,17 +89,22 @@ namespace Voicipher.Business.Commands
                     }
                     else
                     {
+                        _logger.Information($"[{userId}] Create billing purchase {billingPurchase.Id} with purchase state {billingPurchase.PurchaseState}");
+
                         purchase = billingPurchase;
                         await _billingPurchaseRepository.AddAsync(purchase);
                     }
 
                     await _unitOfWork.SaveAsync(cancellationToken);
 
-                    var isSuccess = await RegisterPurchaseAsync(purchase, parameter.ApplicationId, principal, cancellationToken);
-                    if (!isSuccess)
-                        throw new OperationErrorException(ErrorCode.EC302);
+                    if (purchase.PurchaseState == PurchaseState.Purchased)
+                    {
+                        var isSuccess = await RegisterPurchaseAsync(purchase, parameter.ApplicationId, principal, cancellationToken);
+                        if (!isSuccess)
+                            throw new OperationErrorException(ErrorCode.EC302);
+                    }
 
-                    _logger.Information($"[{userId}] Billing purchase was successfully registered. Billing purchase: {purchase.Id}");
+                    _logger.Information($"[{userId}] Billing purchase {purchase.Id} was registered with purchase state {purchase.PurchaseState}");
 
                     await transaction.CommitAsync(cancellationToken);
 
