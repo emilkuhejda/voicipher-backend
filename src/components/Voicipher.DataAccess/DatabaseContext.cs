@@ -43,6 +43,8 @@ namespace Voicipher.DataAccess
 
         public DbSet<BillingPurchase> BillingPurchases { get; set; }
 
+        public DbSet<PurchaseStateTransaction> PurchaseStateTransactions { get; set; }
+
         public DbSet<InformationMessage> InformationMessages { get; set; }
 
         public DbSet<LanguageVersion> LanguageVersions { get; set; }
@@ -75,6 +77,7 @@ namespace Voicipher.DataAccess
             modelBuilder.ApplyConfiguration(new UserDeviceConfiguration());
             modelBuilder.ApplyConfiguration(new DeletedAccountConfiguration());
             modelBuilder.ApplyConfiguration(new BillingPurchaseConfiguration());
+            modelBuilder.ApplyConfiguration(new PurchaseStateTransactionConfiguration());
             modelBuilder.ApplyConfiguration(new InformationMessageConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageVersionConfiguration());
             modelBuilder.ApplyConfiguration(new ContactFormConfiguration());

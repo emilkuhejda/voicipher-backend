@@ -15,10 +15,27 @@ namespace Voicipher.DataAccess.Repositories
         {
         }
 
+        public Task<BillingPurchase> GetByIdAsync(Guid billingPurchaseId, CancellationToken cancellationToken)
+        {
+            return Context.BillingPurchases
+                .Where(x => x.Id == billingPurchaseId)
+                .Include(x => x.PurchaseStateTransactions)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
+        public Task<BillingPurchase> GetByPurchaseIdAsync(string purchaseId, CancellationToken cancellationToken)
+        {
+            return Context.BillingPurchases
+                .Where(x => x.PurchaseId == purchaseId)
+                .Include(x => x.PurchaseStateTransactions)
+                .SingleOrDefaultAsync(cancellationToken);
+        }
+
         public Task<BillingPurchase[]> GetAllAsync(Guid userId, CancellationToken cancellationToken)
         {
             return Context.BillingPurchases
                 .Where(x => x.UserId == userId)
+                .Include(x => x.PurchaseStateTransactions)
                 .AsNoTracking()
                 .ToArrayAsync(cancellationToken);
         }
