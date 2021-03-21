@@ -62,7 +62,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, expectedLanguage, 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, expectedLanguage, false, 0, 0, Guid.NewGuid());
 
             // Act
             var commandResult = await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default);
@@ -120,6 +120,7 @@ namespace Voicipher.Business.Tests.Commands
 
             var transcribePayload = new TranscribePayload(
                 audioFile.Id, expectedLanguage,
+                false,
                 (uint)TimeSpan.FromMinutes(2).TotalSeconds,
                 (uint)TimeSpan.FromMinutes(8).TotalSeconds,
                 Guid.NewGuid());
@@ -176,7 +177,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "lang", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "lang", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -224,7 +225,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 10, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 10, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -276,7 +277,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -327,7 +328,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -375,7 +376,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -423,7 +424,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -471,7 +472,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "en-US", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
@@ -520,7 +521,7 @@ namespace Voicipher.Business.Tests.Commands
                 backgroundJobRepositoryMock.Object,
                 loggerMock.Object);
 
-            var transcribePayload = new TranscribePayload(audioFile.Id, "sk-SK", 0, 0, Guid.NewGuid());
+            var transcribePayload = new TranscribePayload(audioFile.Id, "sk-SK", false, 0, 0, Guid.NewGuid());
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));

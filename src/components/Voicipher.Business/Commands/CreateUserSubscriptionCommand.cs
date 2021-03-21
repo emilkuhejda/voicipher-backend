@@ -25,6 +25,7 @@ namespace Voicipher.Business.Commands
     {
         private readonly IModifySubscriptionTimeCommand _modifySubscriptionTimeCommand;
         private readonly IBillingPurchaseRepository _billingPurchaseRepository;
+        private readonly IPurchaseStateTransactionRepository _purchaseStateTransactionRepository;
         private readonly ICurrentUserSubscriptionRepository _currentUserSubscriptionRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -33,6 +34,7 @@ namespace Voicipher.Business.Commands
         public CreateUserSubscriptionCommand(
             IModifySubscriptionTimeCommand modifySubscriptionTimeCommand,
             IBillingPurchaseRepository billingPurchaseRepository,
+            IPurchaseStateTransactionRepository purchaseStateTransactionRepository,
             ICurrentUserSubscriptionRepository currentUserSubscriptionRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -40,6 +42,7 @@ namespace Voicipher.Business.Commands
         {
             _modifySubscriptionTimeCommand = modifySubscriptionTimeCommand;
             _billingPurchaseRepository = billingPurchaseRepository;
+            _purchaseStateTransactionRepository = purchaseStateTransactionRepository;
             _currentUserSubscriptionRepository = currentUserSubscriptionRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -71,11 +74,37 @@ namespace Voicipher.Business.Commands
             {
                 using (var transaction = await _unitOfWork.BeginTransactionAsync(cancellationToken))
                 {
-                    var isSuccess = await RegisterPurchaseAsync(billingPurchase, parameter.ApplicationId, principal, cancellationToken);
-                    if (!isSuccess)
-                        throw new OperationErrorException(ErrorCode.EC302);
+                    var purchase = await _billingPurchaseRepository.GetByPurchaseIdAsync(parameter.PurchaseId, cancellationToken);
+                    if (purchase != null)
+                    {
+                        _logger.Information($"[{userId}] Update billing purchase {purchase.Id} with purchase state {purchase.PurchaseState}");
 
-                    _logger.Information($"[{userId}] Billing purchase was successfully registered. Billing purchase: {billingPurchase.Id}");
+                        var previousPurchaseState = purchase.PurchaseState.ToString();
+                        foreach (var purchaseStateTransaction in billingPurchase.PurchaseStateTransactions.OrderBy(x => x.TransactionDateUtc))
+                        {
+                            purchaseStateTransaction.PreviousPurchaseState = previousPurchaseState;
+                            await _purchaseStateTransactionRepository.AddAsync(purchaseStateTransaction);
+                            previousPurchaseState = purchaseStateTransaction.PreviousPurchaseState;
+                        }
+                    }
+                    else
+                    {
+                        _logger.Information($"[{userId}] Create billing purchase {billingPurchase.Id} with purchase state {billingPurchase.PurchaseState}");
+
+                        purchase = billingPurchase;
+                        await _billingPurchaseRepository.AddAsync(purchase);
+                    }
+
+                    await _unitOfWork.SaveAsync(cancellationToken);
+
+                    if (purchase.PurchaseState == PurchaseState.Purchased)
+                    {
+                        var isSuccess = await RegisterPurchaseAsync(purchase, parameter.ApplicationId, principal, cancellationToken);
+                        if (!isSuccess)
+                            throw new OperationErrorException(ErrorCode.EC302);
+                    }
+
+                    _logger.Information($"[{userId}] Billing purchase {purchase.Id} was registered with purchase state {purchase.PurchaseState}");
 
                     await transaction.CommitAsync(cancellationToken);
 
@@ -93,9 +122,6 @@ namespace Voicipher.Business.Commands
 
         private async Task<bool> RegisterPurchaseAsync(BillingPurchase billingPurchase, Guid applicationId, ClaimsPrincipal principal, CancellationToken cancellationToken)
         {
-            await _billingPurchaseRepository.AddAsync(billingPurchase);
-            await _unitOfWork.SaveAsync(cancellationToken);
-
             var userId = principal.GetNameIdentifier();
             var subscriptionProduct = SubscriptionProducts.All.FirstOrDefault(x => x.Id == billingPurchase.ProductId);
             if (subscriptionProduct == null)

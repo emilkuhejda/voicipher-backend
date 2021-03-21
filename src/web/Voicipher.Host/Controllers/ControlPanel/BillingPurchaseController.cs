@@ -37,7 +37,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
         [HttpGet("detail/{purchaseId}")]
         public async Task<IActionResult> Get(Guid purchaseId, CancellationToken cancellationToken)
         {
-            var billingPurchase = await _billingPurchaseRepository.Value.GetAsync(purchaseId, cancellationToken);
+            var billingPurchase = await _billingPurchaseRepository.Value.GetByIdAsync(purchaseId, cancellationToken);
             var outputModel = MapBillingPurchase(billingPurchase);
 
             return Ok(outputModel);
@@ -53,7 +53,7 @@ namespace Voicipher.Host.Controllers.ControlPanel
                 ProductId = billingPurchase.ProductId,
                 AutoRenewing = billingPurchase.AutoRenewing,
                 PurchaseToken = billingPurchase.PurchaseToken,
-                PurchaseState = billingPurchase.PurchaseState,
+                PurchaseState = billingPurchase.PurchaseState.ToString(),
                 ConsumptionState = billingPurchase.ConsumptionState,
                 Platform = billingPurchase.Platform,
                 TransactionDateUtc = billingPurchase.TransactionDateUtc
