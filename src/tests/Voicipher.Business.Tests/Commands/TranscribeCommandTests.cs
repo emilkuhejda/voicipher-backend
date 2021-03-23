@@ -231,7 +231,7 @@ namespace Voicipher.Business.Tests.Commands
             var exception = await Assert.ThrowsAsync<OperationErrorException>(async () => await transcribeCommand.ExecuteAsync(transcribePayload, claimsPrincipal, default));
 
             // Assert
-            Assert.Equal(ErrorCode.EC600, exception.ErrorCode);
+            Assert.Equal(ErrorCode.EC204, exception.ErrorCode);
         }
 
         [Fact]
