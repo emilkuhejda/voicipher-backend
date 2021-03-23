@@ -82,6 +82,7 @@ namespace Voicipher.Business.Commands
                         var previousPurchaseState = purchase.PurchaseState.ToString();
                         foreach (var purchaseStateTransaction in billingPurchase.PurchaseStateTransactions.OrderBy(x => x.TransactionDateUtc))
                         {
+                            purchaseStateTransaction.BillingPurchaseId = purchase.Id;
                             purchaseStateTransaction.PreviousPurchaseState = previousPurchaseState;
                             await _purchaseStateTransactionRepository.AddAsync(purchaseStateTransaction);
                             previousPurchaseState = purchaseStateTransaction.PreviousPurchaseState;
