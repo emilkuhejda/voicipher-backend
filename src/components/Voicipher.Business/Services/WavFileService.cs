@@ -202,15 +202,15 @@ namespace Voicipher.Business.Services
                     while (reader.Position < endPosition)
                     {
                         var currentSegmentLength = (int)(endPosition - reader.Position);
-                        if (currentSegmentLength > 0)
-                        {
-                            var bytesToRead = Math.Min(currentSegmentLength, buffer.Length);
-                            var readBytes = reader.Read(buffer, 0, bytesToRead);
-                            if (readBytes > 0)
-                            {
-                                writer.Write(buffer, 0, readBytes);
-                            }
-                        }
+                        if (currentSegmentLength <= 0)
+                            break;
+
+                        var bytesToRead = Math.Min(currentSegmentLength, buffer.Length);
+                        var readBytes = reader.Read(buffer, 0, bytesToRead);
+                        if (readBytes <= 0)
+                            break;
+
+                        writer.Write(buffer, 0, readBytes);
                     }
 
                     return (destinationFileName, writer.TotalTime);
