@@ -187,6 +187,8 @@ namespace Voicipher.Host.Controllers.V1
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         [SwaggerOperation(OperationId = "UpdateFileItem")]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = int.MaxValue)]
+        [RequestSizeLimit(int.MaxValue)]
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> Update([FromForm] UpdateAudioFileInputModel updateAudioFileInputModel, CancellationToken cancellationToken)
         {
