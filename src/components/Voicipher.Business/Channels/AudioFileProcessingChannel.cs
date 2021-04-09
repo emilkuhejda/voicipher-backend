@@ -58,7 +58,7 @@ namespace Voicipher.Business.Channels
         {
             lock (_lockObject)
             {
-                return _cache.Any();
+                return _cache.SelectMany(x => x.Value).Any();
             }
         }
 
