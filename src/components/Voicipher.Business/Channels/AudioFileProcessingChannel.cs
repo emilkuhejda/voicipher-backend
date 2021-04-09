@@ -54,9 +54,17 @@ namespace Voicipher.Business.Channels
             return false;
         }
 
+        public bool IsProcessing()
+        {
+            lock (_lockObject)
+            {
+                return _cache.Any();
+            }
+        }
+
         public bool IsProcessingForUser(Guid userId)
         {
-            lock (_logger)
+            lock (_lockObject)
             {
                 return _cache.ContainsKey(userId) && _cache[userId].Any();
             }

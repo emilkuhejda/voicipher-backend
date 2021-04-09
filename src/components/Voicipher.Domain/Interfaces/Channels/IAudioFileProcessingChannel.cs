@@ -12,6 +12,8 @@ namespace Voicipher.Domain.Interfaces.Channels
 
         Task<bool> AddFileAsync(RecognitionFile recognitionFile, CancellationToken cancellationToken = default);
 
+        bool IsProcessing();
+
         bool IsProcessingForUser(Guid userId);
 
         void FinishProcessing(RecognitionFile recognitionFile);
