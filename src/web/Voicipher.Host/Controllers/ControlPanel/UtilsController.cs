@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Voicipher.Domain.Interfaces.Channels;
 using Voicipher.Domain.Interfaces.Services;
 using Voicipher.Host.Utils;
 
@@ -15,15 +16,25 @@ namespace Voicipher.Host.Controllers.ControlPanel
     [ApiController]
     public class UtilsController : ControllerBase
     {
+        private readonly Lazy<IAudioFileProcessingChannel> _audioFileProcessingChannel;
         private readonly Lazy<ISpeechRecognitionService> _speechRecognitionService;
 
-        public UtilsController(Lazy<ISpeechRecognitionService> speechRecognitionService)
+        public UtilsController(
+            Lazy<IAudioFileProcessingChannel> audioFileProcessingChannel,
+            Lazy<ISpeechRecognitionService> speechRecognitionService)
         {
+            _audioFileProcessingChannel = audioFileProcessingChannel;
             _speechRecognitionService = speechRecognitionService;
         }
 
+        [HttpGet("is-processing")]
+        public IActionResult IsProcessing()
+        {
+            var isProcessing = _audioFileProcessingChannel.Value.IsProcessing();
+            return Ok(isProcessing);
+        }
+
         [HttpPut("send-message")]
-        [ApiExplorerSettings(IgnoreApi = false)]
         public async Task<IActionResult> SendMessage(Guid userId, Guid fileItemId, double percentage)
         {
             throw new NotImplementedException();
