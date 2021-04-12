@@ -55,7 +55,7 @@ namespace Voicipher.Host.Controllers.V1
         {
             var userId = HttpContext.User.GetNameIdentifier();
             var transcribeItems = await _transcribeItemRepository.Value.GetAllAfterDateAsync(userId, updatedAfter, applicationId, cancellationToken);
-            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>).RemoveAlternatives();
 
             return Ok(outputModels);
         }
@@ -69,7 +69,7 @@ namespace Voicipher.Host.Controllers.V1
         public async Task<IActionResult> GetAllByAudioFileId(Guid fileItemId, CancellationToken cancellationToken)
         {
             var transcribeItems = await _transcribeItemRepository.Value.GetAllByAudioFileIdAsync(fileItemId, cancellationToken);
-            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>);
+            var outputModels = transcribeItems.Select(_mapper.Value.Map<TranscribeItemOutputModel>).RemoveAlternatives();
 
             return Ok(outputModels);
         }
