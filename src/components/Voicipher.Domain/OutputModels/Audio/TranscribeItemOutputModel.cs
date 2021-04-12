@@ -18,7 +18,7 @@ namespace Voicipher.Domain.OutputModels.Audio
         public Guid FileItemId { get; init; }
 
         [Required]
-        public IList<RecognitionAlternativeOutputModel> Alternatives { get; }
+        public IList<RecognitionAlternativeOutputModel> Alternatives { get; init; }
 
         public string UserTranscript { get; init; }
 
