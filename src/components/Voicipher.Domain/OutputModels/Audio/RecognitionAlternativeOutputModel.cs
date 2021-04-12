@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace Voicipher.Domain.OutputModels.Audio
 {
@@ -18,6 +20,9 @@ namespace Voicipher.Domain.OutputModels.Audio
 
         [Required]
         public float Confidence { get; init; }
+
+        [Required]
+        public TimeSpan StatTime => TimeSpan.FromTicks(Words.FirstOrDefault()?.StartTimeTicks ?? 0);
 
         public IList<RecognitionWordInfoOutputModel> Words { get; }
     }
