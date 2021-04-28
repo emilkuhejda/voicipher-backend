@@ -62,6 +62,8 @@ namespace Voicipher.Business.Tests.Services
             Assert.Equal(6, transcribedAudioFiles.Length);
             Assert.Equal(TimeSpan.FromSeconds(300 + (5 * ExtraSeconds)), totalTime);
             Assert.Equal(TimeSpan.FromSeconds(300), transcribedTime);
+
+            CleanData(transcribedAudioFiles);
         }
 
         [Fact]
@@ -104,6 +106,8 @@ namespace Voicipher.Business.Tests.Services
             Assert.Equal(4, transcribedAudioFiles.Length);
             Assert.Equal(TimeSpan.FromSeconds(180 + (3 * ExtraSeconds)), totalTime);
             Assert.Equal(TimeSpan.FromSeconds(180), transcribedTime);
+
+            CleanData(transcribedAudioFiles);
         }
 
         [Fact]
@@ -213,6 +217,17 @@ namespace Voicipher.Business.Tests.Services
             using (var reader = new MediaFoundationReader(path))
             {
                 return reader.TotalTime;
+            }
+        }
+
+        private void CleanData(TranscribedAudioFile[] transcribedAudioFiles)
+        {
+            foreach (var transcribedAudioFile in transcribedAudioFiles)
+            {
+                if (File.Exists(transcribedAudioFile.Path))
+                {
+                    File.Delete(transcribedAudioFile.Path);
+                }
             }
         }
     }
