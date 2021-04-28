@@ -18,7 +18,6 @@ namespace Voicipher.Business.Services
 {
     public class WavFileService : IWavFileService
     {
-        private const int FileLengthInSeconds = 58;
         private const float ExtraSeconds = 0.25f;
 
         private readonly IFileAccessService _fileAccessService;
@@ -129,7 +128,8 @@ namespace Voicipher.Business.Services
                 using (var stream = new MemoryStream(inputFile))
                 using (var reader = new WaveFileReader(stream))
                 {
-                    var countItems = (int)Math.Floor(reader.TotalTime.TotalSeconds / FileLengthInSeconds);
+                    var fileLengthInSeconds = CalculatePartialFileLengthInSeconds(inputFile.Length, reader.TotalTime.TotalSeconds);
+                    var countItems = (int)Math.Floor(reader.TotalTime.TotalSeconds / fileLengthInSeconds);
                     var audioTotalTimeTicks = Math.Min(reader.TotalTime.Ticks, remainingTime.Ticks);
                     var audioTotalTime = TimeSpan.FromTicks(audioTotalTimeTicks);
 
@@ -139,9 +139,9 @@ namespace Voicipher.Business.Services
                         if (remainingTimeSpan.Ticks <= 0)
                             return transcribedAudioFiles;
 
-                        var sampleDuration = remainingTimeSpan.TotalSeconds < FileLengthInSeconds
+                        var sampleDuration = remainingTimeSpan.TotalSeconds < fileLengthInSeconds
                             ? remainingTimeSpan
-                            : TimeSpan.FromSeconds(FileLengthInSeconds);
+                            : TimeSpan.FromSeconds(fileLengthInSeconds);
 
                         var requestedEndTime = processedTime.Add(sampleDuration).Add(TimeSpan.FromSeconds(ExtraSeconds));
                         var endTime = requestedEndTime > audioTotalTime ? audioTotalTime : requestedEndTime;
@@ -226,6 +226,16 @@ namespace Voicipher.Business.Services
         private string GetDirectoryPath(Guid audioFileId)
         {
             return _diskStorage.GetDirectoryPath(audioFileId.ToString());
+        }
+
+        private double CalculatePartialFileLengthInSeconds(int bytes, double totalSeconds)
+        {
+            const int maxBytesThreshold = 10000000;
+            const int fileLengthInSeconds = 58;
+
+            var bytesPerSeconds = bytes / totalSeconds;
+            var secondsPerFile = (maxBytesThreshold / bytesPerSeconds) - ExtraSeconds;
+            return Math.Min(Math.Floor(secondsPerFile), fileLengthInSeconds);
         }
     }
 }
