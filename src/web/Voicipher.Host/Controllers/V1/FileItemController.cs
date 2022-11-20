@@ -265,6 +265,8 @@ namespace Voicipher.Host.Controllers.V1
         [SwaggerOperation(OperationId = "TranscribeFileItem")]
         public async Task<IActionResult> Transcribe(Guid fileItemId, string language, bool isPhoneCall, uint startTimeSeconds, uint endTimeSeconds, Guid applicationId, CancellationToken cancellationToken)
         {
+            return BadRequest();
+
             var transcribePayload = new TranscribePayload(fileItemId, language, isPhoneCall, startTimeSeconds, endTimeSeconds, applicationId);
             var commandResult = await _transcribeCommand.Value.ExecuteAsync(transcribePayload, HttpContext.User, cancellationToken);
             if (!commandResult.IsSuccess)
